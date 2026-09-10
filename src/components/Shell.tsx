@@ -10,6 +10,7 @@ import {
   LogOut,
   CalendarCheck,
   UserRound,
+  History,
   type LucideIcon,
 } from "lucide-react";
 
@@ -26,6 +27,7 @@ const adminNav: NavItem[] = [
 
 const userNav: NavItem[] = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/historical-data", label: "Historical Data", icon: History },
   { href: "/profile", label: "Profile", icon: UserRound },
 ];
 
