@@ -23,8 +23,7 @@ import {
 } from "@/lib/push";
 import { registerPasskey, passkeysSupported } from "@/lib/webauthn";
 import type { DailyActivity } from "@/lib/types";
-
-const HotGrid = dynamic(() => import("@/components/HotGrid"), { ssr: false });
+import { DailyActivityRow } from "@/components/DailyActivityRow";
 
 const MONTHS = [
   "January", "February", "March", "April", "May", "June",
@@ -77,9 +76,9 @@ export default function DashboardPage() {
   const [generating, setGenerating] = useState(false);
   const [pushBusy, setPushBusy] = useState(false);
   const [pushOn, setPushOn] = useState(false);
-
-  // All columns are fillable in the interactive grid
-  const fillableFields = useMemo(() => new Set(GRID_COLUMNS.map((c) => c.field)), []);
+  const [page, setPage] = useState(1);
+  const [showTooltip, setShowTooltip] = useState(false);
+  const ITEMS_PER_PAGE = 7;
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -106,6 +105,7 @@ export default function DashboardPage() {
 
   useEffect(() => {
     load();
+    setPage(1);
   }, [load]);
 
   // Register the service worker on mount and reflect current permission state.
@@ -127,96 +127,7 @@ export default function DashboardPage() {
     return map;
   }, [activities]);
 
-  const gridData = useMemo(() => {
-    const DOW = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-    const activityIdx = GRID_COLUMNS.findIndex((c) => c.field === "activity");
-    const statusIdx = GRID_COLUMNS.findIndex((c) => c.field === "status");
-    const rows: any[][] = [];
-    for (let day = 1; day <= totalDays; day++) {
-      const date = new Date(year, month - 1, day);
-      const dow = date.getDay();
-      const isWeekend = dow === 0 || dow === 6;
-      const holiday = holidays[day];
-      const act = byDay.get(day);
-      const cols = GRID_COLUMNS.map((c) => (act ? (act[c.key] as string) || "" : ""));
-      // For non-working days without an entry, show the reason as a hint.
-      if (!act && (isWeekend || holiday)) {
-        if (activityIdx >= 0) cols[activityIdx] = holiday || "Weekend";
-        if (statusIdx >= 0) cols[statusIdx] = "X";
-      }
-      rows.push([`${MONTHS[month - 1].slice(0, 3)} ${day} · ${DOW[dow]}`, ...cols]);
-    }
-    return rows;
-  }, [totalDays, byDay, month, year, holidays]);
 
-  const colHeaders = useMemo(
-    () => ["Day", ...GRID_COLUMNS.map((c) => c.label)],
-    []
-  );
-
-  // Only mapped-fillable columns are editable; the Day column is always locked.
-  const cells = useCallback(
-    (row: number, col: number) => {
-      const day = row + 1;
-      const date = new Date(year, month - 1, day);
-      const dow = date.getDay();
-      const holiday = holidays[day];
-      const nonWorking = dow === 0 || dow === 6 || !!holiday;
-      const nonWorkingClass = holiday ? "ht-holiday" : "ht-weekend";
-
-      if (col === 0) {
-        return { readOnly: true, className: nonWorking ? nonWorkingClass : "ht-day-col" };
-      }
-      if (nonWorking) {
-        // Weekends and holidays are non-editable and visually flagged.
-        return { readOnly: true, className: nonWorkingClass };
-      }
-      const column = GRID_COLUMNS[col - 1];
-      const editable = fillableFields.size === 0 || fillableFields.has(column.field);
-      // Constrain the "Aplikasi Terdampak" column to a fixed dropdown.
-      if (column.field === "app_impacted" && editable) {
-        return {
-          type: "dropdown",
-          source: APP_IMPACTED_OPTIONS,
-          allowInvalid: false,
-          className: "",
-        };
-      }
-      return { readOnly: !editable, className: editable ? "" : "ht-locked" };
-    },
-    [fillableFields, holidays, year, month]
-  );
-
-  // Persist grid edits back to the backend (upsert per day).
-  const onAfterChange = useCallback(
-    async (changes: any, source: string) => {
-      if (source === "loadData" || !changes) return;
-      const affectedDays = new Set<number>();
-      changes.forEach(([rowIndex]: [number]) => affectedDays.add(rowIndex + 1));
-
-      for (const day of Array.from(affectedDays)) {
-        const rowIndex = day - 1;
-        const row = gridData[rowIndex];
-        if (!row) continue;
-        const payload: DailyActivity = {
-          date: `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`,
-          start_time: row[1] || "",
-          end_time: row[2] || "",
-          status: row[3] || "",
-          activity: row[4] || "",
-          project_name: "",
-          project_id: "",
-          app_impacted: row[5] || "",
-        };
-        try {
-          await api("/api/v1/activities", { method: "POST", body: JSON.stringify(payload) });
-        } catch (err: any) {
-          notify(err.message, "error");
-        }
-      }
-    },
-    [gridData, year, month, notify]
-  );
 
   const generate = async () => {
     setGenerating(true);
@@ -283,19 +194,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Action row */}
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <button
-          onClick={() => router.push("/activity")}
-          className="card flex items-center gap-3 p-4 text-left transition hover:shadow-hard"
-        >
-          <div className="grid h-10 w-10 place-items-center bg-mr-yellow text-black">
-            <Plus size={18} />
-          </div>
-          <div>
-            <p className="text-sm font-bold">Daily entry</p>
-            <p className="text-xs text-mr-muted">Add today or a past date</p>
-          </div>
-        </button>
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
 
         <button
           onClick={generate}
@@ -352,30 +251,35 @@ export default function DashboardPage() {
           <div className="flex items-center gap-2">
             <CalendarRange size={18} className="text-mr-purple" />
             <h2 className="text-lg font-bold">Monthly timesheet</h2>
-          </div>
-          <div className="flex gap-2">
-            <select
-              className="input w-auto"
-              value={month}
-              onChange={(e) => setMonth(Number(e.target.value))}
-            >
-              {MONTHS.map((m, i) => (
-                <option key={m} value={i + 1}>
-                  {m}
-                </option>
-              ))}
-            </select>
-            <select
-              className="input w-auto"
-              value={year}
-              onChange={(e) => setYear(Number(e.target.value))}
-            >
-              {[year - 1, year, year + 1].map((y) => (
-                <option key={y} value={y}>
-                  {y}
-                </option>
-              ))}
-            </select>
+            
+            {/* Status Definition Tooltip */}
+            <div className="relative flex items-center ml-1">
+              <button 
+                type="button"
+                onClick={() => setShowTooltip(!showTooltip)}
+                className="text-mr-muted hover:text-mr-ink hover:bg-mr-surface2 transition-colors cursor-pointer rounded-full border border-mr-muted/30 w-5 h-5 flex items-center justify-center text-xs font-bold"
+                aria-label="Toggle status definitions"
+              >
+                ?
+              </button>
+              
+              {showTooltip && (
+                <div className="absolute left-1/2 -translate-x-1/2 top-full mt-2 w-48 p-3 bg-mr-surface text-mr-ink border-2 border-mr-ink shadow-[4px_4px_0_0_var(--ink)] text-xs z-50 cursor-default">
+                  <div className="font-bold mb-2 uppercase border-b border-mr-ink/20 pb-1 flex justify-between items-center">
+                    Definitions
+                    <button onClick={() => setShowTooltip(false)} className="text-mr-muted hover:text-mr-ink font-normal px-1 -mr-1">✕</button>
+                  </div>
+                  <ul className="space-y-1 text-left font-normal">
+                    <li><strong>P</strong> = Present</li>
+                    <li><strong>S</strong> = Sick</li>
+                    <li><strong>V</strong> = Vacation</li>
+                    <li><strong>BT</strong> = Business Trip</li>
+                    <li><strong>PM</strong> = Permit</li>
+                    <li><strong>X</strong> = Not Working Anymore</li>
+                  </ul>
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
@@ -384,18 +288,111 @@ export default function DashboardPage() {
             <Loader2 className="animate-spin text-mr-purple" />
           </div>
         ) : (
-          <HotGrid
-            data={gridData}
-            colHeaders={colHeaders}
-            cells={cells}
-            afterChange={onAfterChange}
-            height={480}
-          />
+          <div className="flex flex-col gap-3">
+            <div className="flex flex-col gap-3 min-h-[400px]">
+              {(() => {
+                // Determine the highest day to show
+                let maxDay = totalDays;
+                if (year === now.getFullYear() && month === now.getMonth() + 1) {
+                  maxDay = Math.min(totalDays, now.getDate());
+                } else if (
+                  year > now.getFullYear() ||
+                  (year === now.getFullYear() && month > now.getMonth() + 1)
+                ) {
+                  maxDay = 0;
+                }
+
+                const allDaysReversed = Array.from({ length: maxDay }, (_, i) => i + 1).reverse();
+                const totalPages = Math.ceil(maxDay / ITEMS_PER_PAGE);
+                
+                // If the user navigates months, page might be temporarily higher than totalPages
+                const currentPage = Math.min(page, totalPages || 1);
+
+                return (
+                  <>
+                    {allDaysReversed
+                      .slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE)
+                      .map((day) => {
+                        const dateObj = new Date(year, month - 1, day);
+                        const dow = dateObj.getDay();
+                        const isWeekend = dow === 0 || dow === 6;
+                        const holiday = holidays[day];
+                        const act = byDay.get(day);
+
+                        const isToday =
+                          now.getDate() === day &&
+                          now.getMonth() + 1 === month &&
+                          now.getFullYear() === year;
+                        const isYesterday =
+                          now.getDate() - 1 === day &&
+                          now.getMonth() + 1 === month &&
+                          now.getFullYear() === year;
+
+                        const dateStr = `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+
+                        return (
+                          <DailyActivityRow
+                            key={day}
+                            day={day}
+                            dateStr={dateStr}
+                            monthName={MONTHS[month - 1].slice(0, 3)}
+                            dow={["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][dow]}
+                            isToday={isToday}
+                            isYesterday={isYesterday}
+                            holiday={holiday}
+                            isWeekend={isWeekend}
+                            activity={act}
+                          />
+                        );
+                      })}
+                  </>
+                );
+              })()}
+            </div>
+
+            {(() => {
+              let maxDay = totalDays;
+              if (year === now.getFullYear() && month === now.getMonth() + 1) {
+                maxDay = Math.min(totalDays, now.getDate());
+              } else if (
+                year > now.getFullYear() ||
+                (year === now.getFullYear() && month > now.getMonth() + 1)
+              ) {
+                maxDay = 0;
+              }
+              const totalPages = Math.max(1, Math.ceil(maxDay / ITEMS_PER_PAGE));
+              const currentPage = Math.min(page, totalPages);
+
+              if (maxDay === 0) {
+                return <div className="text-center text-sm text-mr-muted py-4">No days to show for this month.</div>;
+              }
+
+              return (
+                <div className="flex items-center justify-between mt-2 pt-4 border-t border-mr-black/10">
+                  <span className="text-sm text-mr-muted font-medium">
+                    Page {currentPage} of {totalPages}
+                  </span>
+                  <div className="flex gap-2">
+                    <button
+                      className="btn bg-mr-black/5 hover:bg-mr-black/10 text-black px-4 py-1.5 rounded text-sm font-bold disabled:opacity-50"
+                      disabled={currentPage === 1}
+                      onClick={() => setPage((p) => Math.max(1, p - 1))}
+                    >
+                      Prev
+                    </button>
+                    <button
+                      className="btn bg-mr-black/5 hover:bg-mr-black/10 text-black px-4 py-1.5 rounded text-sm font-bold disabled:opacity-50"
+                      disabled={currentPage === totalPages}
+                      onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                    >
+                      Next
+                    </button>
+                  </div>
+                </div>
+              );
+            })()}
+          </div>
         )}
-        <p className="mt-3 text-xs text-mr-muted">
-          Only columns your admin marked as fillable are editable. Weekends and
-          holidays are locked. Edits save automatically.
-        </p>
       </div>
     </div>
   );
