@@ -79,8 +79,10 @@ export function DailyActivityRow({
     return <div className={containerClasses}>{innerContent}</div>;
   }
 
+  const targetHref = activity?.id ? `/activity?id=${activity.id}` : `/activity?date=${dateStr}`;
+
   return (
-    <Link href={`/activity?date=${dateStr}`} className={containerClasses}>
+    <Link href={targetHref} className={containerClasses}>
       {innerContent}
     </Link>
   );
