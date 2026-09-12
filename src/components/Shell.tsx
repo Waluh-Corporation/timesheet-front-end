@@ -11,6 +11,8 @@ import {
   CalendarCheck,
   UserRound,
   History,
+  Clock,
+  Database,
   type LucideIcon,
 } from "lucide-react";
 
@@ -22,11 +24,13 @@ interface NavItem {
 
 const adminNav: NavItem[] = [
   { href: "/users", label: "Users", icon: Users },
+  { href: "/master-data", label: "Master Data", icon: Database },
   { href: "/profile", label: "Profile", icon: UserRound },
 ];
 
 const userNav: NavItem[] = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/overtime", label: "Overtime", icon: Clock },
   { href: "/historical-data", label: "Historical Data", icon: History },
   { href: "/profile", label: "Profile", icon: UserRound },
 ];

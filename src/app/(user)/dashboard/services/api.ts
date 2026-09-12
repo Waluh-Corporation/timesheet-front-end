@@ -2,7 +2,7 @@ import { api, downloadFile } from "@/lib/api";
 import type { DailyActivity } from "@/lib/types";
 
 export async function fetchDashboardActivities(year: number, month: number) {
-  return api<DailyActivity[]>(`/api/v1/activities?year=${year}&month=${month}`);
+  return api<DailyActivity[]>(`/api/v1/activities?year=${year}&month=${month}&limit=-1`);
 }
 
 export async function fetchHolidays(year: number, month: number) {

@@ -14,7 +14,7 @@ export function ActivityDetailContent() {
   const id = params.get("id");
   const defaultDate = params.get("date") || todayISO();
 
-  const { form, set, setProjectDetails, submit, loading, saving, activeId, projects } = useActivityData(id, defaultDate);
+  const { form, set, setProjectDetails, submit, loading, saving, activeId, projects, statuses } = useActivityData(id, defaultDate);
 
   if (loading) {
     return (
@@ -61,12 +61,11 @@ export function ActivityDetailContent() {
               value={form.status || "P"}
               onChange={(e) => set("status", e.target.value)}
             >
-              <option value="P">Present</option>
-              <option value="S">Sick</option>
-              <option value="PM">Permission</option>
-              <option value="V">Leave</option>
-              <option value="BT">Business Trip</option>
-              <option value="X">Off</option>
+              {statuses.map((s) => (
+                <option key={s.code} value={s.code}>
+                  {s.name} ({s.code})
+                </option>
+              ))}
             </select>
           </div>
         </div>
@@ -119,10 +118,15 @@ export function ActivityDetailContent() {
             <option value="">— Pilih Project —</option>
             {projects.map((p) => (
               <option key={p.id} value={p.id}>
-                {p.name}
+                {p.name} {p.app_impacted ? `(${p.app_impacted})` : ""}
               </option>
             ))}
           </select>
+          {form.app_impacted && (
+            <p className="mt-1 text-xs text-mr-muted">
+              App Impacted: <span className="font-semibold text-mr-ink">{form.app_impacted}</span>
+            </p>
+          )}
         </div>
 
         <div className="mt-2 flex justify-end gap-2">

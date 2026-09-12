@@ -1,19 +1,26 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { X, Loader2, CalendarDays } from "lucide-react";
 import { api } from "@/lib/api";
 import { useToast } from "@/components/Toast";
-import type { DailyActivity } from "@/lib/types";
+import type { ActivityStatus, DailyActivity, Project } from "@/lib/types";
+import { fetchActivityStatuses, fetchProjects } from "@/services/masterData";
 
 function todayISO(): string {
   const now = new Date();
-  // Render in local time; the backend normalises to Asia/Jakarta.
   return now.toISOString().slice(0, 10);
 }
 
-// Friendly modal prompting the user to fill "Today's Activity" or a past date,
-// enabling incremental daily entry instead of a whole-month form.
+const DEFAULT_STATUSES: ActivityStatus[] = [
+  { code: "P", name: "Present", is_working_day: true, sort_order: 1 },
+  { code: "S", name: "Sick", is_working_day: false, sort_order: 2 },
+  { code: "PM", name: "Permission", is_working_day: false, sort_order: 3 },
+  { code: "V", name: "Leave", is_working_day: false, sort_order: 4 },
+  { code: "BT", name: "Business Trip", is_working_day: true, sort_order: 5 },
+  { code: "X", name: "Off", is_working_day: false, sort_order: 6 },
+];
+
 export default function DailyModal({
   onClose,
   onSaved,
@@ -23,6 +30,8 @@ export default function DailyModal({
 }) {
   const { notify } = useToast();
   const [saving, setSaving] = useState(false);
+  const [statuses, setStatuses] = useState<ActivityStatus[]>(DEFAULT_STATUSES);
+  const [projects, setProjects] = useState<Project[]>([]);
   const [form, setForm] = useState<DailyActivity>({
     date: todayISO(),
     start_time: "08:00",
@@ -34,7 +43,40 @@ export default function DailyModal({
     app_impacted: "",
   });
 
-  const set = (k: keyof DailyActivity, v: string) => setForm({ ...form, [k]: v });
+  useEffect(() => {
+    fetchActivityStatuses().then((res) => {
+      if (res && res.length > 0) setStatuses(res);
+    });
+    fetchProjects().then((res) => {
+      if (res) setProjects(res);
+    });
+  }, []);
+
+  const set = (k: keyof DailyActivity, v: any) => setForm((prev) => ({ ...prev, [k]: v }));
+
+  const handleProjectChange = (projectIdStr: string) => {
+    if (!projectIdStr) {
+      setForm((prev) => ({
+        ...prev,
+        project_ref_id: undefined,
+        project_id: "",
+        project_name: "",
+        app_impacted: "",
+      }));
+      return;
+    }
+    const pId = Number.parseInt(projectIdStr, 10);
+    const p = projects.find((proj) => proj.id === pId);
+    if (p) {
+      setForm((prev) => ({
+        ...prev,
+        project_ref_id: p.id,
+        project_id: p.code,
+        project_name: p.name,
+        app_impacted: p.app_impacted || "",
+      }));
+    }
+  };
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -64,7 +106,7 @@ export default function DailyModal({
               <p className="text-xs text-mr-muted">Fill in what you worked on.</p>
             </div>
           </div>
-          <button onClick={onClose} className=" p-2 hover:bg-mr-surface2">
+          <button onClick={onClose} className="p-2 hover:bg-mr-surface2">
             <X size={18} />
           </button>
         </div>
@@ -89,12 +131,11 @@ export default function DailyModal({
                 value={form.status}
                 onChange={(e) => set("status", e.target.value)}
               >
-                <option value="P">Present</option>
-                <option value="S">Sick</option>
-                <option value="PM">Permission</option>
-                <option value="V">Leave</option>
-                <option value="BT">Business Trip</option>
-                <option value="X">Off</option>
+                {statuses.map((s) => (
+                  <option key={s.code} value={s.code}>
+                    {s.name} ({s.code})
+                  </option>
+                ))}
               </select>
             </div>
           </div>
@@ -130,22 +171,27 @@ export default function DailyModal({
             />
           </div>
 
-
           <div>
-            <label className="mb-1 block text-xs font-semibold">
-              Aplikasi Terdampak
-            </label>
+            <label className="mb-1 block text-xs font-semibold">Project / Aplikasi</label>
             <select
               className="input"
-              value={form.app_impacted}
-              onChange={(e) => set("app_impacted", e.target.value)}
+              value={form.project_ref_id || ""}
+              onChange={(e) => handleProjectChange(e.target.value)}
             >
-              <option value="">— Pilih —</option>
-              <option value="Bisnis">Bisnis</option>
-              <option value="Cash">Cash</option>
-              <option value="Overseas">Overseas</option>
+              <option value="">— Pilih Project —</option>
+              {projects.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.name} {p.app_impacted ? `(${p.app_impacted})` : ""}
+                </option>
+              ))}
             </select>
           </div>
+
+          {form.app_impacted && (
+            <div className="text-xs text-mr-muted">
+              App Impacted: <span className="font-semibold text-mr-ink">{form.app_impacted}</span>
+            </div>
+          )}
 
           <div className="mt-2 flex justify-end gap-2">
             <button type="button" onClick={onClose} className="btn-ghost">

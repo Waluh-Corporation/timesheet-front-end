@@ -121,3 +121,71 @@ export interface OvertimeEntry {
   department_head?: Approver;
 }
 
+export interface PaginationMeta {
+  current_page: number;
+  limit: number;
+  total_items: number;
+  total_pages: number;
+}
+
+export interface PaginatedResponse<T> {
+  code: number;
+  status: string;
+  data: T;
+  pagination?: PaginationMeta;
+}
+
+export interface OvertimeRequest {
+  id?: number;
+  date: string;
+  start_time: string;
+  end_time: string;
+  task_description: string;
+  team_leader_id?: number;
+  department_head_id?: number;
+}
+
+export interface CompanyRequest {
+  code: string;
+  name: string;
+}
+
+export interface ApproverRequest {
+  name: string;
+  role_type: "team_leader" | "department_head";
+  title?: string;
+  is_active?: boolean;
+}
+
+export interface SetupStatusResponse {
+  is_initialized: boolean;
+  requires_setup: boolean;
+  admin_count: number;
+  is_new?: string;
+}
+
+export interface InitSetupRequest {
+  admin: {
+    name: string;
+    username: string;
+    email: string;
+    password: string;
+  };
+  companies?: {
+    code: string;
+    name: string;
+  }[];
+  departments?: {
+    code: string;
+    name: string;
+    company_code: string;
+    division?: string;
+  }[];
+  approvers?: {
+    name: string;
+    role_type: "team_leader" | "department_head";
+    title?: string;
+    company_code?: string;
+  }[];
+}
+

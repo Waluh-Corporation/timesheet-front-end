@@ -16,7 +16,8 @@ import {
 import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import { useToast } from "@/components/Toast";
-import type { User, Role, ProfileChangeRequest, Passkey } from "@/lib/types";
+import type { User, Role, ProfileChangeRequest, Passkey, Company } from "@/lib/types";
+import { fetchCompanies } from "@/services/masterData";
 
 // Admin console for provisioning accounts (the ONLY registration path) and
 // reviewing self-service profile change requests.
@@ -30,6 +31,8 @@ export default function UsersPage() {
   const [passkeysFor, setPasskeysFor] = useState<number | null>(null);
   const [userPasskeys, setUserPasskeys] = useState<Passkey[]>([]);
   const [pkLoading, setPkLoading] = useState(false);
+
+  const [companies, setCompanies] = useState<Company[]>([]);
 
   const emptyForm = {
     username: "",
@@ -46,12 +49,14 @@ export default function UsersPage() {
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const [u, c] = await Promise.all([
+      const [u, c, comps] = await Promise.all([
         api<User[]>("/api/v1/admin/users"),
         api<ProfileChangeRequest[]>("/api/v1/admin/profile-changes?status=pending"),
+        fetchCompanies(),
       ]);
       setUsers(u);
       setChanges(c || []);
+      setCompanies(comps || []);
     } catch (err: any) {
       notify(err.message || "Failed to load", "error");
     } finally {
@@ -212,10 +217,11 @@ export default function UsersPage() {
                 required
               >
                 <option value="">— Select Company —</option>
-                <option value="MII">MII</option>
-                <option value="SDD">SDD</option>
-                <option value="NTT">NTT</option>
-                <option value="Adidata">Adidata</option>
+                {companies.map((c) => (
+                  <option key={c.id} value={c.code}>
+                    {c.name} ({c.code.toUpperCase()})
+                  </option>
+                ))}
               </select>
             </div>
             <select
@@ -321,10 +327,11 @@ export default function UsersPage() {
                             }}
                           >
                             <option value="">— Unassigned —</option>
-                            <option value="MII">MII</option>
-                            <option value="SDD">SDD</option>
-                            <option value="NTT">NTT</option>
-                            <option value="Adidata">Adidata</option>
+                            {companies.map((c) => (
+                              <option key={c.id} value={c.code}>
+                                {c.code.toUpperCase()}
+                              </option>
+                            ))}
                           </select>
                         </td>
                         <td className="py-3">
