@@ -13,6 +13,7 @@ import {
   History,
   Clock,
   Database,
+  ClipboardList,
   type LucideIcon,
 } from "lucide-react";
 
@@ -24,6 +25,7 @@ interface NavItem {
 
 const adminNav: NavItem[] = [
   { href: "/users", label: "Users", icon: Users },
+  { href: "/profile-changes", label: "Profile Requests", icon: ClipboardList },
   { href: "/master-data", label: "Master Data", icon: Database },
   { href: "/profile", label: "Profile", icon: UserRound },
 ];

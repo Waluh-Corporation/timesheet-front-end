@@ -48,16 +48,21 @@ export interface User {
   role: Role;
   is_active: boolean;
   name: string;
-  mii_id: string;
-  division: string;
+  mii_id?: string;
+  employee_id?: string;
+  bni_id?: string;
+  division?: string;
   department?: string;
   department_id?: number;
   department_rel?: Department;
-  site: string;
+  site?: string;
   company?: string;
   company_id?: number;
   company_rel?: Company;
+  position?: string;
+  group_name?: string;
   created_at: string;
+  updated_at?: string;
 }
 
 export interface DailyActivity {
@@ -87,16 +92,51 @@ export interface ProfileChangeRequest {
   user_id: number;
   status: "pending" | "approved" | "rejected";
   name: string;
-  mii_id: string;
-  division: string;
+  mii_id?: string;
+  employee_id?: string;
+  bni_id?: string;
+  division?: string;
   department?: string;
   department_id?: number;
-  site: string;
+  site?: string;
   company_id?: number;
   reviewed_by?: number;
+  reviewer_name?: string;
   reviewed_at?: string;
   created_at: string;
+  updated_at?: string;
   user?: User;
+}
+
+export interface AdminProfileChange {
+  id: number;
+  user_id: number;
+  user_name?: string;
+  user_email?: string;
+  name?: string;
+  employee_id?: string;
+  bni_id?: string;
+  division?: string;
+  department?: string;
+  department_id?: number;
+  company_id?: number;
+  site?: string;
+  status: "pending" | "approved" | "rejected";
+  reviewed_by?: number;
+  reviewer_name?: string;
+  reviewed_at?: string;
+  created_at: string;
+}
+
+export interface ProfileChangeRequestDTO {
+  name?: string;
+  employee_id?: string;
+  bni_id?: string;
+  company_id?: number;
+  department?: string;
+  department_id?: number;
+  division?: string;
+  site?: string;
 }
 
 export interface Approver {
@@ -189,3 +229,13 @@ export interface InitSetupRequest {
   }[];
 }
 
+export interface ChangePasswordRequest {
+  old_password: string;
+  new_password: string;
+}
+
+export interface ChangePasswordResponse {
+  code: number;
+  status: string;
+  message: string;
+}

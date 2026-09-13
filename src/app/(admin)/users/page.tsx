@@ -1,6 +1,7 @@
 "use client";
 
 import { Fragment, useEffect, useState, useCallback } from "react";
+import Link from "next/link";
 import {
   UserPlus,
   Loader2,
@@ -12,6 +13,7 @@ import {
   KeyRound,
   Trash2,
   Fingerprint,
+  ChevronRight,
 } from "lucide-react";
 import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
@@ -39,8 +41,10 @@ export default function UsersPage() {
     email: "",
     role: "user" as Role,
     name: "",
+    bni_id: "",
     mii_id: "",
     division: "",
+    department: "",
     site: "",
     company: "",
   };
@@ -192,23 +196,37 @@ export default function UsersPage() {
             <div className="grid grid-cols-2 gap-3">
               <input
                 className="input"
-                placeholder="MII ID"
+                placeholder="Employee / MII ID"
                 value={form.mii_id}
                 onChange={(e) => setForm({ ...form, mii_id: e.target.value })}
               />
               <input
                 className="input"
-                placeholder="Site"
-                value={form.site}
-                onChange={(e) => setForm({ ...form, site: e.target.value })}
+                placeholder="BNI ID"
+                value={form.bni_id}
+                onChange={(e) => setForm({ ...form, bni_id: e.target.value })}
               />
             </div>
             <div className="grid grid-cols-2 gap-3">
               <input
                 className="input"
+                placeholder="Department"
+                value={form.department}
+                onChange={(e) => setForm({ ...form, department: e.target.value })}
+              />
+              <input
+                className="input"
                 placeholder="Division"
                 value={form.division}
                 onChange={(e) => setForm({ ...form, division: e.target.value })}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <input
+                className="input"
+                placeholder="Site"
+                value={form.site}
+                onChange={(e) => setForm({ ...form, site: e.target.value })}
               />
               <select
                 className="input font-semibold"
@@ -243,10 +261,18 @@ export default function UsersPage() {
         <div className="flex flex-col gap-6 lg:col-span-2">
           {changes.length > 0 && (
             <div className="card p-6">
-              <div className="mb-4 flex items-center gap-2">
-                <ClipboardList size={18} className="text-mr-purple" />
-                <h2 className="text-lg font-bold">Pending profile changes</h2>
-                <span className="chip bg-mr-yellow text-mr-ink">{changes.length}</span>
+              <div className="mb-4 flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  <ClipboardList size={18} className="text-mr-purple" />
+                  <h2 className="text-lg font-bold">Pending profile changes</h2>
+                  <span className="chip bg-mr-yellow text-mr-ink">{changes.length}</span>
+                </div>
+                <Link
+                  href="/profile-changes"
+                  className="text-xs font-bold text-mr-purple hover:underline flex items-center gap-0.5"
+                >
+                  Manage all requests <ChevronRight size={14} />
+                </Link>
               </div>
               <div className="flex flex-col gap-3">
                 {changes.map((c) => (
@@ -257,7 +283,15 @@ export default function UsersPage() {
                     <div className="text-sm">
                       <p className="font-semibold">{c.user?.username || `User #${c.user_id}`}</p>
                       <p className="text-mr-muted">
-                        {[c.name, c.mii_id, c.division, c.site].filter(Boolean).join(" · ")}
+                        {[
+                          c.name,
+                          c.employee_id || c.mii_id,
+                          c.bni_id ? `BNI: ${c.bni_id}` : null,
+                          c.division,
+                          c.site,
+                        ]
+                          .filter(Boolean)
+                          .join(" · ")}
                       </p>
                     </div>
                     <div className="flex gap-2">
@@ -391,7 +425,7 @@ export default function UsersPage() {
                       </tr>
                       {passkeysFor === u.id && (
                         <tr>
-                          <td colSpan={4} className="border-t-2 border-mr-ink bg-mr-surface2 p-4">
+                          <td colSpan={5} className="border-t-2 border-mr-ink bg-mr-surface2 p-4">
                             <div className="mb-2 flex items-center gap-2 text-xs font-extrabold uppercase text-mr-muted">
                               <KeyRound size={14} /> Passkeys for {u.username}
                             </div>
