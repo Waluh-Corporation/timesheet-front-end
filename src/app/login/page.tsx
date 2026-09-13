@@ -46,7 +46,7 @@ function friendlyAuthError(err: any, context: "password" | "passkey"): string {
 }
 
 export default function LoginPage() {
-  const { loginWithPassword, loginWithToken } = useAuth();
+  const { user, loading, loginWithPassword, loginWithToken } = useAuth();
   const { notify } = useToast();
   const router = useRouter();
 
@@ -67,6 +67,13 @@ export default function LoginPage() {
     },
     [router]
   );
+
+  // If already authenticated, redirect to appropriate role route
+  useEffect(() => {
+    if (!loading && user) {
+      routeForRole(user.role);
+    }
+  }, [user, loading, routeForRole]);
 
   // Check setup status
   useEffect(() => {

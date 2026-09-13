@@ -152,10 +152,14 @@ export async function loginWithPasskey(
     },
   };
 
-  const res = await api<{ token: string; user: User }>(
+  const res = await api<{ token: string; user?: User }>(
     `/api/v1/auth/passkey/login/finish?session_id=${encodeURIComponent(session_id)}`,
     { method: "POST", auth: false, body: JSON.stringify(body) }
   );
   setToken(res.token);
-  return res.user;
+  let userData = res.user;
+  if (!userData) {
+    userData = await api<User>("/api/v1/me");
+  }
+  return userData;
 }
