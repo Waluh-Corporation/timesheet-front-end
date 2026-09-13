@@ -70,18 +70,24 @@ export default function ProfilePage() {
 
   useEffect(() => {
     if (user) {
+      const matchedCompany = companies.find(
+        (c) =>
+          (user.company_id && c.id === user.company_id) ||
+          (user.company && c.name?.toLowerCase() === user.company.toLowerCase()) ||
+          (user.company && c.code?.toLowerCase() === user.company.toLowerCase())
+      );
       setForm({
         name: user.name || "",
         employee_id: user.employee_id || user.mii_id || "",
         bni_id: user.bni_id || "",
         division: user.division || "",
         site: user.site || "",
-        company_id: user.company_id || 0,
+        company_id: matchedCompany ? matchedCompany.id : user.company_id || 0,
         department_id: user.department_id || 0,
         department: user.department || "",
       });
     }
-  }, [user]);
+  }, [user, companies]);
 
   const load = useCallback(async () => {
     setLoading(true);

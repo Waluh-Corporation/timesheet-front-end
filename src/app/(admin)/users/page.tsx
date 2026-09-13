@@ -47,6 +47,7 @@ export default function UsersPage() {
     department: "",
     site: "",
     company: "",
+    company_id: 0,
   };
   const [form, setForm] = useState(emptyForm);
 
@@ -76,7 +77,15 @@ export default function UsersPage() {
     e.preventDefault();
     setCreating(true);
     try {
-      await api("/api/v1/admin/users", { method: "POST", body: JSON.stringify(form) });
+      const selectedComp = companies.find(
+        (c) => c.id === form.company_id || c.name === form.company || c.code === form.company
+      );
+      const payload = {
+        ...form,
+        company_id: selectedComp ? selectedComp.id : undefined,
+        company: selectedComp ? selectedComp.name : form.company,
+      };
+      await api("/api/v1/admin/users", { method: "POST", body: JSON.stringify(payload) });
       notify("User created — a setup email has been sent.", "success");
       setForm(emptyForm);
       load();
@@ -230,13 +239,21 @@ export default function UsersPage() {
               />
               <select
                 className="input font-semibold"
-                value={form.company}
-                onChange={(e) => setForm({ ...form, company: e.target.value })}
+                value={form.company_id || ""}
+                onChange={(e) => {
+                  const compId = Number(e.target.value);
+                  const comp = companies.find((c) => c.id === compId);
+                  setForm({
+                    ...form,
+                    company_id: compId,
+                    company: comp ? comp.name : "",
+                  });
+                }}
                 required
               >
                 <option value="">— Select Company —</option>
                 {companies.map((c) => (
-                  <option key={c.id} value={c.code}>
+                  <option key={c.id} value={c.id}>
                     {c.name} ({c.code.toUpperCase()})
                   </option>
                 ))}
@@ -341,32 +358,48 @@ export default function UsersPage() {
                           <p className="text-xs text-mr-muted">{u.email}</p>
                         </td>
                         <td className="py-3">
-                          <select
-                            className={`input py-1 px-2 text-xs font-bold border-mr-ink/30 ${
-                              u.company ? "bg-mr-surface" : "bg-amber-100 text-amber-800 border-amber-400"
-                            }`}
-                            value={u.company || ""}
-                            onChange={async (e) => {
-                              const newComp = e.target.value;
-                              try {
-                                await api(`/api/v1/admin/users/${u.id}`, {
-                                  method: "PATCH",
-                                  body: JSON.stringify({ company: newComp }),
-                                });
-                                notify(`Assigned ${u.username} to ${newComp || "none"}`, "success");
-                                load();
-                              } catch (err: any) {
-                                notify(err.message, "error");
-                              }
-                            }}
-                          >
-                            <option value="">— Unassigned —</option>
-                            {companies.map((c) => (
-                              <option key={c.id} value={c.code}>
-                                {c.code.toUpperCase()}
-                              </option>
-                            ))}
-                          </select>
+                          {(() => {
+                            const matchedCompany = companies.find(
+                              (c) =>
+                                (u.company_id && c.id === u.company_id) ||
+                                (u.company && c.name?.toLowerCase() === u.company.toLowerCase()) ||
+                                (u.company && c.code?.toLowerCase() === u.company.toLowerCase())
+                            );
+                            const currentVal = matchedCompany ? String(matchedCompany.id) : "";
+
+                            return (
+                              <select
+                                className={`input py-1 px-2 text-xs font-bold border-mr-ink/30 ${
+                                  currentVal ? "bg-mr-surface" : "bg-amber-100 text-amber-800 border-amber-400"
+                                }`}
+                                value={currentVal}
+                                onChange={async (e) => {
+                                  const compId = e.target.value ? Number(e.target.value) : undefined;
+                                  const compObj = companies.find((c) => c.id === compId);
+                                  try {
+                                    await api(`/api/v1/admin/users/${u.id}`, {
+                                      method: "PATCH",
+                                      body: JSON.stringify({
+                                        company_id: compId,
+                                        company: compObj ? compObj.name : "",
+                                      }),
+                                    });
+                                    notify(`Assigned ${u.username} to ${compObj ? compObj.name : "Unassigned"}`, "success");
+                                    load();
+                                  } catch (err: any) {
+                                    notify(err.message, "error");
+                                  }
+                                }}
+                              >
+                                <option value="">— Unassigned —</option>
+                                {companies.map((c) => (
+                                  <option key={c.id} value={String(c.id)}>
+                                    {c.code.toUpperCase()} — {c.name}
+                                  </option>
+                                ))}
+                              </select>
+                            );
+                          })()}
                         </td>
                         <td className="py-3">
                           <span
