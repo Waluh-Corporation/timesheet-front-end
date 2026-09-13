@@ -25,7 +25,7 @@ export function getApiBase(): string {
 
 export const API_BASE = getApiBase();
 
-const TOKEN_KEY = "ts_token";
+const TOKEN_KEY = "ts_auth_token";
 
 export function getCookie(name: string): string | null {
   if (typeof document === "undefined") return null;
