@@ -61,7 +61,7 @@ export default function MasterDataPage() {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2 px-4 py-2.5 font-bold text-sm transition border-b-2 -mb-[2px] whitespace-nowrap ${
+              className={`flex items-center gap-2 px-4 py-2.5 font-bold text-sm transition-colors duration-200 border-b-2 -mb-[2px] whitespace-nowrap outline-none cursor-pointer focus-visible:ring-2 focus-visible:ring-mr-purple focus-visible:-outline-offset-2 ${
                 isActive
                   ? "border-mr-purple text-mr-purple bg-mr-surface"
                   : "border-transparent text-mr-muted hover:text-mr-ink hover:bg-mr-surface2/30"

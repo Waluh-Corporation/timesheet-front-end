@@ -154,14 +154,14 @@ export function CompaniesTable() {
                             setForm({ id: c.id, code: c.code, name: c.name });
                             setModalOpen(true);
                           }}
-                          className="border border-mr-ink p-1.5 hover:bg-mr-surface2"
+                          className="btn-icon bg-mr-surface2"
                           title="Edit"
                         >
                           <Edit2 size={14} />
                         </button>
                         <button
                           onClick={() => handleDelete(c.id, c.name)}
-                          className="border border-mr-ink p-1.5 text-mr-muted hover:bg-mr-pink hover:text-white"
+                          className="btn-icon hover:bg-mr-pink hover:text-white"
                           title="Delete"
                         >
                           <Trash2 size={14} />

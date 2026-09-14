@@ -167,14 +167,14 @@ export function SitesTable() {
                             setForm({ id: d.id, code: d.code || "", name: d.name, is_active: d.is_active });
                             setModalOpen(true);
                           }}
-                          className="border border-mr-ink p-1.5 hover:bg-mr-surface2"
+                          className="btn-icon bg-mr-surface2"
                           title="Edit"
                         >
                           <Edit2 size={14} />
                         </button>
                         <button
                           onClick={() => handleDelete(d.id, d.name)}
-                          className="border border-mr-ink p-1.5 text-mr-muted hover:bg-mr-pink hover:text-white"
+                          className="btn-icon hover:bg-mr-pink hover:text-white"
                           title="Delete"
                         >
                           <Trash2 size={14} />
@@ -233,7 +233,7 @@ export function SitesTable() {
                 <input className="input" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
               </div>
               <div className="flex items-center gap-2 mt-1">
-                <input type="checkbox" id="is_active" checked={form.is_active} onChange={(e) => setForm({ ...form, is_active: e.target.checked })} className="h-4 w-4" />
+                <input type="checkbox" id="is_active" checked={form.is_active} onChange={(e) => setForm({ ...form, is_active: e.target.checked })} className="h-4 w-4 cursor-pointer accent-mr-purple focus-visible:ring-2 focus-visible:ring-mr-purple outline-none" />
                 <label htmlFor="is_active" className="text-xs font-semibold">Active</label>
               </div>
               <div className="mt-2 flex justify-end gap-2">

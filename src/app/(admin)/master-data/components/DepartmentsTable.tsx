@@ -178,14 +178,14 @@ export function DepartmentsTable() {
                             setForm({ id: d.id, code: d.code || "", name: d.name, division: d.division || "", is_active: d.is_active });
                             setModalOpen(true);
                           }}
-                          className="border border-mr-ink p-1.5 hover:bg-mr-surface2"
+                          className="btn-icon bg-mr-surface2"
                           title="Edit"
                         >
                           <Edit2 size={14} />
                         </button>
                         <button
                           onClick={() => handleDelete(d.id, d.name)}
-                          className="border border-mr-ink p-1.5 text-mr-muted hover:bg-mr-pink hover:text-white"
+                          className="btn-icon hover:bg-mr-pink hover:text-white"
                           title="Delete"
                         >
                           <Trash2 size={14} />
@@ -294,7 +294,7 @@ export function DepartmentsTable() {
                   id="is_active"
                   checked={form.is_active}
                   onChange={(e) => setForm({ ...form, is_active: e.target.checked })}
-                  className="h-4 w-4"
+                  className="h-4 w-4 cursor-pointer accent-mr-purple focus-visible:ring-2 focus-visible:ring-mr-purple outline-none"
                 />
                 <label htmlFor="is_active" className="text-xs font-semibold">
                   Active

@@ -180,14 +180,14 @@ export function ApproversTable() {
                             setForm({ id: a.id, name: a.name, role_type: a.role_type, title: a.title || "", is_active: a.is_active });
                             setModalOpen(true);
                           }}
-                          className="border border-mr-ink p-1.5 hover:bg-mr-surface2"
+                          className="btn-icon bg-mr-surface2"
                           title="Edit"
                         >
                           <Edit2 size={14} />
                         </button>
                         <button
                           onClick={() => handleDelete(a.id, a.name)}
-                          className="border border-mr-ink p-1.5 text-mr-muted hover:bg-mr-pink hover:text-white"
+                          className="btn-icon hover:bg-mr-pink hover:text-white"
                           title="Delete"
                         >
                           <Trash2 size={14} />
@@ -253,7 +253,7 @@ export function ApproversTable() {
                 <input className="input" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="e.g. Lead Engineer" />
               </div>
               <div className="flex items-center gap-2 mt-1">
-                <input type="checkbox" id="is_active" checked={form.is_active} onChange={(e) => setForm({ ...form, is_active: e.target.checked })} className="h-4 w-4" />
+                <input type="checkbox" id="is_active" checked={form.is_active} onChange={(e) => setForm({ ...form, is_active: e.target.checked })} className="h-4 w-4 cursor-pointer accent-mr-purple focus-visible:ring-2 focus-visible:ring-mr-purple outline-none" />
                 <label htmlFor="is_active" className="text-xs font-semibold">Active</label>
               </div>
               <div className="mt-2 flex justify-end gap-2">
