@@ -2,11 +2,11 @@
 
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
-import { useNewUser, DUMMY_DEPARTMENTS, DUMMY_DIVISIONS, DUMMY_SITES } from "./hooks/useNewUser";
+import { useNewUser } from "./hooks/useNewUser";
 import { NewUserForm } from "./components/NewUserForm";
 
 export default function NewUserPage() {
-  const { form, setForm, companies, creating, createUser } = useNewUser();
+  const { form, setForm, companies, departments, divisions, sites, creating, createUser } = useNewUser();
 
   return (
     <div className="flex flex-col gap-6 max-w-2xl mx-auto">
@@ -26,9 +26,9 @@ export default function NewUserPage() {
         companies={companies}
         creating={creating}
         createUser={createUser}
-        dummyDepartments={DUMMY_DEPARTMENTS}
-        dummyDivisions={DUMMY_DIVISIONS}
-        dummySites={DUMMY_SITES}
+        dummyDepartments={departments}
+        dummyDivisions={divisions}
+        dummySites={sites}
       />
     </div>
   );

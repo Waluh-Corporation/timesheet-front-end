@@ -1,19 +1,19 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/components/Toast";
-import type { Role, Company } from "@/lib/types";
-import { fetchCompanies } from "@/services/masterData";
+import type { Role, Company, Department } from "@/lib/types";
+import { fetchCompanies, fetchDepartments, fetchDivisions, fetchSites } from "@/services/masterData";
 import { newUserService } from "../services/newUserService";
-
-export const DUMMY_DEPARTMENTS = ["Engineering", "HR", "Finance", "Sales"];
-export const DUMMY_DIVISIONS = ["Software", "Recruiting", "Accounting", "Enterprise"];
-export const DUMMY_SITES = ["Jakarta", "Bandung", "Surabaya", "Bali"];
 
 export function useNewUser() {
   const router = useRouter();
   const { notify } = useToast();
   
   const [companies, setCompanies] = useState<Company[]>([]);
+  const [departments, setDepartments] = useState<string[]>([]);
+  const [divisions, setDivisions] = useState<string[]>([]);
+  const [sites, setSites] = useState<string[]>([]);
+  
   const [creating, setCreating] = useState(false);
 
   const emptyForm = {
@@ -32,7 +32,17 @@ export function useNewUser() {
   const [form, setForm] = useState(emptyForm);
 
   useEffect(() => {
-    fetchCompanies().then((comps) => setCompanies(comps || []));
+    Promise.all([
+      fetchCompanies(),
+      fetchDepartments(),
+      fetchDivisions(),
+      fetchSites(),
+    ]).then(([comps, depts, divs, sts]) => {
+      setCompanies(comps || []);
+      setDepartments(depts ? depts.map(d => d.name || (d as any).department_name || (d as any).title) : []);
+      setDivisions(divs ? divs.map(d => d.name || d.title || d.division_name) : []);
+      setSites(sts ? sts.map(s => s.name || s.site_name || s.location) : []);
+    });
   }, []);
 
   const createUser = async (e: React.FormEvent) => {
@@ -62,6 +72,9 @@ export function useNewUser() {
     form,
     setForm,
     companies,
+    departments,
+    divisions,
+    sites,
     creating,
     createUser,
   };

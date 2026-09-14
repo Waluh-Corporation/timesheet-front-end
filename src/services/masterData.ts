@@ -38,6 +38,24 @@ export async function fetchDepartments(companyId?: number): Promise<Department[]
   }
 }
 
+export async function fetchDivisions(): Promise<any[]> {
+  try {
+    return await api<any[]>("/api/v1/admin/divisions");
+  } catch (err) {
+    console.error("Failed to load divisions", err);
+    return [];
+  }
+}
+
+export async function fetchSites(): Promise<any[]> {
+  try {
+    return await api<any[]>("/api/v1/admin/sites");
+  } catch (err) {
+    console.error("Failed to load sites", err);
+    return [];
+  }
+}
+
 export async function fetchProjects(): Promise<Project[]> {
   try {
     return await api<Project[]>("/api/v1/projects");
