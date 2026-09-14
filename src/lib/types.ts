@@ -190,6 +190,40 @@ export interface CompanyRequest {
   name: string;
 }
 
+export interface DepartmentRequest {
+  code?: string;
+  name: string;
+  division?: string;
+  company_id?: number;
+  is_active?: boolean;
+}
+
+export interface Division {
+  id: number;
+  code: string;
+  name: string;
+  is_active: boolean;
+}
+
+export interface DivisionRequest {
+  code: string;
+  name: string;
+  is_active?: boolean;
+}
+
+export interface Site {
+  id: number;
+  code: string;
+  name: string;
+  is_active: boolean;
+}
+
+export interface SiteRequest {
+  code: string;
+  name: string;
+  is_active?: boolean;
+}
+
 export interface ApproverRequest {
   name: string;
   role_type: "team_leader" | "department_head";

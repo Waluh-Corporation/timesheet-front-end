@@ -30,7 +30,7 @@ import type {
   Department,
   ProfileChangeRequestDTO,
 } from "@/lib/types";
-import { fetchCompanies, fetchDepartments } from "@/services/masterData";
+import { fetchCompanies, fetchDepartments } from "@/app/(admin)/master-data/services/masterData";
 import { changePassword, submitProfileChange } from "@/services/profileChange";
 
 // Account page for any authenticated user (user OR admin): profile details

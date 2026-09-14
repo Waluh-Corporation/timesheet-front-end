@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { fetchHistoricalActivities } from "../services/api";
-import { fetchProjects } from "@/services/masterData";
+import { fetchProjects } from "@/app/(admin)/master-data/services/masterData";
 import { useToast } from "@/components/Toast";
 import type { DailyActivity, Project } from "@/lib/types";
 

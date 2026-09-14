@@ -1,5 +1,5 @@
 import { api } from "@/lib/api";
-import { fetchCompanies } from "@/services/masterData";
+import { fetchCompanies } from "@/app/(admin)/master-data/services/masterData";
 import type { User, ProfileChangeRequest, Passkey } from "@/lib/types";
 
 export const usersService = {

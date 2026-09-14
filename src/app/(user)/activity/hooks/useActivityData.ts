@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { fetchActivityById, createActivity } from "../services/api";
 import type { DailyActivity, Project, ActivityStatus } from "@/lib/types";
-import { fetchProjects, fetchActivityStatuses } from "@/services/masterData";
+import { fetchProjects, fetchActivityStatuses } from "@/app/(admin)/master-data/services/masterData";
 import { useToast } from "@/components/Toast";
 import { useRouter } from "next/navigation";
 

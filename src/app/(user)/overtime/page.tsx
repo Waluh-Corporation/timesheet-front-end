@@ -16,7 +16,7 @@ import {
 import { useToast } from "@/components/Toast";
 import type { OvertimeEntry, OvertimeRequest, Approver } from "@/lib/types";
 import { fetchOvertimes, upsertOvertime, deleteOvertime } from "@/services/overtime";
-import { fetchApprovers } from "@/services/masterData";
+import { fetchApprovers } from "@/app/(admin)/master-data/services/masterData";
 
 function todayISO(): string {
   return new Date().toISOString().slice(0, 10);

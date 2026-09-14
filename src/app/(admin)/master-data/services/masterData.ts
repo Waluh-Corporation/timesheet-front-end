@@ -8,6 +8,11 @@ import type {
   Approver,
   ApproverRequest,
   Holiday,
+  DepartmentRequest,
+  Division,
+  DivisionRequest,
+  Site,
+  SiteRequest,
 } from "@/lib/types";
 
 export async function fetchActivityStatuses(): Promise<ActivityStatus[]> {
@@ -31,29 +36,99 @@ export async function fetchCompanies(): Promise<Company[]> {
 export async function fetchDepartments(companyId?: number): Promise<Department[]> {
   try {
     const q = companyId ? `?company_id=${companyId}` : "";
-    return await api<Department[]>(`/api/v1/departments${q}`);
+    // In doc.json, Admin fetch might be /api/v1/admin/departments, but /api/v1/departments also works. We'll use admin.
+    return await api<Department[]>(`/api/v1/admin/departments${q}`);
   } catch (err) {
     console.error("Failed to load departments", err);
     return [];
   }
 }
 
-export async function fetchDivisions(): Promise<any[]> {
+export async function createDepartment(data: DepartmentRequest): Promise<Department> {
+  return api<Department>("/api/v1/admin/departments", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+
+export async function updateDepartment(
+  id: number,
+  data: Partial<DepartmentRequest>
+): Promise<Department> {
+  return api<Department>(`/api/v1/admin/departments/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify(data),
+  });
+}
+
+export async function deleteDepartment(id: number): Promise<{ message: string }> {
+  return api<{ message: string }>(`/api/v1/admin/departments/${id}`, {
+    method: "DELETE",
+  });
+}
+
+export async function fetchDivisions(): Promise<Division[]> {
   try {
-    return await api<any[]>("/api/v1/admin/divisions");
+    return await api<Division[]>("/api/v1/admin/divisions");
   } catch (err) {
     console.error("Failed to load divisions", err);
     return [];
   }
 }
 
-export async function fetchSites(): Promise<any[]> {
+export async function createDivision(data: DivisionRequest): Promise<Division> {
+  return api<Division>("/api/v1/admin/divisions", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+
+export async function updateDivision(
+  id: number,
+  data: Partial<DivisionRequest>
+): Promise<Division> {
+  return api<Division>(`/api/v1/admin/divisions/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify(data),
+  });
+}
+
+export async function deleteDivision(id: number): Promise<{ message: string }> {
+  return api<{ message: string }>(`/api/v1/admin/divisions/${id}`, {
+    method: "DELETE",
+  });
+}
+
+export async function fetchSites(): Promise<Site[]> {
   try {
-    return await api<any[]>("/api/v1/admin/sites");
+    return await api<Site[]>("/api/v1/admin/sites");
   } catch (err) {
     console.error("Failed to load sites", err);
     return [];
   }
+}
+
+export async function createSite(data: SiteRequest): Promise<Site> {
+  return api<Site>("/api/v1/admin/sites", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+
+export async function updateSite(
+  id: number,
+  data: Partial<SiteRequest>
+): Promise<Site> {
+  return api<Site>(`/api/v1/admin/sites/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify(data),
+  });
+}
+
+export async function deleteSite(id: number): Promise<{ message: string }> {
+  return api<{ message: string }>(`/api/v1/admin/sites/${id}`, {
+    method: "DELETE",
+  });
 }
 
 export async function fetchProjects(): Promise<Project[]> {

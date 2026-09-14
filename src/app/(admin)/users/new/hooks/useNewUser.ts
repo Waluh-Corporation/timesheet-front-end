@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/components/Toast";
 import type { Role, Company, Department } from "@/lib/types";
-import { fetchCompanies, fetchDepartments, fetchDivisions, fetchSites } from "@/services/masterData";
+import { fetchCompanies, fetchDepartments, fetchDivisions, fetchSites } from "@/app/(admin)/master-data/services/masterData";
 import { newUserService } from "../services/newUserService";
 
 export function useNewUser() {

@@ -5,7 +5,7 @@ import { X, Loader2, CalendarDays } from "lucide-react";
 import { api } from "@/lib/api";
 import { useToast } from "@/components/Toast";
 import type { ActivityStatus, DailyActivity, Project } from "@/lib/types";
-import { fetchActivityStatuses, fetchProjects } from "@/services/masterData";
+import { fetchActivityStatuses, fetchProjects } from "@/app/(admin)/master-data/services/masterData";
 
 function todayISO(): string {
   const now = new Date();
