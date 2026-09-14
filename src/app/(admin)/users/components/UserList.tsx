@@ -15,7 +15,7 @@ export function UserList({
   onAssignCompany,
   onViewPasskeys,
   onRemovePasskey,
-}: {
+}: Readonly<{
   users: User[];
   companies: Company[];
   loading: boolean;
@@ -27,9 +27,52 @@ export function UserList({
   onAssignCompany: (u: User, compId?: number, compObj?: Company) => void;
   onViewPasskeys: (u: User) => void;
   onRemovePasskey: (u: User, pk: Passkey) => void;
-}) {
+}>) {
   const { user: currentUser } = useAuth();
 
+  const renderPasskeyContent = (u: User) => {
+    if (pkLoading) {
+      return (
+        <div className="flex justify-center py-3">
+          <Loader2 size={18} className="animate-spin text-mr-purple" />
+        </div>
+      );
+    }
+    if (userPasskeys.length === 0) {
+      return (
+        <p className="text-sm text-mr-muted">
+          This user has no passkeys.
+        </p>
+      );
+    }
+    return (
+      <div className="flex flex-col gap-2">
+        {userPasskeys.map((pk) => (
+          <div
+            key={pk.id}
+            className="flex items-center justify-between gap-3 border-2 border-mr-ink bg-mr-surface px-3 py-2"
+          >
+            <div className="flex items-center gap-2">
+              <Fingerprint size={16} className="text-mr-purple" />
+              <div>
+                <p className="text-sm font-semibold">{pk.friendly_name || "Passkey"}</p>
+                <p className="text-xs text-mr-muted">
+                  Added {new Date(pk.created_at).toLocaleDateString()}
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={() => onRemovePasskey(u, pk)}
+              className="border-2 border-mr-ink p-2 text-mr-muted hover:bg-mr-pink hover:text-white"
+              title="Remove passkey"
+            >
+              <Trash2 size={15} />
+            </button>
+          </div>
+        ))}
+      </div>
+    );
+  };
   return (
     <div className="card p-6">
       <h2 className="mb-4 text-lg font-bold">All users</h2>
@@ -150,41 +193,7 @@ export function UserList({
                         <div className="mb-2 flex items-center gap-2 text-xs font-extrabold uppercase text-mr-muted">
                           <KeyRound size={14} /> Passkeys for {u.username}
                         </div>
-                        {pkLoading ? (
-                          <div className="flex justify-center py-3">
-                            <Loader2 size={18} className="animate-spin text-mr-purple" />
-                          </div>
-                        ) : userPasskeys.length === 0 ? (
-                          <p className="text-sm text-mr-muted">
-                            This user has no passkeys.
-                          </p>
-                        ) : (
-                          <div className="flex flex-col gap-2">
-                            {userPasskeys.map((pk) => (
-                              <div
-                                key={pk.id}
-                                className="flex items-center justify-between gap-3 border-2 border-mr-ink bg-mr-surface px-3 py-2"
-                              >
-                                <div className="flex items-center gap-2">
-                                  <Fingerprint size={16} className="text-mr-purple" />
-                                  <div>
-                                    <p className="text-sm font-semibold">{pk.friendly_name || "Passkey"}</p>
-                                    <p className="text-xs text-mr-muted">
-                                      Added {new Date(pk.created_at).toLocaleDateString()}
-                                    </p>
-                                  </div>
-                                </div>
-                                <button
-                                  onClick={() => onRemovePasskey(u, pk)}
-                                  className="border-2 border-mr-ink p-2 text-mr-muted hover:bg-mr-pink hover:text-white"
-                                  title="Remove passkey"
-                                >
-                                  <Trash2 size={15} />
-                                </button>
-                              </div>
-                            ))}
-                          </div>
-                        )}
+                        {renderPasskeyContent(u)}
                       </td>
                     </tr>
                   )}

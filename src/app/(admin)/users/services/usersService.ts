@@ -1,6 +1,6 @@
 import { api } from "@/lib/api";
 import { fetchCompanies } from "@/services/masterData";
-import type { User, ProfileChangeRequest, Passkey, Company } from "@/lib/types";
+import type { User, ProfileChangeRequest, Passkey } from "@/lib/types";
 
 export const usersService = {
   getUsers: () => api<User[]>("/api/v1/admin/users"),

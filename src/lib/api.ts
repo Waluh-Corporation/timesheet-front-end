@@ -30,9 +30,8 @@ const TOKEN_KEY = "ts_auth_token";
 export function getCookie(name: string): string | null {
   if (typeof document === "undefined") return null;
   const cleanName = name.replace(/[\r\n]/g, "");
-  const match = document.cookie.match(
-    new RegExp("(?:^|; )" + cleanName.replace(/([.$?*|{}()[\]\\/+^])/g, "\\$1") + "=([^;]*)")
-  );
+  const regex = new RegExp("(?:^|; )" + cleanName.replace(/([.$?*|{}()[\]\\/+^])/g, String.raw`\$1`) + "=([^;]*)");
+  const match = regex.exec(document.cookie);
   return match ? decodeURIComponent(match[1]) : null;
 }
 
@@ -123,15 +122,23 @@ export async function api<T = any>(
 
   const contentType = res.headers.get("content-type") || "";
   if (!res.ok) {
-    let message = res.statusText;
-    if (contentType.includes("application/json")) {
-      const data = await res.json().catch(() => null);
-      if (data?.error) message = data.error;
-      else if (data?.message) message = data.message;
-    }
-    throw new Error(message);
+    await handleApiError(res, contentType);
   }
 
+  return parseApiResponse<T>(res, contentType);
+}
+
+async function handleApiError(res: Response, contentType: string) {
+  let message = res.statusText;
+  if (contentType.includes("application/json")) {
+    const data = await res.json().catch(() => null);
+    if (data?.error) message = data.error;
+    else if (data?.message) message = data.message;
+  }
+  throw new Error(message);
+}
+
+async function parseApiResponse<T>(res: Response, contentType: string): Promise<T> {
   if (contentType.includes("application/json")) {
     const json = await res.json();
     if (json && typeof json === "object" && "data" in json && "code" in json) {
@@ -168,7 +175,7 @@ export async function downloadFile(
   }
 
   const disposition = res.headers.get("content-disposition") || "";
-  const match = disposition.match(/filename=([^;]+)/);
+  const match = /filename=([^;]+)/.exec(disposition);
   const filename = match ? match[1].trim() : fallbackName;
 
   const blob = await res.blob();

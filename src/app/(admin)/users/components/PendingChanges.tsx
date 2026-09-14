@@ -5,10 +5,10 @@ import type { ProfileChangeRequest } from "@/lib/types";
 export function PendingChanges({
   changes,
   onReview,
-}: {
+}: Readonly<{
   changes: ProfileChangeRequest[];
   onReview: (c: ProfileChangeRequest, action: "approve" | "reject") => void;
-}) {
+}>) {
   if (changes.length === 0) return null;
 
   return (

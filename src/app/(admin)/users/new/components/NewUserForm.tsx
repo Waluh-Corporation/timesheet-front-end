@@ -24,7 +24,7 @@ export function NewUserForm({
   dummyDepartments,
   dummyDivisions,
   dummySites,
-}: {
+}: Readonly<{
   form: NewUserFormState;
   setForm: (form: NewUserFormState) => void;
   companies: Company[];
@@ -33,7 +33,7 @@ export function NewUserForm({
   dummyDepartments: string[];
   dummyDivisions: string[];
   dummySites: string[];
-}) {
+}>) {
   return (
     <div className="card p-6">
       <form onSubmit={createUser} className="flex flex-col gap-4">
