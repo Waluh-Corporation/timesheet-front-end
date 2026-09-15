@@ -40,8 +40,8 @@ export function useNewUser() {
     ]).then(([comps, depts, divs, sts]) => {
       setCompanies(comps || []);
       setDepartments(depts ? depts.map(d => d.name || (d as any).department_name || (d as any).title) : []);
-      setDivisions(divs ? divs.map(d => d.name || d.title || d.division_name) : []);
-      setSites(sts ? sts.map(s => s.name || s.site_name || s.location) : []);
+      setDivisions(divs ? divs.map(d => d.name || (d as any).title || (d as any).division_name) : []);
+      setSites(sts ? sts.map(s => s.name || (s as any).site_name || (s as any).location) : []);
     });
   }, []);
 
