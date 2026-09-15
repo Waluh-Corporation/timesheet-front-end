@@ -39,8 +39,8 @@ export function ProfileForm({ hasPending, onSuccess }: { hasPending: boolean, on
           <input
             className="input"
             value={form.employee_id}
-            onChange={(e) => setFieldValue("employee_id", e.target.value)}
-            placeholder="e.g. EMP-001 or MII-12345"
+            onChange={(e) => setFieldValue("employee_id", e.target.value.replace(/\D/g, ""))}
+            placeholder="e.g. 12345"
           />
         </div>
         <div>
@@ -48,7 +48,7 @@ export function ProfileForm({ hasPending, onSuccess }: { hasPending: boolean, on
           <input
             className="input"
             value={form.bni_id}
-            onChange={(e) => setFieldValue("bni_id", e.target.value)}
+            onChange={(e) => setFieldValue("bni_id", e.target.value.replace(/\D/g, ""))}
             placeholder="e.g. 12345678"
           />
         </div>

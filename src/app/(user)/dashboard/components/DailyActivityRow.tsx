@@ -58,13 +58,11 @@ export function DailyActivityRow({
         )}
       </div>
       <div className="flex items-center justify-end gap-2">
-        {activity?.status ? (
+        {activity?.status && (
           <span className="font-bold text-sm px-3 py-1 rounded bg-mr-surface2 text-mr-ink border border-mr-ink/10">
             {activity.status}
           </span>
-        ) : isNonWorking ? (
-          <span className="font-bold text-sm text-mr-muted px-3 py-1">X</span>
-        ) : null}
+        )}
       </div>
     </div>
   );
