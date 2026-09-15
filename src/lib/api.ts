@@ -7,21 +7,90 @@
 // against a separately-running backend, set NEXT_PUBLIC_API_URL=http://localhost:8080
 // (the dev docker-compose already does this).
 
-export const API_BASE = process.env.NEXT_PUBLIC_API_URL || "";
+export function getApiBase(): string {
+  if (process.env.NEXT_PUBLIC_API_URL) {
+    return process.env.NEXT_PUBLIC_API_URL;
+  }
+  // In development, when frontend is accessed via localhost:3000,
+  // automatically route API calls to local backend on port 8080.
+  if (
+    typeof window !== "undefined" &&
+    (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") &&
+    window.location.port === "3000"
+  ) {
+    return "http://localhost:8080";
+  }
+  return "";
+}
 
-const TOKEN_KEY = "ts_token";
+export const API_BASE = getApiBase();
+
+const TOKEN_KEY = "ts_auth_token";
+
+export function getCookie(name: string): string | null {
+  if (typeof document === "undefined") return null;
+  const cleanName = name.replace(/[\r\n]/g, "");
+  const regex = new RegExp("(?:^|; )" + cleanName.replace(/([.$?*|{}()[\]\\/+^])/g, String.raw`\$1`) + "=([^;]*)");
+  const match = regex.exec(document.cookie);
+  return match ? decodeURIComponent(match[1]) : null;
+}
+
+export function setCookie(name: string, value: string, days = 7) {
+  if (typeof document === "undefined") return;
+  const cleanName = name.replace(/[\r\n;=]/g, "").trim();
+  const cleanValue = value.replace(/[\r\n;]/g, "").trim();
+  const maxAge = days * 24 * 60 * 60;
+  const secure = typeof window !== "undefined" && window.location.protocol === "https:" ? "; Secure" : "";
+  document.cookie = `${cleanName}=${encodeURIComponent(cleanValue)}; path=/; max-age=${maxAge}; SameSite=Lax${secure}`;
+}
+
+export function deleteCookie(name: string) {
+  if (typeof document === "undefined") return;
+  const cleanName = name.replace(/[\r\n;=]/g, "").trim();
+  const secure = typeof window !== "undefined" && window.location.protocol === "https:" ? "; Secure" : "";
+  document.cookie = `${cleanName}=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax${secure}`;
+}
 
 export function getToken(): string | null {
   if (typeof window === "undefined") return null;
-  return window.localStorage.getItem(TOKEN_KEY);
+  const cookieVal = getCookie(TOKEN_KEY);
+  if (cookieVal) return cookieVal;
+
+  // Migration from legacy localStorage: move to cookie and purge from localStorage immediately
+  try {
+    const localVal = window.localStorage.getItem(TOKEN_KEY);
+    if (localVal) {
+      setCookie(TOKEN_KEY, localVal);
+      window.localStorage.removeItem(TOKEN_KEY);
+      return localVal;
+    }
+  } catch {
+    // Ignore restricted localStorage in sandboxed environments
+  }
+  return null;
 }
 
 export function setToken(token: string) {
-  window.localStorage.setItem(TOKEN_KEY, token);
+  setCookie(TOKEN_KEY, token);
+  // Purge token from localStorage to prevent XSS exposure
+  if (typeof window !== "undefined") {
+    try {
+      window.localStorage.removeItem(TOKEN_KEY);
+    } catch {
+      // Ignore
+    }
+  }
 }
 
 export function clearToken() {
-  window.localStorage.removeItem(TOKEN_KEY);
+  deleteCookie(TOKEN_KEY);
+  if (typeof window !== "undefined") {
+    try {
+      window.localStorage.removeItem(TOKEN_KEY);
+    } catch {
+      // Ignore
+    }
+  }
 }
 
 interface RequestOptions extends RequestInit {
@@ -41,7 +110,11 @@ export async function api<T = any>(
     if (token) headers.set("Authorization", `Bearer ${token}`);
   }
 
-  const res = await fetch(`${API_BASE}${path}`, { ...opts, headers });
+  const res = await fetch(`${getApiBase()}${path}`, {
+    ...opts,
+    credentials: opts.credentials || "include",
+    headers,
+  });
 
   if (res.status === 401 && typeof window !== "undefined") {
     clearToken();
@@ -49,15 +122,23 @@ export async function api<T = any>(
 
   const contentType = res.headers.get("content-type") || "";
   if (!res.ok) {
-    let message = res.statusText;
-    if (contentType.includes("application/json")) {
-      const data = await res.json().catch(() => null);
-      if (data?.error) message = data.error;
-      else if (data?.message) message = data.message;
-    }
-    throw new Error(message);
+    await handleApiError(res, contentType);
   }
 
+  return parseApiResponse<T>(res, contentType);
+}
+
+async function handleApiError(res: Response, contentType: string) {
+  let message = res.statusText;
+  if (contentType.includes("application/json")) {
+    const data = await res.json().catch(() => null);
+    if (data?.error) message = data.error;
+    else if (data?.message) message = data.message;
+  }
+  throw new Error(message);
+}
+
+async function parseApiResponse<T>(res: Response, contentType: string): Promise<T> {
   if (contentType.includes("application/json")) {
     const json = await res.json();
     if (json && typeof json === "object" && "data" in json && "code" in json) {
@@ -82,8 +163,9 @@ export async function downloadFile(
   const token = getToken();
   if (token) headers["Authorization"] = `Bearer ${token}`;
 
-  const res = await fetch(`${API_BASE}${path}`, {
+  const res = await fetch(`${getApiBase()}${path}`, {
     method: "POST",
+    credentials: "include",
     headers,
     body: JSON.stringify(body),
   });
@@ -93,7 +175,7 @@ export async function downloadFile(
   }
 
   const disposition = res.headers.get("content-disposition") || "";
-  const match = disposition.match(/filename=([^;]+)/);
+  const match = /filename=([^;]+)/.exec(disposition);
   const filename = match ? match[1].trim() : fallbackName;
 
   const blob = await res.blob();

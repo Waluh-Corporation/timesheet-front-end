@@ -49,14 +49,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const loginWithPassword = useCallback(
     async (identifier: string, password: string) => {
-      const res = await api<{ token: string; user: User }>("/api/v1/auth/login", {
+      const res = await api<{ token: string; user?: User }>("/api/v1/auth/login", {
         method: "POST",
         auth: false,
         body: JSON.stringify({ identifier, password }),
       });
       setToken(res.token);
-      setUser(res.user);
-      return res.user;
+      let userData = res.user;
+      if (!userData) {
+        userData = await api<User>("/api/v1/me");
+      }
+      setUser(userData);
+      return userData;
     },
     []
   );

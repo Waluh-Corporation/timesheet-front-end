@@ -3,16 +3,35 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth";
+import { fetchSetupStatus } from "@/services/setup";
 
-// Landing route: bounce the visitor to the right place based on session state.
+// Landing route: bounce the visitor to the right place based on session & setup state.
 export default function Home() {
   const { user, loading } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
     if (loading) return;
-    if (!user) router.replace("/login");
-    else router.replace(user.role === "admin" ? "/users" : "/dashboard");
+
+    async function checkAndRoute() {
+      try {
+        const setup = await fetchSetupStatus();
+        if (setup && (setup.requires_setup || !setup.is_initialized)) {
+          router.replace("/setup");
+          return;
+        }
+      } catch (err) {
+        console.error("Setup check error", err);
+      }
+
+      if (!user) {
+        router.replace("/login");
+      } else {
+        router.replace(user.role === "admin" ? "/users" : "/dashboard");
+      }
+    }
+
+    checkAndRoute();
   }, [user, loading, router]);
 
   return (

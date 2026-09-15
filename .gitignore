@@ -28,6 +28,7 @@ pnpm-debug.log*
 # local env files
 .env*.local
 .env
+.env.development
 
 # vercel
 .vercel
@@ -35,3 +36,11 @@ pnpm-debug.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Playwright
+node_modules/
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+/playwright/.auth/

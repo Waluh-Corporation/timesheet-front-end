@@ -1,18 +1,31 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { CalendarCheck, KeyRound, Fingerprint, Loader2 } from "lucide-react";
+import {
+  CalendarCheck,
+  KeyRound,
+  Fingerprint,
+  Loader2,
+  Eye,
+  EyeOff,
+  AlertCircle,
+} from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { useToast } from "@/components/Toast";
 import ThemeToggle from "@/components/ThemeToggle";
-import { loginWithPasskey, passkeysSupported } from "@/lib/webauthn";
+import {
+  loginWithPasskey,
+  passkeysSupported,
+  isConditionalSupported,
+} from "@/lib/webauthn";
 import { api, getToken } from "@/lib/api";
+import { fetchSetupStatus } from "@/services/setup";
 
-// friendlyAuthError maps raw backend/browser errors to a message that's safe
-// and useful to show a user, instead of surfacing the raw response text.
 function friendlyAuthError(err: any, context: "password" | "passkey"): string {
+  if (err?.name === "AbortError") return "";
   const raw = (err?.message || "").toLowerCase();
+  if (raw.includes("abort") || raw.includes("signal is aborted") || raw.includes("canceled")) return "";
   if (err?.name === "NotAllowedError" || raw.includes("timed out") || raw.includes("not allowed")) {
     return "Passkey sign-in was cancelled or timed out. Please try again.";
   }
@@ -32,49 +45,143 @@ function friendlyAuthError(err: any, context: "password" | "passkey"): string {
     : "Sign-in failed. Please try again.";
 }
 
-// The sole entry point to the portal. There is NO public sign-up — accounts are
-// created by admins. This page offers password login, passkey login, and the
-// forgot-password flow.
 export default function LoginPage() {
-  const { loginWithPassword, loginWithToken } = useAuth();
+  const { user, loading, loginWithPassword, loginWithToken } = useAuth();
   const { notify } = useToast();
   const router = useRouter();
 
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
   const [showForgot, setShowForgot] = useState(false);
   const [forgotEmail, setForgotEmail] = useState("");
+  const [conditionalActive, setConditionalActive] = useState(false);
 
-  const routeForRole = (role: string) =>
-    router.replace(role === "admin" ? "/users" : "/dashboard");
+  const abortControllerRef = useRef<AbortController | null>(null);
+
+  const routeForRole = useCallback(
+    (role: string) => {
+      router.replace(role === "admin" ? "/users" : "/dashboard");
+    },
+    [router]
+  );
+
+  // If already authenticated, redirect to appropriate role route
+  useEffect(() => {
+    if (!loading && user) {
+      routeForRole(user.role);
+    }
+  }, [user, loading, routeForRole]);
+
+  // Check setup status
+  useEffect(() => {
+    async function checkSetup() {
+      try {
+        const setup = await fetchSetupStatus();
+        if (setup && (setup.requires_setup || !setup.is_initialized)) {
+          router.replace("/setup");
+        }
+      } catch (err) {
+        console.error("Setup check error on login", err);
+      }
+    }
+    checkSetup();
+  }, [router]);
+
+  // WebAuthn Conditional UI (Passkey Autofill)
+  useEffect(() => {
+    let active = true;
+
+    async function startConditionalUI() {
+      if (!passkeysSupported()) return;
+      const supported = await isConditionalSupported();
+      if (!supported || !active || showForgot) return;
+
+      setConditionalActive(true);
+      abortControllerRef.current = new AbortController();
+
+      try {
+        const user = await loginWithPasskey("", {
+          conditional: true,
+          signal: abortControllerRef.current.signal,
+        });
+
+        if (active && user) {
+          loginWithToken(getToken() || "", user);
+          notify(`Welcome back, ${user.name || user.username}!`, "success");
+          routeForRole(user.role);
+        }
+      } catch (err: any) {
+        // Silently catch abort or user dismissal
+        if (err?.name !== "AbortError") {
+          console.debug("Conditional UI passkey interaction ended", err);
+        }
+      }
+    }
+
+    startConditionalUI();
+
+    return () => {
+      active = false;
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+        abortControllerRef.current = null;
+      }
+    };
+  }, [showForgot, loginWithToken, notify, routeForRole]);
 
   const handlePasswordLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    const cleanId = identifier.trim();
+    if (!cleanId || !password) {
+      const msg = "Please enter your username/email and password.";
+      setErrorMessage(msg);
+      notify(msg, "error");
+      return;
+    }
+
+    // Abort conditional mediation when explicit form submit starts
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+    }
     setBusy(true);
+    setErrorMessage("");
     try {
-      const user = await loginWithPassword(identifier, password);
+      const user = await loginWithPassword(cleanId, password);
       notify(`Welcome back, ${user.name || user.username}!`, "success");
       routeForRole(user.role);
     } catch (err: any) {
-      notify(friendlyAuthError(err, "password"), "error");
+      const msg = friendlyAuthError(err, "password");
+      setErrorMessage(msg);
+      notify(msg, "error");
     } finally {
       setBusy(false);
     }
   };
 
   const handlePasskeyLogin = async () => {
+    const cleanId = identifier.trim();
+    // Abort any ongoing conditional request before explicit modal request
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+    }
     setBusy(true);
+    setErrorMessage("");
     try {
-      // Usernameless: an identifier is optional. If the user typed one we scope
-      // to it, otherwise the browser offers its resident passkeys.
-      const user = await loginWithPasskey(identifier);
-      // loginWithPasskey already persisted the JWT; sync the auth context user.
+      const user = await loginWithPasskey(cleanId);
       loginWithToken(getToken() || "", user);
       notify("Signed in with passkey", "success");
       routeForRole(user.role);
     } catch (err: any) {
-      notify(friendlyAuthError(err, "passkey"), "error");
+      const msg = friendlyAuthError(err, "passkey");
+      if (msg) {
+        setErrorMessage(msg);
+        notify(msg, "error");
+      }
     } finally {
       setBusy(false);
     }
@@ -82,17 +189,28 @@ export default function LoginPage() {
 
   const handleForgot = async (e: React.FormEvent) => {
     e.preventDefault();
+    const cleanEmail = forgotEmail.trim();
+    if (!cleanEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)) {
+      const msg = "Please provide a valid email address.";
+      setErrorMessage(msg);
+      notify(msg, "error");
+      return;
+    }
+
     setBusy(true);
+    setErrorMessage("");
     try {
       await api("/api/v1/auth/forgot-password", {
         method: "POST",
         auth: false,
-        body: JSON.stringify({ email: forgotEmail }),
+        body: JSON.stringify({ email: cleanEmail }),
       });
       notify("If that email exists, a reset link is on its way.", "success");
       setShowForgot(false);
     } catch (err: any) {
-      notify(err.message || "Request failed", "error");
+      const msg = err.message || "Request failed";
+      setErrorMessage(msg);
+      notify(msg, "error");
     } finally {
       setBusy(false);
     }
@@ -105,7 +223,7 @@ export default function LoginPage() {
       </div>
       <div className="w-full max-w-md">
         <div className="mb-6 flex flex-col items-center text-center">
-          <div className="mb-3 grid h-16 w-16 place-items-center bg-mr-yellow text-black shadow-hard">
+          <div className="mb-3 grid h-16 w-16 place-items-center bg-mr-yellow text-black shadow-hard border-2 border-mr-ink">
             <CalendarCheck size={30} className="text-black" />
           </div>
           <h1 className="text-2xl font-extrabold">Timesheet Portal</h1>
@@ -114,31 +232,49 @@ export default function LoginPage() {
           </p>
         </div>
 
-        <div className="card p-6">
+        <div className="card p-6 shadow-hard">
+          {/* Conditional Error Banner */}
+          {errorMessage && (
+            <div className="mb-4 flex items-start gap-2 border-2 border-mr-ink bg-mr-pink/15 p-3 text-xs font-semibold text-mr-pink">
+              <AlertCircle size={16} className="shrink-0 mt-0.5" />
+              <span>{errorMessage}</span>
+            </div>
+          )}
+
           {!showForgot ? (
             <form onSubmit={handlePasswordLogin} className="flex flex-col gap-4">
               <div>
-                <label className="mb-1 block text-sm font-semibold">Username or Email</label>
                 <input
                   className="input"
                   value={identifier}
                   onChange={(e) => setIdentifier(e.target.value)}
                   placeholder="you@company.com"
-                  autoComplete="username"
+                  autoComplete="username webauthn"
                   required
                 />
               </div>
+
               <div>
                 <label className="mb-1 block text-sm font-semibold">Password</label>
-                <input
-                  className="input"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  autoComplete="current-password"
-                  required
-                />
+                <div className="relative">
+                  <input
+                    className="input pr-10"
+                    type={showPassword ? "text" : "password"}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="••••••••"
+                    autoComplete="current-password"
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-mr-muted hover:text-mr-ink"
+                    aria-label={showPassword ? "Hide password" : "Show password"}
+                  >
+                    {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                  </button>
+                </div>
               </div>
 
               <button type="submit" className="btn-primary w-full" disabled={busy}>
@@ -159,7 +295,10 @@ export default function LoginPage() {
 
               <button
                 type="button"
-                onClick={() => setShowForgot(true)}
+                onClick={() => {
+                  setErrorMessage("");
+                  setShowForgot(true);
+                }}
                 className="text-center text-sm font-semibold text-mr-purple hover:underline"
               >
                 Forgot your password?
@@ -187,7 +326,10 @@ export default function LoginPage() {
               </button>
               <button
                 type="button"
-                onClick={() => setShowForgot(false)}
+                onClick={() => {
+                  setErrorMessage("");
+                  setShowForgot(false);
+                }}
                 className="text-center text-sm font-semibold text-mr-purple hover:underline"
               >
                 Back to sign in

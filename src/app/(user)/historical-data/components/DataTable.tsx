@@ -73,7 +73,7 @@ export function DataTable({ loading, activities }: DataTableProps) {
                       ? `${act.activity.substring(0, 50)}...` 
                       : act.activity}
                   </td>
-                  <td className="p-4">{act.app_impacted}</td>
+                  <td className="p-4">{act.app_impacted || act.project_ref?.app_impacted || "-"}</td>
                 </tr>
               );
             })}
