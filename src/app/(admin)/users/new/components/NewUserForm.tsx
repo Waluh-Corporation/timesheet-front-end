@@ -63,13 +63,13 @@ export function NewUserForm({
             className="input"
             placeholder="Employee / MII ID"
             value={form.mii_id}
-            onChange={(e) => setForm({ ...form, mii_id: e.target.value })}
+            onChange={(e) => setForm({ ...form, mii_id: e.target.value.replace(/\D/g, "") })}
           />
           <input
             className="input"
             placeholder="BNI ID"
             value={form.bni_id}
-            onChange={(e) => setForm({ ...form, bni_id: e.target.value })}
+            onChange={(e) => setForm({ ...form, bni_id: e.target.value.replace(/\D/g, "") })}
           />
         </div>
         <div className="grid grid-cols-2 gap-4">
