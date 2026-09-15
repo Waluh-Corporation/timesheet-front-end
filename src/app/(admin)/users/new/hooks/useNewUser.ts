@@ -22,7 +22,7 @@ export function useNewUser() {
     role: "user" as Role,
     name: "",
     bni_id: "",
-    mii_id: "",
+    employee_id: "",
     division: "",
     department: "",
     site: "",

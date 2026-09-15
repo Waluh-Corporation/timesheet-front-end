@@ -7,7 +7,7 @@ export type NewUserFormState = {
   role: Role;
   name: string;
   bni_id: string;
-  mii_id: string;
+  employee_id: string;
   division: string;
   department: string;
   site: string;
@@ -62,8 +62,8 @@ export function NewUserForm({
           <input
             className="input"
             placeholder="Employee / MII ID"
-            value={form.mii_id}
-            onChange={(e) => setForm({ ...form, mii_id: e.target.value.replace(/\D/g, "") })}
+            value={form.employee_id}
+            onChange={(e) => setForm({ ...form, employee_id: e.target.value.replace(/\D/g, "") })}
           />
           <input
             className="input"
