@@ -33,6 +33,15 @@ export async function fetchCompanies(): Promise<Company[]> {
   }
 }
 
+export async function fetchAdminCompanies(): Promise<Company[]> {
+  try {
+    return await api<Company[]>("/api/v1/admin/companies");
+  } catch (err) {
+    console.error("Failed to load companies", err);
+    return [];
+  }
+}
+
 export async function fetchDepartments(companyId?: number): Promise<Department[]> {
   try {
     const q = companyId ? `?company_id=${companyId}` : "";
@@ -146,6 +155,18 @@ export async function fetchApprovers(
   try {
     const q = roleType ? `?role_type=${roleType}` : "";
     return await api<Approver[]>(`/api/v1/approvers${q}`);
+  } catch (err) {
+    console.error("Failed to load approvers", err);
+    return [];
+  }
+}
+
+export async function fetchAdminApprovers(
+  roleType?: "team_leader" | "department_head"
+): Promise<Approver[]> {
+  try {
+    const q = roleType ? `?role_type=${roleType}` : "";
+    return await api<Approver[]>(`/api/v1/admin/approvers${q}`);
   } catch (err) {
     console.error("Failed to load approvers", err);
     return [];

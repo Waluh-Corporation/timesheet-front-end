@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { Plus, Trash2, Edit2, Loader2, X, Search, ChevronUp, ChevronDown, ChevronLeft, ChevronRight } from "lucide-react";
 import { useToast } from "@/components/Toast";
 import type { Company, CompanyRequest } from "@/lib/types";
-import { fetchCompanies, createCompany, updateCompany, deleteCompany } from "@/app/(admin)/master-data/services/masterData";
+import { fetchAdminCompanies, createCompany, updateCompany, deleteCompany } from "@/app/(admin)/master-data/services/masterData";
 import { useClientPagination } from "../hooks/useClientPagination";
 
 export function CompaniesTable() {
@@ -22,7 +22,7 @@ export function CompaniesTable() {
   const loadData = useCallback(async () => {
     setLoading(true);
     try {
-      const data = await fetchCompanies();
+      const data = await fetchAdminCompanies();
       setCompanies(data || []);
     } catch (err: any) {
       notify(err.message || "Failed to load companies", "error");

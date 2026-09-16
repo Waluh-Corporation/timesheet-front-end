@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { Plus, Trash2, Edit2, Loader2, X, Search, ChevronUp, ChevronDown, ChevronLeft, ChevronRight } from "lucide-react";
 import { useToast } from "@/components/Toast";
 import type { Approver } from "@/lib/types";
-import { fetchApprovers, createApprover, updateApprover, deleteApprover } from "@/app/(admin)/master-data/services/masterData";
+import { fetchAdminApprovers, createApprover, updateApprover, deleteApprover } from "@/app/(admin)/master-data/services/masterData";
 import { useClientPagination } from "../hooks/useClientPagination";
 
 export function ApproversTable() {
@@ -24,7 +24,7 @@ export function ApproversTable() {
   const loadData = useCallback(async () => {
     setLoading(true);
     try {
-      const data = await fetchApprovers();
+      const data = await fetchAdminApprovers();
       setApprovers(data || []);
     } catch (err: any) {
       notify(err.message || "Failed to load approvers", "error");
