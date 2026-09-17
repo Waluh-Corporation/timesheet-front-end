@@ -1,0 +1,52 @@
+name: Release & Changelog
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch:
+    inputs:
+      tag_name:
+        description: 'Tag version to release (e.g. v1.0.0)'
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  create-release:
+    name: Create GitHub Release & Changelog
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Determine Tag Name
+        id: release_tag
+        env:
+          INPUT_TAG_NAME: ${{ inputs.tag_name }}
+          REF_NAME: ${{ github.ref_name }}
+        run: |
+          if [ -n "$INPUT_TAG_NAME" ]; then
+            echo "tag=$INPUT_TAG_NAME" >> $GITHUB_OUTPUT
+          else
+            echo "tag=$REF_NAME" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64
+        with:
+          tag_name: ${{ steps.release_tag.outputs.tag }}
+          name: Release ${{ steps.release_tag.outputs.tag }}
+          generate_release_notes: true
+          draft: false
+          prerelease: false
+          body: |
+            ### 📦 Container Images
+            Production image has been published to GitHub Container Registry:
+            ```bash
+            docker pull ghcr.io/${{ github.repository }}:${{ steps.release_tag.outputs.tag }}
+            docker pull ghcr.io/${{ github.repository }}:latest
+            ```
