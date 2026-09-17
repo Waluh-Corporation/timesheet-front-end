@@ -11,6 +11,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.4.0] - 2026-09-17
+
+### Added
+- **New User Creation Workflow**: Dedicated administrator screen (`/users/new`) allowing rapid onboarding of employees with role assignments, departments, divisions, and email setup.
+- **Automated Web Push Unsubscribe**: Integrated push notification clean-up during logout, ensuring notifications do not persist on shared workstations.
+- **Dynamic Division Assignment**: Active divisions are now dynamically populated in department creation and edit forms to ensure relational data integrity.
+- **Comprehensive Unit Testing Suite**: Standardized unit tests using Bun test runner with automated test coverage reporting and SonarCloud analysis in CI pipelines.
+
+### Changed
+- **Lightweight Native Grid Interface**: Replaced heavy third-party table libraries (Handsontable) with a lightweight, responsive native React accordion/grid layout, drastically reducing client bundle weight.
+- **Framework Modernization**: Upgraded Next.js to version `14.2.35` for enhanced build performance and framework stability.
+- **Master Data Endpoint Alignment**: Refactored approvers and company dropdowns across master data views to utilize dedicated administrative API endpoints.
+
+### Fixed
+- **Identifier Validation**: Enforced strict validation rules for MII and BNI ID fields during user profile and management operations.
+- **Profile State Synchronization**: Fixed user profile and password change synchronization issues.
+- **Static Export Compilation**: Resolved static page export and linting warnings during production builds.
+
+### Security
+- **HTTP Security Headers & CSP**: Added strict Content-Security-Policy (CSP), Permissions-Policy, and hidden server tokens in Nginx responses.
+- **Static Asset Security Inheritance**: Fixed Nginx configuration flaw ensuring security headers (`nosniff`, `Referrer-Policy`) persist on cached static and JavaScript assets.
+- **Database Network Isolation**: Restricted PostgreSQL port mapping to `127.0.0.1` (localhost) in Docker Compose, preventing direct exposure to public networks.
+- **Automated Dependency Security Auditing**: Integrated automated dependency security checks in GitHub Actions CI workflows to detect vulnerable packages.
+
+---
+
 ## [0.3.0] - 2026-09-15
 
 ### Added

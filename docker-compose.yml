@@ -71,7 +71,7 @@ services:
       POSTGRES_DB: "${POSTGRES_DB:-timesheet}"
       TZ: Asia/Jakarta
     ports:
-      - "5432:5432" # Direct access for DBeaver / psql / Navicat
+      - "127.0.0.1:5432:5432" # Direct access for DBeaver / psql / Navicat (localhost only)
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
