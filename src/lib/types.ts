@@ -194,9 +194,11 @@ export interface DepartmentRequest {
   code?: string;
   name: string;
   division?: string;
+  division_id?: number;
   company_id?: number;
   is_active?: boolean;
 }
+
 
 export interface Division {
   id: number;
@@ -272,4 +274,8 @@ export interface ChangePasswordResponse {
   code: number;
   status: string;
   message: string;
+}
+
+export interface WebAuthnOriginsResponse {
+  origins: string[];
 }

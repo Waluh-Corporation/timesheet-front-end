@@ -3,14 +3,16 @@
 import { useState, useEffect, useCallback } from "react";
 import { Plus, Trash2, Edit2, Loader2, X, Search, ChevronUp, ChevronDown, ChevronLeft, ChevronRight } from "lucide-react";
 import { useToast } from "@/components/Toast";
-import type { Department, DepartmentRequest } from "@/lib/types";
-import { fetchDepartments, createDepartment, updateDepartment, deleteDepartment } from "@/app/(admin)/master-data/services/masterData";
+import type { Department, DepartmentRequest, Division } from "@/lib/types";
+import { fetchDepartments, fetchDivisions, createDepartment, updateDepartment, deleteDepartment } from "@/app/(admin)/master-data/services/masterData";
 import { useClientPagination } from "../hooks/useClientPagination";
 
 export function DepartmentsTable() {
   const { notify } = useToast();
   const [loading, setLoading] = useState(true);
   const [departments, setDepartments] = useState<Department[]>([]);
+  const [divisions, setDivisions] = useState<Division[]>([]);
+  const [loadingDivisions, setLoadingDivisions] = useState(false);
 
   // Modal State
   const [modalOpen, setModalOpen] = useState(false);
@@ -24,15 +26,22 @@ export function DepartmentsTable() {
 
   const loadData = useCallback(async () => {
     setLoading(true);
+    setLoadingDivisions(true);
     try {
-      const data = await fetchDepartments();
-      setDepartments(data || []);
+      const [deptData, divData] = await Promise.all([
+        fetchDepartments(),
+        fetchDivisions(),
+      ]);
+      setDepartments(deptData || []);
+      setDivisions(divData || []);
     } catch (err: any) {
       notify(err.message || "Failed to load departments", "error");
     } finally {
       setLoading(false);
+      setLoadingDivisions(false);
     }
   }, [notify]);
+
 
   useEffect(() => {
     loadData();
@@ -62,21 +71,22 @@ export function DepartmentsTable() {
     e.preventDefault();
     setSaving(true);
     try {
+      const selectedDiv = divisions.find(
+        (d) => d.name === form.division || d.code === form.division
+      );
+      const payload: DepartmentRequest = {
+        code: form.code,
+        name: form.name,
+        division: form.division,
+        division_id: selectedDiv?.id,
+        is_active: form.is_active,
+      };
+
       if (form.id) {
-        await updateDepartment(form.id, {
-          code: form.code,
-          name: form.name,
-          division: form.division,
-          is_active: form.is_active,
-        });
+        await updateDepartment(form.id, payload);
         notify("Department updated", "success");
       } else {
-        await createDepartment({
-          code: form.code,
-          name: form.name,
-          division: form.division,
-          is_active: form.is_active,
-        });
+        await createDepartment(payload);
         notify("Department created", "success");
       }
       setModalOpen(false);
@@ -87,6 +97,7 @@ export function DepartmentsTable() {
       setSaving(false);
     }
   };
+
 
   const handleDelete = async (id: number, name: string) => {
     if (!confirm(`Are you sure you want to delete department "${name}"?`)) return;
@@ -280,13 +291,24 @@ export function DepartmentsTable() {
                 />
               </div>
               <div>
-                <label className="mb-1 block text-xs font-semibold">Division</label>
-                <input
+                <label className="mb-1 block text-xs font-semibold">
+                  Division {loadingDivisions && <span className="text-mr-muted font-normal">(Loading...)</span>}
+                </label>
+                <select
                   className="input"
-                  value={form.division}
+                  value={form.division || ""}
                   onChange={(e) => setForm({ ...form, division: e.target.value })}
-                  placeholder="e.g. Technology"
-                />
+                  disabled={loadingDivisions}
+                >
+                  <option value="">— Select Division (Optional) —</option>
+                  {divisions
+                    .filter((div) => div.is_active)
+                    .map((div) => (
+                      <option key={div.id} value={div.name}>
+                        {div.name} {div.code ? `(${div.code})` : ""}
+                      </option>
+                    ))}
+                </select>
               </div>
               <div className="flex items-center gap-2 mt-1">
                 <input

@@ -4,7 +4,7 @@
 // challenge/id fields on the way in and re-encode on the way out.
 
 import { api, setToken } from "./api";
-import type { User } from "./types";
+import type { User, WebAuthnOriginsResponse } from "./types";
 
 function bufToBase64url(buf: ArrayBuffer | null | undefined): string {
   if (!buf) return "";
@@ -163,3 +163,9 @@ export async function loginWithPasskey(
   }
   return userData;
 }
+
+// fetchWebAuthnOrigins retrieves the W3C WebAuthn related origins document from backend
+export async function fetchWebAuthnOrigins(): Promise<WebAuthnOriginsResponse> {
+  return api<WebAuthnOriginsResponse>("/.well-known/webauthn", { auth: false });
+}
+
