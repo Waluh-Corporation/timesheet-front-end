@@ -62,6 +62,45 @@ export async function sendTestPush() {
   await api("/api/v1/push/test", { method: "POST", body: JSON.stringify({}) });
 }
 
+// isPushSubscribed checks if the current browser has an active push subscription.
+export async function isPushSubscribed(): Promise<boolean> {
+  if (!pushSupported()) return false;
+  try {
+    const registration = await navigator.serviceWorker.ready;
+    const sub = await registration.pushManager.getSubscription();
+    return sub !== null;
+  } catch {
+    return false;
+  }
+}
+
+// unsubscribePush checks if this browser is subscribed, and if so,
+// unsubscribes the service worker and tells the backend to drop this endpoint.
+export async function unsubscribePush(): Promise<void> {
+  if (!pushSupported()) return;
+  try {
+    const registration = await navigator.serviceWorker.ready;
+    const sub = await registration.pushManager.getSubscription();
+    if (!sub) return;
+
+    const endpoint = sub.endpoint;
+    try {
+      await sub.unsubscribe();
+    } catch (err) {
+      console.warn("Failed to unsubscribe push manager:", err);
+    }
+
+    if (endpoint) {
+      await api("/api/v1/push/unsubscribe", {
+        method: "POST",
+        body: JSON.stringify({ endpoint }),
+      });
+    }
+  } catch (err) {
+    console.warn("Failed to unsubscribe push on logout:", err);
+  }
+}
+
 // disablePush unsubscribes this browser and tells the backend to drop the
 // subscription, turning off the daily reminder.
 export async function disablePush(): Promise<void> {

@@ -46,8 +46,8 @@ export default function Shell({ children }: { children: React.ReactNode }) {
 
   const nav = user?.role === "admin" ? adminNav : userNav;
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await logout();
     router.replace("/login");
   };
 
