@@ -9,6 +9,7 @@ import {
   ReactNode,
 } from "react";
 import { api, setToken, clearToken, getToken } from "./api";
+import { unsubscribePush } from "./push";
 import type { User } from "./types";
 
 interface AuthContextValue {
@@ -16,7 +17,7 @@ interface AuthContextValue {
   loading: boolean;
   loginWithPassword: (identifier: string, password: string) => Promise<User>;
   loginWithToken: (token: string, user: User) => void;
-  logout: () => void;
+  logout: () => Promise<void>;
   refresh: () => Promise<void>;
 }
 
@@ -70,9 +71,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(u);
   }, []);
 
-  const logout = useCallback(() => {
-    clearToken();
-    setUser(null);
+  const logout = useCallback(async () => {
+    try {
+      await unsubscribePush();
+    } catch {
+      // Ignore push unsubscribe errors to ensure logout always succeeds
+    } finally {
+      clearToken();
+      setUser(null);
+    }
   }, []);
 
   return (

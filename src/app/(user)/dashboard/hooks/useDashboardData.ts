@@ -2,7 +2,7 @@ import { useState, useCallback, useEffect, useMemo } from "react";
 import { fetchDashboardActivities, fetchHolidays, downloadTimesheet } from "../services/api";
 import { useToast } from "@/components/Toast";
 import type { DailyActivity } from "@/lib/types";
-import { enablePush, disablePush, pushSupported, registerServiceWorker } from "@/lib/push";
+import { enablePush, disablePush, pushSupported, registerServiceWorker, isPushSubscribed } from "@/lib/push";
 import { registerPasskey, passkeysSupported } from "@/lib/webauthn";
 import { useAuth } from "@/lib/auth";
 
@@ -53,10 +53,18 @@ export function useDashboardData() {
   }, [load]);
 
   useEffect(() => {
+    let mounted = true;
     if (pushSupported()) {
-      registerServiceWorker().catch(() => {});
-      setPushOn(Notification.permission === "granted");
+      registerServiceWorker()
+        .then(() => isPushSubscribed())
+        .then((subscribed) => {
+          if (mounted) setPushOn(subscribed);
+        })
+        .catch(() => {});
     }
+    return () => {
+      mounted = false;
+    };
   }, []);
 
   const totalDays = daysInMonth(year, month);
