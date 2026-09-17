@@ -43,12 +43,7 @@ const HotGrid = forwardRef<any, HotGridProps>(function HotGrid(props, ref) {
   const handleInputChange = (originalRowIndex: number, colIndex: number, newValue: string) => {
     if (readOnly) return;
     
-    // We update the local data directly to simulate the two-way binding of Handsontable
-    // However, since `data` is passed from parent, we should ideally let the parent update it.
-    // The parent dashboard currently expects Handsontable to mutate the array before calling afterChange, 
-    // or it relies on reading the changed gridData in afterChange.
-    // Wait, dashboard's afterChange reads from gridData which is re-computed on render!
-    // Actually, Handsontable mutates the array internally.
+    // Directly update local array before firing afterChange callback
     const oldValue = data[originalRowIndex][colIndex];
     data[originalRowIndex][colIndex] = newValue;
     

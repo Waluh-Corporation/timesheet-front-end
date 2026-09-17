@@ -115,21 +115,6 @@
   }
 }
 
-/* --- Handsontable theming (both light + dark) --- */
-.handsontable {
-  font-family: 'Rubik', system-ui, sans-serif !important;
-  color: var(--text-body);
-}
-.handsontable th { background-color: var(--bg-surface-secondary) !important; color: var(--text-body) !important; font-weight: 800; }
-.handsontable td { background-color: var(--bg-surface) !important; color: var(--text-body) !important; }
-.ht-mapped-cell { background-color: rgba(168, 51, 185, 0.28) !important; font-weight: 700; }
-.ht-mapped-col { background-color: rgba(250, 204, 0, 0.30) !important; }
-.ht-day-col { background-color: var(--bg-surface-secondary) !important; font-weight: 800; }
-.ht-locked { background-color: var(--bg-surface-secondary) !important; color: var(--text-muted) !important; }
-.ht-weekend { background-color: rgba(100, 116, 139, 0.18) !important; color: var(--text-muted) !important; }
-.ht-holiday { background-color: rgba(255, 77, 80, 0.20) !important; color: var(--danger-fg) !important; font-weight: 700; }
-[data-theme="dark"] .handsontable td,
-[data-theme="dark"] .handsontable th { border-color: #3A3D48 !important; }
 
 /* --- Hard-edged scrollbars --- */
 ::-webkit-scrollbar { width: 12px; height: 12px; }
