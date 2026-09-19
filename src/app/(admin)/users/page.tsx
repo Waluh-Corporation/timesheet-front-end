@@ -6,6 +6,7 @@ import { UserPlus } from "lucide-react";
 import { useUsers } from "./hooks/useUsers";
 import { PendingChanges } from "./components/PendingChanges";
 import { UserList } from "./components/UserList";
+import { EditUserModal } from "./components/EditUserModal";
 
 // Admin console for provisioning accounts (the ONLY registration path) and
 // reviewing self-service profile change requests.
@@ -15,6 +16,9 @@ export default function UsersPage() {
     changes,
     companies,
     loading,
+    editingUser,
+    setEditingUser,
+    handleUpdateUser,
     passkeysFor,
     userPasskeys,
     pkLoading,
@@ -57,11 +61,20 @@ export default function UsersPage() {
             onToggleActive={toggleActive}
             onDeactivateUser={deactivateUser}
             onAssignCompany={assignCompany}
+            onEditUser={setEditingUser}
             onViewPasskeys={viewPasskeys}
             onRemovePasskey={removeUserPasskey}
           />
         </div>
       </div>
+
+      <EditUserModal
+        user={editingUser}
+        companies={companies}
+        isOpen={!!editingUser}
+        onClose={() => setEditingUser(null)}
+        onSave={handleUpdateUser}
+      />
     </div>
   );
 }

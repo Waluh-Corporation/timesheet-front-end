@@ -26,6 +26,7 @@ export function getApiBase(): string {
 export const API_BASE = getApiBase();
 
 const TOKEN_KEY = "ts_auth_token";
+const REFRESH_TOKEN_KEY = "ts_refresh_token";
 
 export function getCookie(name: string): string | null {
   if (typeof document === "undefined") return null;
@@ -82,8 +83,49 @@ export function setToken(token: string) {
   }
 }
 
+export function getRefreshToken(): string | null {
+  if (typeof window === "undefined") return null;
+  const cookieVal = getCookie(REFRESH_TOKEN_KEY);
+  if (cookieVal) return cookieVal;
+
+  try {
+    const localVal = window.localStorage.getItem(REFRESH_TOKEN_KEY);
+    if (localVal) {
+      setCookie(REFRESH_TOKEN_KEY, localVal, 30);
+      window.localStorage.removeItem(REFRESH_TOKEN_KEY);
+      return localVal;
+    }
+  } catch {
+    // Ignore
+  }
+  return null;
+}
+
+export function setRefreshToken(refreshToken: string) {
+  setCookie(REFRESH_TOKEN_KEY, refreshToken, 30);
+  if (typeof window !== "undefined") {
+    try {
+      window.localStorage.removeItem(REFRESH_TOKEN_KEY);
+    } catch {
+      // Ignore
+    }
+  }
+}
+
+export function clearRefreshToken() {
+  deleteCookie(REFRESH_TOKEN_KEY);
+  if (typeof window !== "undefined") {
+    try {
+      window.localStorage.removeItem(REFRESH_TOKEN_KEY);
+    } catch {
+      // Ignore
+    }
+  }
+}
+
 export function clearToken() {
   deleteCookie(TOKEN_KEY);
+  clearRefreshToken();
   if (typeof window !== "undefined") {
     try {
       window.localStorage.removeItem(TOKEN_KEY);
@@ -93,8 +135,57 @@ export function clearToken() {
   }
 }
 
+export function clearAuthTokens() {
+  clearToken();
+}
+
+let refreshTokenPromise: Promise<string | null> | null = null;
+
+export async function requestTokenRefresh(): Promise<string | null> {
+  if (refreshTokenPromise) return refreshTokenPromise;
+
+  refreshTokenPromise = (async () => {
+    const rf = getRefreshToken();
+    if (!rf) return null;
+
+    try {
+      const res = await fetch(`${getApiBase()}/api/v1/auth/refresh`, {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ refresh_token: rf }),
+      });
+
+      if (!res.ok) {
+        clearAuthTokens();
+        return null;
+      }
+
+      const json = await res.json();
+      const payload = json && typeof json === "object" && "data" in json ? json.data : json;
+      if (payload?.token) {
+        setToken(payload.token);
+        if (payload.refresh_token) {
+          setRefreshToken(payload.refresh_token);
+        }
+        return payload.token;
+      }
+      clearAuthTokens();
+      return null;
+    } catch {
+      clearAuthTokens();
+      return null;
+    } finally {
+      refreshTokenPromise = null;
+    }
+  })();
+
+  return refreshTokenPromise;
+}
+
 interface RequestOptions extends RequestInit {
   auth?: boolean;
+  _retry?: boolean;
 }
 
 export async function api<T = any>(
@@ -116,8 +207,22 @@ export async function api<T = any>(
     headers,
   });
 
-  if (res.status === 401 && typeof window !== "undefined") {
-    clearToken();
+  if (
+    res.status === 401 &&
+    opts.auth !== false &&
+    !opts._retry &&
+    !path.includes("/api/v1/auth/") &&
+    !path.includes("/api/v1/setup/")
+  ) {
+    const newToken = await requestTokenRefresh();
+    if (newToken) {
+      return api<T>(path, { ...opts, _retry: true });
+    }
+    if (typeof window !== "undefined") {
+      clearAuthTokens();
+    }
+  } else if (res.status === 401 && typeof window !== "undefined") {
+    clearAuthTokens();
   }
 
   const contentType = res.headers.get("content-type") || "";
@@ -126,6 +231,54 @@ export async function api<T = any>(
   }
 
   return parseApiResponse<T>(res, contentType);
+}
+
+export async function apiWithMeta<T = any>(
+  path: string,
+  opts: RequestOptions = {}
+): Promise<{ data: T; pagination?: any; code?: number; status?: string }> {
+  const headers = new Headers(opts.headers);
+  if (!(opts.body instanceof FormData)) {
+    headers.set("Content-Type", "application/json");
+  }
+  if (opts.auth !== false) {
+    const token = getToken();
+    if (token) headers.set("Authorization", `Bearer ${token}`);
+  }
+
+  const res = await fetch(`${getApiBase()}${path}`, {
+    ...opts,
+    credentials: opts.credentials || "include",
+    headers,
+  });
+
+  if (
+    res.status === 401 &&
+    opts.auth !== false &&
+    !opts._retry &&
+    !path.includes("/api/v1/auth/") &&
+    !path.includes("/api/v1/setup/")
+  ) {
+    const newToken = await requestTokenRefresh();
+    if (newToken) {
+      return apiWithMeta<T>(path, { ...opts, _retry: true });
+    }
+    if (typeof window !== "undefined") {
+      clearAuthTokens();
+    }
+  } else if (res.status === 401 && typeof window !== "undefined") {
+    clearAuthTokens();
+  }
+
+  const contentType = res.headers.get("content-type") || "";
+  if (!res.ok) {
+    await handleApiError(res, contentType);
+  }
+
+  if (contentType.includes("application/json")) {
+    return await res.json();
+  }
+  return { data: (await res.blob()) as unknown as T };
 }
 
 async function handleApiError(res: Response, contentType: string) {

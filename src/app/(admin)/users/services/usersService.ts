@@ -1,6 +1,6 @@
 import { api } from "@/lib/api";
 import { fetchCompanies } from "@/app/(admin)/master-data/services/masterData";
-import type { User, ProfileChangeRequest, Passkey } from "@/lib/types";
+import type { User, ProfileChangeRequest, Passkey, UpdateUserRequestDTO } from "@/lib/types";
 
 export const usersService = {
   getUsers: () => api<User[]>("/api/v1/admin/users"),
@@ -15,6 +15,9 @@ export const usersService = {
     
   assignCompany: (id: number, company_id?: number, company?: string) =>
     api(`/api/v1/admin/users/${id}`, { method: "PATCH", body: JSON.stringify({ company_id, company }) }),
+
+  updateUser: (id: number, payload: Partial<UpdateUserRequestDTO>) =>
+    api<User>(`/api/v1/admin/users/${id}`, { method: "PATCH", body: JSON.stringify(payload) }),
     
   getPasskeys: (id: number) => 
     api<Passkey[]>(`/api/v1/admin/users/${id}/passkeys`),

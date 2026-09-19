@@ -10,10 +10,16 @@ export async function fetchCompanies(): Promise<Company[]> {
   }
 }
 
-export async function fetchDepartments(companyId?: number): Promise<Department[]> {
+export async function fetchDepartments(params?: {
+  division?: string;
+  division_id?: number;
+}): Promise<Department[]> {
   try {
-    const q = companyId ? `?company_id=${companyId}` : "";
-    return await api<Department[]>(`/api/v1/departments${q}`);
+    const q = new URLSearchParams();
+    if (params?.division) q.set("division", params.division);
+    if (params?.division_id) q.set("division_id", params.division_id.toString());
+    const queryStr = q.toString() ? `?${q.toString()}` : "";
+    return await api<Department[]>(`/api/v1/departments${queryStr}`);
   } catch (err) {
     console.error("Failed to load departments", err);
     return [];

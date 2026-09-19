@@ -65,8 +65,8 @@ export function useProfileForm(onSuccess?: () => void) {
   }, [user, companies]);
 
   useEffect(() => {
-    if (form.company_id) {
-      fetchDepartments(form.company_id).then((depts) => {
+    if (form.division) {
+      fetchDepartments({ division: form.division }).then((depts) => {
         setDepartments(depts || []);
       });
     } else {
@@ -74,7 +74,7 @@ export function useProfileForm(onSuccess?: () => void) {
         setDepartments(depts || []);
       });
     }
-  }, [form.company_id]);
+  }, [form.division]);
 
   const setFieldValue = (k: keyof typeof form, v: any) => setForm((prev) => ({ ...prev, [k]: v }));
 
