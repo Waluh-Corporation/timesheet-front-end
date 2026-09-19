@@ -66,7 +66,8 @@ export async function sendTestPush() {
 export async function isPushSubscribed(): Promise<boolean> {
   if (!pushSupported()) return false;
   try {
-    const registration = await navigator.serviceWorker.ready;
+    const registration = await navigator.serviceWorker.getRegistration();
+    if (!registration) return false;
     const sub = await registration.pushManager.getSubscription();
     return sub !== null;
   } catch {
@@ -79,7 +80,12 @@ export async function isPushSubscribed(): Promise<boolean> {
 export async function unsubscribePush(): Promise<void> {
   if (!pushSupported()) return;
   try {
-    const registration = await navigator.serviceWorker.ready;
+    const registration = await Promise.race([
+      navigator.serviceWorker.getRegistration(),
+      new Promise<undefined>((resolve) => setTimeout(() => resolve(undefined), 1500)),
+    ]);
+    if (!registration) return;
+
     const sub = await registration.pushManager.getSubscription();
     if (!sub) return;
 
@@ -107,11 +113,13 @@ export async function disablePush(): Promise<void> {
   let endpoint = "";
   if (pushSupported()) {
     try {
-      const registration = await navigator.serviceWorker.ready;
-      const sub = await registration.pushManager.getSubscription();
-      if (sub) {
-        endpoint = sub.endpoint;
-        await sub.unsubscribe();
+      const registration = await navigator.serviceWorker.getRegistration();
+      if (registration) {
+        const sub = await registration.pushManager.getSubscription();
+        if (sub) {
+          endpoint = sub.endpoint;
+          await sub.unsubscribe();
+        }
       }
     } catch {
       /* ignore — still tell the backend to drop our subscriptions */
