@@ -33,6 +33,7 @@ describe("push notification helper", () => {
     mockServiceWorker = {
       register: mock(async () => ({ pushManager: mockPushManager })),
       ready: Promise.resolve({ pushManager: mockPushManager }),
+      getRegistration: mock(async () => ({ pushManager: mockPushManager })),
     };
 
     (globalThis as any).window = {
@@ -108,6 +109,12 @@ describe("push notification helper", () => {
       const subscribed = await isPushSubscribed();
       expect(subscribed).toBe(false);
     });
+
+    it("returns false when service worker is not registered", async () => {
+      mockServiceWorker.getRegistration = mock(async () => undefined);
+      const subscribed = await isPushSubscribed();
+      expect(subscribed).toBe(false);
+    });
   });
 
   describe("unsubscribePush", () => {
@@ -123,6 +130,15 @@ describe("push notification helper", () => {
       expect(JSON.parse(calledOpts.body)).toEqual({
         endpoint: "https://push.example.com/sub/123",
       });
+    });
+
+    it("does nothing when service worker is not registered", async () => {
+      mockServiceWorker.getRegistration = mock(async () => undefined);
+
+      await unsubscribePush();
+
+      expect(mockSubscription.unsubscribe).not.toHaveBeenCalled();
+      expect(fetchSpy).not.toHaveBeenCalled();
     });
 
     it("does nothing when subscription is null", async () => {
