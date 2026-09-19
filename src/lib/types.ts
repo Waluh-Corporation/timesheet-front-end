@@ -279,3 +279,55 @@ export interface ChangePasswordResponse {
 export interface WebAuthnOriginsResponse {
   origins: string[];
 }
+
+export interface LoginResponse {
+  token: string;
+  refresh_token: string;
+  user?: User;
+}
+
+export interface RefreshRequest {
+  refresh_token: string;
+}
+
+export interface RefreshResponse {
+  token: string;
+  refresh_token: string;
+}
+
+export interface LogoutRequest {
+  refresh_token?: string;
+}
+
+export interface DepartmentQueryParams {
+  division?: string;
+  division_id?: number;
+}
+
+export interface UpdateUserRequestDTO {
+  name?: string;
+  role?: Role;
+  is_active?: boolean;
+  employee_id?: string;
+  bni_id?: string;
+  company?: string;
+  company_id?: number;
+  division?: string;
+  division_id?: number;
+  department?: string;
+  department_id?: number;
+  site?: string;
+  site_id?: number;
+}
+
+export interface ActivityFilterParams {
+  page?: number;
+  limit?: number;
+  year?: number;
+  month?: number;
+  start_date?: string;
+  end_date?: string;
+  status_id?: number;
+  sort?: "asc" | "desc";
+  all?: boolean;
+}

@@ -43,8 +43,11 @@ self.addEventListener("push", (event) => {
 });
 
 self.addEventListener("notificationclick", (event) => {
-  event.notification.close();
-  const targetUrl = (event.notification.data && event.notification.data.url) || "/dashboard";
+  let targetUrl = (event.notification.data && event.notification.data.url) || "/dashboard";
+  // Enforce safe relative path to prevent open redirect or arbitrary scheme execution
+  if (typeof targetUrl !== "string" || !targetUrl.startsWith("/") || targetUrl.startsWith("//")) {
+    targetUrl = "/dashboard";
+  }
 
   event.waitUntil(
     self.clients

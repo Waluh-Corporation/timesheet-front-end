@@ -1,5 +1,5 @@
 import { Fragment } from "react";
-import { Loader2, ShieldCheck, KeyRound, Ban, Trash2, Fingerprint } from "lucide-react";
+import { Loader2, ShieldCheck, KeyRound, Ban, Trash2, Fingerprint, Edit2 } from "lucide-react";
 import type { User, Company, Passkey } from "@/lib/types";
 import { useAuth } from "@/lib/auth";
 
@@ -13,6 +13,7 @@ export function UserList({
   onToggleActive,
   onDeactivateUser,
   onAssignCompany,
+  onEditUser,
   onViewPasskeys,
   onRemovePasskey,
 }: Readonly<{
@@ -25,6 +26,7 @@ export function UserList({
   onToggleActive: (u: User) => void;
   onDeactivateUser: (u: User) => void;
   onAssignCompany: (u: User, compId?: number, compObj?: Company) => void;
+  onEditUser: (u: User) => void;
   onViewPasskeys: (u: User) => void;
   onRemovePasskey: (u: User, pk: Passkey) => void;
 }>) {
@@ -164,6 +166,13 @@ export function UserList({
                     </td>
                     <td className="py-3">
                       <div className="flex items-center justify-end gap-2">
+                        <button
+                          onClick={() => onEditUser(u)}
+                          className="border-2 border-mr-ink p-2 text-mr-muted hover:bg-mr-surface2 hover:text-mr-ink"
+                          title="Edit user details"
+                        >
+                          <Edit2 size={16} />
+                        </button>
                         <button
                           onClick={() => onViewPasskeys(u)}
                           className={`border-2 border-mr-ink p-2 ${
