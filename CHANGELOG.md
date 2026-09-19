@@ -11,6 +11,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.5.1] - 2026-09-19
+
+### Fixed
+- **Docker & New Origin Logout Freeze**: Fixed an issue where clicking logout would freeze or fail to respond when accessing the application on Docker ports or fresh origins without registered service workers. Replaced the blocking `navigator.serviceWorker.ready` promise with `navigator.serviceWorker.getRegistration()` and added a defensive timeout race guard on push cleanup so session termination and token clearing always proceed immediately.
+
+---
+
 ## [0.5.0] - 2026-09-19
 
 ### Added
