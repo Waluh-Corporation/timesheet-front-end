@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from "react";
 import { useToast } from "@/components/Toast";
-import type { User, ProfileChangeRequest, Passkey, Company } from "@/lib/types";
+import type { User, ProfileChangeRequest, Passkey, Company, UpdateUserRequestDTO } from "@/lib/types";
 import { usersService } from "../services/usersService";
 
 export function useUsers() {
@@ -10,6 +10,7 @@ export function useUsers() {
   const [companies, setCompanies] = useState<Company[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const [editingUser, setEditingUser] = useState<User | null>(null);
   const [passkeysFor, setPasskeysFor] = useState<number | null>(null);
   const [userPasskeys, setUserPasskeys] = useState<Passkey[]>([]);
   const [pkLoading, setPkLoading] = useState(false);
@@ -115,11 +116,26 @@ export function useUsers() {
     }
   };
 
+  const handleUpdateUser = async (id: number, payload: Partial<UpdateUserRequestDTO>) => {
+    try {
+      await usersService.updateUser(id, payload);
+      notify("User updated successfully", "success");
+      load();
+    } catch (error) {
+      const err = error as Error;
+      notify(err.message || "Failed to update user", "error");
+      throw err;
+    }
+  };
+
   return {
     users,
     changes,
     companies,
     loading,
+    editingUser,
+    setEditingUser,
+    handleUpdateUser,
     passkeysFor,
     userPasskeys,
     pkLoading,

@@ -3,8 +3,8 @@
 // browser's credential API needs as ArrayBuffers — so we base64url-decode the
 // challenge/id fields on the way in and re-encode on the way out.
 
-import { api, setToken } from "./api";
-import type { User, WebAuthnOriginsResponse } from "./types";
+import { api, setToken, setRefreshToken } from "./api";
+import type { User, WebAuthnOriginsResponse, LoginResponse } from "./types";
 
 function bufToBase64url(buf: ArrayBuffer | null | undefined): string {
   if (!buf) return "";
@@ -152,11 +152,14 @@ export async function loginWithPasskey(
     },
   };
 
-  const res = await api<{ token: string; user?: User }>(
+  const res = await api<LoginResponse>(
     `/api/v1/auth/passkey/login/finish?session_id=${encodeURIComponent(session_id)}`,
     { method: "POST", auth: false, body: JSON.stringify(body) }
   );
   setToken(res.token);
+  if (res.refresh_token) {
+    setRefreshToken(res.refresh_token);
+  }
   let userData = res.user;
   if (!userData) {
     userData = await api<User>("/api/v1/me");

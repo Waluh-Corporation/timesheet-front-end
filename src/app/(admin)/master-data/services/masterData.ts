@@ -42,11 +42,16 @@ export async function fetchAdminCompanies(): Promise<Company[]> {
   }
 }
 
-export async function fetchDepartments(companyId?: number): Promise<Department[]> {
+export async function fetchDepartments(params?: {
+  division?: string;
+  division_id?: number;
+}): Promise<Department[]> {
   try {
-    const q = companyId ? `?company_id=${companyId}` : "";
-    // In doc.json, Admin fetch might be /api/v1/admin/departments, but /api/v1/departments also works. We'll use admin.
-    return await api<Department[]>(`/api/v1/admin/departments${q}`);
+    const q = new URLSearchParams();
+    if (params?.division) q.set("division", params.division);
+    if (params?.division_id) q.set("division_id", params.division_id.toString());
+    const queryStr = q.toString() ? `?${q.toString()}` : "";
+    return await api<Department[]>(`/api/v1/admin/departments${queryStr}`);
   } catch (err) {
     console.error("Failed to load departments", err);
     return [];

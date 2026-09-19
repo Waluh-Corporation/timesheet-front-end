@@ -1,6 +1,7 @@
 {
     "sonarlint.connectedMode.project": {
-        "connectionId": "khw315",
+        "connectionId": "waluh-corporation",
         "projectKey": "Waluh-Corporation_timesheet-front-end"
-    }
+    },
+    "discord.enabled": false
 }

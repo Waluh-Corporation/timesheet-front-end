@@ -6,18 +6,9 @@ import * as pushModule from "./push";
 
 describe("auth context", () => {
   beforeEach(() => {
-    (globalThis as any).document = {
-      cookie: "",
-    };
-    (globalThis as any).window = {
-      location: { protocol: "http:", hostname: "localhost", port: "3000" },
-      localStorage: {
-        getItem: () => null,
-        setItem: () => {},
-        removeItem: () => {},
-      },
-    };
-    (globalThis as any).navigator = {};
+    if (typeof document !== "undefined") {
+      document.cookie = "";
+    }
   });
 
   it("renders children in AuthProvider", () => {

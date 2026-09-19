@@ -8,15 +8,15 @@ import {
   useCallback,
   ReactNode,
 } from "react";
-import { api, setToken, clearToken, getToken } from "./api";
+import { api, setToken, clearToken, getToken, setRefreshToken, getRefreshToken, clearAuthTokens } from "./api";
 import { unsubscribePush } from "./push";
-import type { User } from "./types";
+import type { User, LoginResponse } from "./types";
 
 interface AuthContextValue {
   user: User | null;
   loading: boolean;
   loginWithPassword: (identifier: string, password: string) => Promise<User>;
-  loginWithToken: (token: string, user: User) => void;
+  loginWithToken: (token: string, user: User, refreshToken?: string) => void;
   logout: () => Promise<void>;
   refresh: () => Promise<void>;
 }
@@ -28,7 +28,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   const refresh = useCallback(async () => {
-    if (!getToken()) {
+    if (!getToken() && !getRefreshToken()) {
       setUser(null);
       setLoading(false);
       return;
@@ -38,7 +38,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(me);
     } catch {
       setUser(null);
-      clearToken();
+      clearAuthTokens();
     } finally {
       setLoading(false);
     }
@@ -50,12 +50,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const loginWithPassword = useCallback(
     async (identifier: string, password: string) => {
-      const res = await api<{ token: string; user?: User }>("/api/v1/auth/login", {
+      const res = await api<LoginResponse>("/api/v1/auth/login", {
         method: "POST",
         auth: false,
         body: JSON.stringify({ identifier, password }),
       });
       setToken(res.token);
+      if (res.refresh_token) {
+        setRefreshToken(res.refresh_token);
+      }
       let userData = res.user;
       if (!userData) {
         userData = await api<User>("/api/v1/me");
@@ -66,18 +69,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     []
   );
 
-  const loginWithToken = useCallback((token: string, u: User) => {
+  const loginWithToken = useCallback((token: string, u: User, refreshToken?: string) => {
     setToken(token);
+    if (refreshToken) {
+      setRefreshToken(refreshToken);
+    }
     setUser(u);
   }, []);
 
   const logout = useCallback(async () => {
+    const rf = getRefreshToken();
     try {
       await unsubscribePush();
     } catch {
       // Ignore push unsubscribe errors to ensure logout always succeeds
+    }
+    try {
+      await api("/api/v1/auth/logout", {
+        method: "POST",
+        body: JSON.stringify({ refresh_token: rf || undefined }),
+      });
+    } catch {
+      // Ignore backend logout network errors to ensure client cleanup always succeeds
     } finally {
-      clearToken();
+      clearAuthTokens();
       setUser(null);
     }
   }, []);
