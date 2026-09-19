@@ -11,6 +11,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.5.0] - 2026-09-19
+
+### Added
+- **Silent Token Refresh Interceptor**: Automatically recovers from expired access tokens on HTTP 401 errors using `POST /api/v1/auth/refresh` without disrupting the user session. Includes mutex queuing to prevent duplicate refresh calls during concurrent requests.
+- **Server-Side Session Revocation on Logout**: Properly invalidates active server sessions and refresh tokens via `POST /api/v1/auth/logout` before clearing local client credentials.
+- **Complete Admin User Editing**: Added comprehensive user editing modal (`/users`) supporting partial and full profile updates (`PATCH /api/v1/admin/users/:id`), including role, employee ID, BNI ID, company, division, department, site, and active status.
+- **Activity Server-Side Pagination & Filtering**: Integrated full backend query filters (`year`, `month`, `start_date`, `end_date`, `status_id`, `sort`, `page`, `limit`) with pagination metadata on `GET /api/v1/activities`.
+- **Automated Branch Synchronization Workflow**: Added `.github/workflows/sync-main-to-development.yml` to automatically merge `main` into `development` on release merges.
+
+### Changed
+- **Master Data Query Filter Alignment**: Aligned department lookup parameters (`GET /api/v1/departments`) with backend Swagger documentation (`division` and `division_id`), replacing legacy non-existent parameters.
+- **Supply Chain & Lockfile Consolidation**: Removed competing `pnpm-lock.yaml` and `pnpm-workspace.yaml` files, consolidating the build and runtime package management entirely on Bun (`bun.lock`).
+- **Next.js Framework Patch**: Upgraded Next.js to version `14.2.35` to include the latest security patches and stability improvements.
+
+### Fixed
+- **Code Duplication Elimination**: Refactored `api.ts` by extracting unified fetch and retry logic (`fetchWithRetry`), reducing duplicated code density to 0.0%.
+- **Test Coverage Expansion**: Expanded isolated unit testing suite with comprehensive coverage for silent refresh, download utilities, and error edge cases, achieving 95.8% test coverage and 100% clean SonarCloud Quality Gate.
+
+### Security
+- **Strict-Transport-Security (HSTS)**: Configured HTTP Strict Transport Security (`max-age=31536000; includeSubDomains; preload`) in Nginx to prevent SSL-stripping attacks.
+- **Content Security Policy (CSP) Tightening**: Restricted `connect-src` to `'self'`, blocking unauthorized external outbound connections from malicious scripts.
+- **Nginx Security Header Inheritance**: Fixed Nginx configuration flaw where `add_header Cache-Control` on immutable and static assets inadvertently suppressed global security headers.
+- **Service Worker Open Redirect Prevention**: Enforced strict relative URL validation on push notification clicks in `public/sw.js`, preventing arbitrary protocol or domain redirection.
+- **Environment File Protection**: Hardened `.gitignore` to block all `.env*` variations while explicitly preserving `.env.example`.
+- **Script Execution Isolation**: Added `--ignore-scripts` to dependency installation in CI workflows to protect against malicious package lifecycle scripts.
+
+---
+
 ## [0.4.0] - 2026-09-17
 
 ### Added
