@@ -152,4 +152,144 @@ describe("Auth refresh & new endpoint integration tests", () => {
     expect(calledUrl).toContain("division_id=5");
     expect(calledUrl).not.toContain("company_id");
   });
+
+  it("handles token refresh failure gracefully and clears tokens", async () => {
+    setToken("expired_token");
+    setRefreshToken("invalid_refresh_token");
+
+    (globalThis as any).fetch = mock(async (url: string) => {
+      if (url.includes("/api/v1/auth/refresh")) {
+        return new Response(JSON.stringify({ error: "Session expired" }), {
+          status: 401,
+          headers: { "Content-Type": "application/json" },
+        });
+      }
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { "Content-Type": "application/json" },
+      });
+    });
+
+    await expect(api("/api/v1/some-endpoint")).rejects.toThrow();
+    expect(getToken()).toBeNull();
+    expect(getRefreshToken()).toBeNull();
+  });
+
+  it("handles network error during token refresh", async () => {
+    setToken("expired_token");
+    setRefreshToken("invalid_refresh_token");
+
+    (globalThis as any).fetch = mock(async (url: string) => {
+      if (url.includes("/api/v1/auth/refresh")) {
+        throw new Error("Network down");
+      }
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { "Content-Type": "application/json" },
+      });
+    });
+
+    await expect(api("/api/v1/some-endpoint")).rejects.toThrow();
+    expect(getToken()).toBeNull();
+    expect(getRefreshToken()).toBeNull();
+  });
+
+  it("migrates tokens from localStorage when cookies are missing", () => {
+    window.localStorage.setItem("ts_auth_token", "legacy_access_123");
+    window.localStorage.setItem("ts_refresh_token", "legacy_refresh_456");
+
+    expect(getToken()).toBe("legacy_access_123");
+    expect(getRefreshToken()).toBe("legacy_refresh_456");
+    expect(window.localStorage.getItem("ts_auth_token")).toBeNull();
+    expect(window.localStorage.getItem("ts_refresh_token")).toBeNull();
+  });
+
+  it("parses non-json blob responses correctly", async () => {
+    (globalThis as any).fetch = mock(async () => {
+      return new Response("plain text or binary stream", {
+        status: 200,
+        headers: { "Content-Type": "application/octet-stream" },
+      });
+    });
+
+    const res = await api("/api/v1/download-raw");
+    expect(res).toBeDefined();
+
+    const metaRes = await apiWithMeta("/api/v1/download-raw");
+    expect(metaRes.data).toBeDefined();
+  });
+
+  it("handles downloadFile with filename header and click event", async () => {
+    const origCreateObjectURL = window.URL.createObjectURL;
+    const origRevokeObjectURL = window.URL.revokeObjectURL;
+
+    window.URL.createObjectURL = mock(() => "blob:http://localhost:3000/mock-uuid");
+    window.URL.revokeObjectURL = mock(() => {});
+
+    let clicked = false;
+    let appended = false;
+    let downloadAttr = "";
+
+    const origCreateElement = document.createElement.bind(document);
+    document.createElement = ((tag: string) => {
+      if (tag === "a") {
+        return {
+          href: "",
+          download: "",
+          click: () => {
+            clicked = true;
+          },
+          remove: () => {},
+          setAttribute: (k: string, v: string) => {
+            if (k === "download") downloadAttr = v;
+          },
+        } as any;
+      }
+      return origCreateElement(tag);
+    }) as any;
+
+    const origAppendChild = document.body.appendChild.bind(document.body);
+    document.body.appendChild = ((node: any) => {
+      appended = true;
+      return node;
+    }) as any;
+
+    const { downloadFile } = await import("./api");
+
+    (globalThis as any).fetch = mock(async () => {
+      return new Response(new Blob(["mock-xlsx-content"]), {
+        status: 200,
+        headers: {
+          "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+          "Content-Disposition": 'attachment; filename="timesheet-2026.xlsx"',
+        },
+      });
+    });
+
+    await downloadFile("/api/v1/timesheet/generate", { year: 2026, month: 9 }, "fallback.xlsx");
+
+    expect(clicked).toBe(true);
+    expect(appended).toBe(true);
+
+    // Restore DOM mocks
+    window.URL.createObjectURL = origCreateObjectURL;
+    window.URL.revokeObjectURL = origRevokeObjectURL;
+    document.createElement = origCreateElement;
+    document.body.appendChild = origAppendChild;
+  });
+
+  it("handles downloadFile error when server returns failure", async () => {
+    const { downloadFile } = await import("./api");
+
+    (globalThis as any).fetch = mock(async () => {
+      return new Response(JSON.stringify({ error: "Cannot generate timesheet" }), {
+        status: 400,
+        headers: { "Content-Type": "application/json" },
+      });
+    });
+
+    await expect(
+      downloadFile("/api/v1/timesheet/generate", { year: 2026, month: 9 }, "fallback.xlsx")
+    ).rejects.toThrow("Cannot generate timesheet");
+  });
 });

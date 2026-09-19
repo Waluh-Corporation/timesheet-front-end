@@ -52,17 +52,12 @@ export function deleteCookie(name: string) {
   document.cookie = `${cleanName}=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax${secure}`;
 }
 
-export function getToken(): string | null {
-  if (typeof window === "undefined") return null;
-  const cookieVal = getCookie(TOKEN_KEY);
-  if (cookieVal) return cookieVal;
-
-  // Migration from legacy localStorage: move to cookie and purge from localStorage immediately
+function getLegacyStorageToken(key: string, days = 7): string | null {
   try {
-    const localVal = window.localStorage.getItem(TOKEN_KEY);
+    const localVal = window.localStorage.getItem(key);
     if (localVal) {
-      setCookie(TOKEN_KEY, localVal);
-      window.localStorage.removeItem(TOKEN_KEY);
+      setCookie(key, localVal, days);
+      window.localStorage.removeItem(key);
       return localVal;
     }
   } catch {
@@ -71,9 +66,15 @@ export function getToken(): string | null {
   return null;
 }
 
+export function getToken(): string | null {
+  if (typeof window === "undefined") return null;
+  const cookieVal = getCookie(TOKEN_KEY);
+  if (cookieVal) return cookieVal;
+  return getLegacyStorageToken(TOKEN_KEY, 7);
+}
+
 export function setToken(token: string) {
   setCookie(TOKEN_KEY, token);
-  // Purge token from localStorage to prevent XSS exposure
   if (typeof window !== "undefined") {
     try {
       window.localStorage.removeItem(TOKEN_KEY);
@@ -87,18 +88,7 @@ export function getRefreshToken(): string | null {
   if (typeof window === "undefined") return null;
   const cookieVal = getCookie(REFRESH_TOKEN_KEY);
   if (cookieVal) return cookieVal;
-
-  try {
-    const localVal = window.localStorage.getItem(REFRESH_TOKEN_KEY);
-    if (localVal) {
-      setCookie(REFRESH_TOKEN_KEY, localVal, 30);
-      window.localStorage.removeItem(REFRESH_TOKEN_KEY);
-      return localVal;
-    }
-  } catch {
-    // Ignore
-  }
-  return null;
+  return getLegacyStorageToken(REFRESH_TOKEN_KEY, 30);
 }
 
 export function setRefreshToken(refreshToken: string) {
@@ -188,10 +178,10 @@ interface RequestOptions extends RequestInit {
   _retry?: boolean;
 }
 
-export async function api<T = any>(
+async function fetchWithRetry(
   path: string,
-  opts: RequestOptions = {}
-): Promise<T> {
+  opts: RequestOptions
+): Promise<{ res: Response; contentType: string }> {
   const headers = new Headers(opts.headers);
   if (!(opts.body instanceof FormData)) {
     headers.set("Content-Type", "application/json");
@@ -216,7 +206,7 @@ export async function api<T = any>(
   ) {
     const newToken = await requestTokenRefresh();
     if (newToken) {
-      return api<T>(path, { ...opts, _retry: true });
+      return fetchWithRetry(path, { ...opts, _retry: true });
     }
     if (typeof window !== "undefined") {
       clearAuthTokens();
@@ -230,6 +220,14 @@ export async function api<T = any>(
     await handleApiError(res, contentType);
   }
 
+  return { res, contentType };
+}
+
+export async function api<T = any>(
+  path: string,
+  opts: RequestOptions = {}
+): Promise<T> {
+  const { res, contentType } = await fetchWithRetry(path, opts);
   return parseApiResponse<T>(res, contentType);
 }
 
@@ -237,44 +235,7 @@ export async function apiWithMeta<T = any>(
   path: string,
   opts: RequestOptions = {}
 ): Promise<{ data: T; pagination?: any; code?: number; status?: string }> {
-  const headers = new Headers(opts.headers);
-  if (!(opts.body instanceof FormData)) {
-    headers.set("Content-Type", "application/json");
-  }
-  if (opts.auth !== false) {
-    const token = getToken();
-    if (token) headers.set("Authorization", `Bearer ${token}`);
-  }
-
-  const res = await fetch(`${getApiBase()}${path}`, {
-    ...opts,
-    credentials: opts.credentials || "include",
-    headers,
-  });
-
-  if (
-    res.status === 401 &&
-    opts.auth !== false &&
-    !opts._retry &&
-    !path.includes("/api/v1/auth/") &&
-    !path.includes("/api/v1/setup/")
-  ) {
-    const newToken = await requestTokenRefresh();
-    if (newToken) {
-      return apiWithMeta<T>(path, { ...opts, _retry: true });
-    }
-    if (typeof window !== "undefined") {
-      clearAuthTokens();
-    }
-  } else if (res.status === 401 && typeof window !== "undefined") {
-    clearAuthTokens();
-  }
-
-  const contentType = res.headers.get("content-type") || "";
-  if (!res.ok) {
-    await handleApiError(res, contentType);
-  }
-
+  const { res, contentType } = await fetchWithRetry(path, opts);
   if (contentType.includes("application/json")) {
     return await res.json();
   }
