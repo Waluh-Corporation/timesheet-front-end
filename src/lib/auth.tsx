@@ -80,7 +80,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logout = useCallback(async () => {
     const rf = getRefreshToken();
     try {
-      await unsubscribePush();
+      await Promise.race([
+        unsubscribePush(),
+        new Promise<void>((resolve) => setTimeout(resolve, 1500)),
+      ]);
     } catch {
       // Ignore push unsubscribe errors to ensure logout always succeeds
     }
