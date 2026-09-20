@@ -85,14 +85,26 @@ export async function registerPasskey(friendlyName?: string) {
   }
   const response = credential.response as AuthenticatorAttestationResponse;
 
+  const rawTransports =
+    typeof response.getTransports === "function" ? response.getTransports() : [];
+  const transports =
+    rawTransports.length > 0
+      ? rawTransports
+      : credential.authenticatorAttachment === "platform"
+      ? ["internal"]
+      : [];
+
   const body = {
     id: credential.id,
     rawId: bufToBase64url(credential.rawId),
     type: credential.type,
+    authenticatorAttachment: credential.authenticatorAttachment,
     response: {
       attestationObject: bufToBase64url(response.attestationObject),
       clientDataJSON: bufToBase64url(response.clientDataJSON),
+      transports,
     },
+    transports,
   };
 
   const nameParam = sanitizedName ? `&name=${encodeURIComponent(sanitizedName)}` : "";
