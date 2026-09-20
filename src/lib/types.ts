@@ -82,8 +82,11 @@ export interface DailyActivity {
 
 export interface Passkey {
   id: number;
-  user_id: number;
+  user_id?: number;
   friendly_name: string;
+  authenticator_aaguid?: string;
+  icon_light?: string;
+  icon_dark?: string;
   created_at: string;
 }
 
@@ -331,3 +334,40 @@ export interface ActivityFilterParams {
   sort?: "asc" | "desc";
   all?: boolean;
 }
+
+export interface UpdatePasskeyRequest {
+  name: string;
+}
+
+export interface VerifyResetTokenRequest {
+  token: string;
+}
+
+export interface VerifyResetTokenResponse {
+  valid: boolean;
+  status: string;
+  message: string;
+  email?: string;
+  username?: string;
+}
+
+export interface AuthenticatorItem {
+  aaguid: string;
+  name: string;
+  icon_light?: string;
+  icon_dark?: string;
+  updated_at?: string;
+}
+
+export interface AuthenticatorListResponse {
+  authenticators: AuthenticatorItem[];
+  page: number;
+  limit: number;
+  total: number;
+}
+
+export interface AuthenticatorSyncResponse {
+  synced_at: string;
+  total_synced: number;
+}
+
