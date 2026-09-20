@@ -417,5 +417,79 @@ describe("Auth refresh & new endpoint integration tests", () => {
     expect(JSON.parse(capturedBody)).toEqual({ name: "Work MacBook Pro" });
     expect(res.message).toBe("Passkey name updated successfully");
   });
+
+  it("registerPasskey forwards authenticatorAttachment and transports in registration finish payload", async () => {
+    const { registerPasskey } = await import("./webauthn");
+
+    let beginCalled = false;
+    let finishPayload: any = null;
+    let finishUrl = "";
+
+    Object.defineProperty(globalThis.navigator, "credentials", {
+      value: {
+        create: mock(async () => ({
+          id: "test_cred_id",
+          rawId: new Uint8Array([1, 2, 3]).buffer,
+          type: "public-key",
+          authenticatorAttachment: "platform",
+          response: {
+            attestationObject: new Uint8Array([4, 5, 6]).buffer,
+            clientDataJSON: new Uint8Array([7, 8, 9]).buffer,
+            getTransports: () => ["internal"],
+          },
+        })),
+      },
+      configurable: true,
+      writable: true,
+    });
+
+    (globalThis as any).fetch = mock(async (url: string, opts: any) => {
+      if (url.includes("/api/v1/passkey/register/begin")) {
+        beginCalled = true;
+        return new Response(
+          JSON.stringify({
+            code: 200,
+            status: "success",
+            data: {
+              session_id: "sess_xyz_789",
+              options: {
+                publicKey: {
+                  challenge: "Y2hhbGxlbmdl",
+                  user: { id: "dXNlcl9pZA" },
+                },
+              },
+            },
+          }),
+          { status: 200, headers: { "Content-Type": "application/json" } }
+        );
+      }
+
+      if (url.includes("/api/v1/passkey/register/finish")) {
+        finishUrl = url;
+        finishPayload = JSON.parse(opts.body);
+        return new Response(
+          JSON.stringify({
+            code: 200,
+            status: "success",
+            message: "Passkey registered successfully",
+          }),
+          { status: 200, headers: { "Content-Type": "application/json" } }
+        );
+      }
+
+      return new Response(JSON.stringify({ code: 404 }), { status: 404 });
+    });
+
+    await registerPasskey("My MacBook TouchID");
+
+    expect(beginCalled).toBe(true);
+    expect(finishUrl).toContain("/api/v1/passkey/register/finish?session_id=sess_xyz_789&name=My%20MacBook%20TouchID");
+    expect(finishPayload).toBeDefined();
+    expect(finishPayload.id).toBe("test_cred_id");
+    expect(finishPayload.authenticatorAttachment).toBe("platform");
+    expect(finishPayload.transports).toEqual(["internal"]);
+    expect(finishPayload.response.transports).toEqual(["internal"]);
+  });
 });
+
 
