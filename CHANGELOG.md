@@ -11,6 +11,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.6.2] - 2026-09-20
+
+### Fixed
+- **Seamless Passkey Device Recognition**: When adding a new passkey, your browser now automatically shares whether you are using device biometrics (such as Touch ID or Windows Hello) or an external key, ensuring hassle-free sign-in prompts when you log back in.
+
+---
+
 ## [0.6.1] - 2026-09-20
 
 ### Changed
