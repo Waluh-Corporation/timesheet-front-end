@@ -7,7 +7,8 @@ import {
   CalendarCheck2,
   FolderTree,
   MapPin,
-  Network
+  Network,
+  Fingerprint,
 } from "lucide-react";
 
 import { DepartmentsTable } from "./components/DepartmentsTable";
@@ -16,8 +17,9 @@ import { SitesTable } from "./components/SitesTable";
 import { CompaniesTable } from "./components/CompaniesTable";
 import { ApproversTable } from "./components/ApproversTable";
 import { HolidaysTable } from "./components/HolidaysTable";
+import { AuthenticatorsTable } from "./components/AuthenticatorsTable";
 
-type TabId = "departments" | "divisions" | "sites" | "companies" | "approvers" | "holidays";
+type TabId = "departments" | "divisions" | "sites" | "companies" | "approvers" | "holidays" | "authenticators";
 
 export default function MasterDataPage() {
   const [activeTab, setActiveTab] = useState<TabId>("departments");
@@ -29,6 +31,7 @@ export default function MasterDataPage() {
     { id: "companies", name: "Companies", icon: Building2 },
     { id: "approvers", name: "Approvers", icon: Users2 },
     { id: "holidays", name: "National Holidays", icon: CalendarCheck2 },
+    { id: "authenticators", name: "Authenticators", icon: Fingerprint },
   ];
 
   const renderActiveTab = () => {
@@ -39,6 +42,7 @@ export default function MasterDataPage() {
       case "companies": return <CompaniesTable />;
       case "approvers": return <ApproversTable />;
       case "holidays": return <HolidaysTable />;
+      case "authenticators": return <AuthenticatorsTable />;
       default: return null;
     }
   };
@@ -48,7 +52,7 @@ export default function MasterDataPage() {
       <header>
         <h1 className="text-2xl font-extrabold">Master Data</h1>
         <p className="text-sm text-mr-muted">
-          Manage departments, divisions, sites, companies, overtime approvers, and Indonesian public holidays.
+          Manage departments, divisions, sites, companies, overtime approvers, Indonesian public holidays, and authenticators.
         </p>
       </header>
 

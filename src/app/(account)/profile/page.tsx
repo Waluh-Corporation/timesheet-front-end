@@ -43,10 +43,10 @@ export default function ProfilePage() {
     load();
   }, [load]);
 
-  const addPasskey = async () => {
+  const addPasskey = async (name?: string) => {
     setAddingKey(true);
     try {
-      await registerPasskey(`${user?.username}'s device`);
+      await registerPasskey(name);
       notify("Passkey added", "success");
       load();
     } catch (err: any) {
@@ -58,6 +58,19 @@ export default function ProfilePage() {
       );
     } finally {
       setAddingKey(false);
+    }
+  };
+
+  const renamePasskey = async (pk: Passkey, newName: string) => {
+    try {
+      await api(`/api/v1/passkeys/${pk.id}`, {
+        method: "PATCH",
+        body: JSON.stringify({ name: newName }),
+      });
+      notify("Passkey renamed", "success");
+      load();
+    } catch (err: any) {
+      notify(err.message || "Rename failed", "error");
     }
   };
 
@@ -93,6 +106,7 @@ export default function ProfilePage() {
         loading={loading} 
         addingKey={addingKey} 
         addPasskey={addPasskey} 
+        renamePasskey={renamePasskey}
         removePasskey={removePasskey} 
       />
       <ProfileForm hasPending={hasPending} onSuccess={load} />

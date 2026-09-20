@@ -13,6 +13,8 @@ import type {
   DivisionRequest,
   Site,
   SiteRequest,
+  AuthenticatorListResponse,
+  AuthenticatorSyncResponse,
 } from "@/lib/types";
 
 export async function fetchActivityStatuses(): Promise<ActivityStatus[]> {
@@ -243,3 +245,23 @@ export async function fetchAllHolidays(year: number): Promise<Holiday[]> {
 export async function checkSetupStatus(): Promise<{ initialized: boolean }> {
   return api<{ initialized: boolean }>("/api/v1/setup/status", { auth: false });
 }
+
+export async function fetchAuthenticators(params?: {
+  search?: string;
+  page?: number;
+  limit?: number;
+}): Promise<AuthenticatorListResponse> {
+  const query = new URLSearchParams();
+  if (params?.search) query.set("search", params.search);
+  if (params?.page) query.set("page", params.page.toString());
+  if (params?.limit) query.set("limit", params.limit.toString());
+  const queryString = query.toString() ? `?${query.toString()}` : "";
+  return api<AuthenticatorListResponse>(`/api/v1/admin/authenticators${queryString}`);
+}
+
+export async function syncAuthenticators(): Promise<AuthenticatorSyncResponse> {
+  return api<AuthenticatorSyncResponse>("/api/v1/admin/authenticators/sync", {
+    method: "POST",
+  });
+}
+

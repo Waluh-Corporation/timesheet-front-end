@@ -22,9 +22,6 @@ export const usersService = {
   getPasskeys: (id: number) => 
     api<Passkey[]>(`/api/v1/admin/users/${id}/passkeys`),
     
-  removePasskey: (userId: number, pkId: number) => 
-    api(`/api/v1/admin/users/${userId}/passkeys/${pkId}`, { method: "DELETE" }),
-    
   reviewChange: (id: number, action: "approve" | "reject") => 
     api(`/api/v1/admin/profile-changes/${id}/review?action=${action}`, { method: "POST", body: JSON.stringify({}) }),
 };

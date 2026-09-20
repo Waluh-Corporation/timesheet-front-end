@@ -1,5 +1,5 @@
 import { Fragment } from "react";
-import { Loader2, ShieldCheck, KeyRound, Ban, Trash2, Fingerprint, Edit2 } from "lucide-react";
+import { Loader2, ShieldCheck, KeyRound, Ban, Fingerprint, Edit2 } from "lucide-react";
 import type { User, Company, Passkey } from "@/lib/types";
 import { useAuth } from "@/lib/auth";
 
@@ -15,7 +15,6 @@ export function UserList({
   onAssignCompany,
   onEditUser,
   onViewPasskeys,
-  onRemovePasskey,
 }: Readonly<{
   users: User[];
   companies: Company[];
@@ -28,7 +27,6 @@ export function UserList({
   onAssignCompany: (u: User, compId?: number, compObj?: Company) => void;
   onEditUser: (u: User) => void;
   onViewPasskeys: (u: User) => void;
-  onRemovePasskey: (u: User, pk: Passkey) => void;
 }>) {
   const { user: currentUser } = useAuth();
 
@@ -49,29 +47,41 @@ export function UserList({
     }
     return (
       <div className="flex flex-col gap-2">
-        {userPasskeys.map((pk) => (
-          <div
-            key={pk.id}
-            className="flex items-center justify-between gap-3 border-2 border-mr-ink bg-mr-surface px-3 py-2"
-          >
-            <div className="flex items-center gap-2">
-              <Fingerprint size={16} className="text-mr-purple" />
-              <div>
-                <p className="text-sm font-semibold">{pk.friendly_name || "Passkey"}</p>
-                <p className="text-xs text-mr-muted">
-                  Added {new Date(pk.created_at).toLocaleDateString()}
-                </p>
-              </div>
-            </div>
-            <button
-              onClick={() => onRemovePasskey(u, pk)}
-              className="border-2 border-mr-ink p-2 text-mr-muted hover:bg-mr-pink hover:text-white"
-              title="Remove passkey"
+        {userPasskeys.map((pk) => {
+          const iconSrc = pk.icon_light || pk.icon_dark;
+          return (
+            <div
+              key={pk.id}
+              className="flex items-center justify-between gap-3 border-2 border-mr-ink bg-mr-surface px-3 py-2"
             >
-              <Trash2 size={15} />
-            </button>
-          </div>
-        ))}
+              <div className="flex items-center gap-2.5">
+                <div className="flex h-5 w-5 shrink-0 items-center justify-center">
+                  {iconSrc ? (
+                    <img
+                      src={iconSrc}
+                      alt={pk.friendly_name || "Authenticator"}
+                      className="h-4 w-4 object-contain"
+                      onError={(e) => {
+                        e.currentTarget.style.display = "none";
+                      }}
+                    />
+                  ) : (
+                    <Fingerprint size={16} className="text-mr-purple" />
+                  )}
+                </div>
+                <div>
+                  <p className="text-sm font-semibold">{pk.friendly_name || "Passkey"}</p>
+                  <p className="text-xs text-mr-muted">
+                    Added {new Date(pk.created_at).toLocaleDateString()}
+                  </p>
+                </div>
+              </div>
+              <span className="text-[11px] font-semibold text-mr-muted border border-mr-ink/20 px-2 py-0.5 rounded bg-mr-surface2">
+                User Managed
+              </span>
+            </div>
+          );
+        })}
       </div>
     );
   };

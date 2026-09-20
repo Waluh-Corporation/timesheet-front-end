@@ -110,7 +110,7 @@ export function useDashboardData() {
 
   const handleAddPasskey = async () => {
     try {
-      await registerPasskey(`${user?.username}'s device`);
+      await registerPasskey();
       notify("Passkey registered — you can now sign in without a password.", "success");
     } catch (err: any) {
       notify(err.message || "Passkey registration failed", "error");

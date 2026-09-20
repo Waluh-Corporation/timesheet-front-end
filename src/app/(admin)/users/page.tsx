@@ -26,7 +26,6 @@ export default function UsersPage() {
     deactivateUser,
     assignCompany,
     viewPasskeys,
-    removeUserPasskey,
     reviewChange,
   } = useUsers();
 
@@ -63,7 +62,6 @@ export default function UsersPage() {
             onAssignCompany={assignCompany}
             onEditUser={setEditingUser}
             onViewPasskeys={viewPasskeys}
-            onRemovePasskey={removeUserPasskey}
           />
         </div>
       </div>
