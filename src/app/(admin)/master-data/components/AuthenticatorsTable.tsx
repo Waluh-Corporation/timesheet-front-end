@@ -117,7 +117,7 @@ export function AuthenticatorsTable() {
             </thead>
             <tbody>
               {authenticators.map((auth) => {
-                const iconSrc = auth.icon_light || auth.icon_dark;
+                const iconSrc = auth.icon || auth.icon_light || auth.icon_dark;
                 return (
                   <tr key={auth.aaguid} className="border-b border-mr-ink/20 hover:bg-mr-surface2/50 transition-colors">
                     <td className="py-3 pr-2">

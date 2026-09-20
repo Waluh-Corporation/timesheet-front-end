@@ -310,6 +310,7 @@ describe("Auth refresh & new endpoint integration tests", () => {
               {
                 aaguid: "42a048a9-4b68-45a8-aa5a-cfb3d4a462ec",
                 name: "Bitwarden",
+                icon: "data:image/svg+xml;base64,123",
                 icon_light: "data:image/svg+xml;base64,123",
                 icon_dark: "data:image/svg+xml;base64,456",
                 updated_at: "2026-09-20T10:00:00Z",
