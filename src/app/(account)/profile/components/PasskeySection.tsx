@@ -155,17 +155,9 @@ export function PasskeySection({
                         </button>
                       </div>
                     )}
-                    <div className="flex items-center gap-1.5 flex-wrap text-xs text-mr-muted">
-                      <span>Added {new Date(pk.created_at).toLocaleDateString()}</span>
-                      {pk.authenticator_aaguid && (
-                        <span
-                          className="font-mono text-[10px] text-mr-muted border border-mr-ink/20 px-1 py-0.5 rounded bg-mr-surface"
-                          title={`AAGUID: ${pk.authenticator_aaguid}`}
-                        >
-                          {pk.authenticator_aaguid.slice(0, 8)}…
-                        </span>
-                      )}
-                    </div>
+                    <p className="text-xs text-mr-muted">
+                      Added {new Date(pk.created_at).toLocaleDateString()}
+                    </p>
                   </div>
                 </div>
 

@@ -71,17 +71,9 @@ export function UserList({
                 </div>
                 <div>
                   <p className="text-sm font-semibold">{pk.friendly_name || "Passkey"}</p>
-                  <div className="flex items-center gap-1.5 flex-wrap text-xs text-mr-muted">
-                    <span>Added {new Date(pk.created_at).toLocaleDateString()}</span>
-                    {pk.authenticator_aaguid && (
-                      <span
-                        className="font-mono text-[10px] text-mr-muted border border-mr-ink/20 px-1 py-0.5 rounded bg-mr-surface"
-                        title={`AAGUID: ${pk.authenticator_aaguid}`}
-                      >
-                        {pk.authenticator_aaguid.slice(0, 8)}…
-                      </span>
-                    )}
-                  </div>
+                  <p className="text-xs text-mr-muted">
+                    Added {new Date(pk.created_at).toLocaleDateString()}
+                  </p>
                 </div>
               </div>
               <span className="text-[11px] font-semibold text-mr-muted border border-mr-ink/20 px-2 py-0.5 rounded bg-mr-surface2">
