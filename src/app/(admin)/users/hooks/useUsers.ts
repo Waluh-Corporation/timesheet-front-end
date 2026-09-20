@@ -91,20 +91,6 @@ export function useUsers() {
     }
   };
 
-  const removeUserPasskey = async (u: User, pk: Passkey) => {
-    // ponytail: [Need custom modal to replace native confirm]
-    if (!window.confirm(`Remove ${u.username}'s passkey "${pk.friendly_name || "Passkey"}"?`)) return;
-    try {
-      await usersService.removePasskey(u.id, pk.id);
-      notify("Passkey removed", "success");
-      const pks = await usersService.getPasskeys(u.id);
-      setUserPasskeys(pks || []);
-    } catch (error) {
-      const err = error as Error;
-      notify(err.message, "error");
-    }
-  };
-
   const reviewChange = async (c: ProfileChangeRequest, action: "approve" | "reject") => {
     try {
       await usersService.reviewChange(c.id, action);
@@ -143,7 +129,6 @@ export function useUsers() {
     deactivateUser,
     assignCompany,
     viewPasskeys,
-    removeUserPasskey,
     reviewChange,
   };
 }
