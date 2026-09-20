@@ -87,7 +87,7 @@ export function PasskeySection({
       ) : (
         <div className="flex flex-col gap-2">
           {passkeys.map((pk) => {
-            const iconSrc = pk.icon_light || pk.icon_dark;
+            const iconSrc = pk.icon || pk.icon_light || pk.icon_dark;
             const isEditing = editingId === pk.id;
 
             return (
