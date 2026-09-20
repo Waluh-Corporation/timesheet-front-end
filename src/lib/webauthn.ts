@@ -53,8 +53,10 @@ export async function isConditionalSupported(): Promise<boolean> {
 }
 
 // registerPasskey runs a registration ceremony for the logged-in user.
-export async function registerPasskey(friendlyName = "My device") {
-  const sanitizedName = (friendlyName || "My device").trim().slice(0, 100);
+// If friendlyName is omitted or empty, the backend automatically sets the name
+// using the authenticator's AAGUID (e.g. Bitwarden, iCloud Keychain, Windows Hello).
+export async function registerPasskey(friendlyName?: string) {
+  const sanitizedName = friendlyName ? friendlyName.trim().slice(0, 100) : "";
 
   const { session_id, options } = await api<{ session_id: string; options: any }>(
     "/api/v1/passkey/register/begin",
@@ -93,8 +95,9 @@ export async function registerPasskey(friendlyName = "My device") {
     },
   };
 
+  const nameParam = sanitizedName ? `&name=${encodeURIComponent(sanitizedName)}` : "";
   await api(
-    `/api/v1/passkey/register/finish?session_id=${encodeURIComponent(session_id)}&name=${encodeURIComponent(sanitizedName)}`,
+    `/api/v1/passkey/register/finish?session_id=${encodeURIComponent(session_id)}${nameParam}`,
     { method: "POST", body: JSON.stringify(body) }
   );
 }
