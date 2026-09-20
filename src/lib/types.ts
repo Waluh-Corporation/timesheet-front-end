@@ -85,6 +85,7 @@ export interface Passkey {
   user_id?: number;
   friendly_name: string;
   authenticator_aaguid?: string;
+  icon?: string;
   icon_light?: string;
   icon_dark?: string;
   created_at: string;
@@ -354,6 +355,7 @@ export interface VerifyResetTokenResponse {
 export interface AuthenticatorItem {
   aaguid: string;
   name: string;
+  icon?: string;
   icon_light?: string;
   icon_dark?: string;
   updated_at?: string;

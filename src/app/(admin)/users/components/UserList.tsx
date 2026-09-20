@@ -48,7 +48,7 @@ export function UserList({
     return (
       <div className="flex flex-col gap-2">
         {userPasskeys.map((pk) => {
-          const iconSrc = pk.icon_light || pk.icon_dark;
+          const iconSrc = pk.icon || pk.icon_light || pk.icon_dark;
           return (
             <div
               key={pk.id}

@@ -11,6 +11,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.6.1] - 2026-09-20
+
+### Changed
+- **Unified Authenticator Brand Icons**: Streamlined authenticator and passkey icon rendering to support the latest unified brand icon format, ensuring device and password manager logos (such as Bitwarden, Apple iCloud Keychain, and Windows Hello) display seamlessly across dark and light themes.
+
+---
+
 ## [0.6.0] - 2026-09-20
 
 ### Added
