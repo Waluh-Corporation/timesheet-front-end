@@ -131,8 +131,9 @@ function ResetPasswordInner() {
               </div>
             )}
             <div>
-              <label className="mb-1 block text-sm font-semibold">New password</label>
+              <label htmlFor="reset-new-password" className="mb-1 block text-sm font-semibold">New password</label>
               <input
+                id="reset-new-password"
                 className="input"
                 type="password"
                 value={password}
@@ -142,8 +143,9 @@ function ResetPasswordInner() {
               />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-semibold">Confirm password</label>
+              <label htmlFor="reset-confirm-password" className="mb-1 block text-sm font-semibold">Confirm password</label>
               <input
+                id="reset-confirm-password"
                 className="input"
                 type="password"
                 value={confirm}

@@ -90,6 +90,7 @@ export function AuthenticatorsTable() {
           type="text"
           className="input pl-9 text-sm"
           placeholder="Search authenticators by name or AAGUID..."
+          aria-label="Search authenticators by name or AAGUID"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />

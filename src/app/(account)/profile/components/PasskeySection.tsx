@@ -119,7 +119,7 @@ export function PasskeySection({
                           className="input py-0.5 px-2 text-xs font-semibold"
                           value={editName}
                           onChange={(e) => setEditName(e.target.value)}
-                          autoFocus
+                          aria-label="Rename passkey"
                           disabled={savingRename}
                           onKeyDown={(e) => {
                             if (e.key === "Enter") handleSaveRename(pk);
@@ -197,10 +197,11 @@ export function PasskeySection({
               </p>
 
               <div>
-                <label className="mb-1 block text-xs font-bold uppercase text-mr-muted">
+                <label htmlFor="new-passkey-name" className="mb-1 block text-xs font-bold uppercase text-mr-muted">
                   Passkey Name (Optional)
                 </label>
                 <input
+                  id="new-passkey-name"
                   type="text"
                   className="input text-sm"
                   placeholder="e.g. Work MacBook, or leave blank for auto"
