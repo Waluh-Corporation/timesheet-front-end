@@ -9,7 +9,11 @@ import {
   clearAuthTokens,
 } from "./api";
 import { usersService } from "@/app/(admin)/users/services/usersService";
-import { fetchDepartments } from "@/app/(admin)/master-data/services/masterData";
+import {
+  fetchDepartments,
+  fetchAuthenticators,
+  syncAuthenticators,
+} from "@/app/(admin)/master-data/services/masterData";
 
 describe("Auth refresh & new endpoint integration tests", () => {
   beforeEach(() => {
@@ -292,4 +296,125 @@ describe("Auth refresh & new endpoint integration tests", () => {
       downloadFile("/api/v1/timesheet/generate", { year: 2026, month: 9 }, "fallback.xlsx")
     ).rejects.toThrow("Cannot generate timesheet");
   });
+
+  it("fetchAuthenticators queries /api/v1/admin/authenticators with search, page, and limit", async () => {
+    let capturedUrl = "";
+    (globalThis as any).fetch = mock(async (url: string) => {
+      capturedUrl = url;
+      return new Response(
+        JSON.stringify({
+          code: 200,
+          status: "success",
+          data: {
+            authenticators: [
+              {
+                aaguid: "42a048a9-4b68-45a8-aa5a-cfb3d4a462ec",
+                name: "Bitwarden",
+                icon_light: "data:image/svg+xml;base64,123",
+                icon_dark: "data:image/svg+xml;base64,456",
+                updated_at: "2026-09-20T10:00:00Z",
+              },
+            ],
+            page: 2,
+            limit: 20,
+            total: 56,
+          },
+        }),
+        { status: 200, headers: { "Content-Type": "application/json" } }
+      );
+    });
+
+    const res = await fetchAuthenticators({ search: "bitwarden", page: 2, limit: 20 });
+    expect(capturedUrl).toContain("/api/v1/admin/authenticators");
+    expect(capturedUrl).toContain("search=bitwarden");
+    expect(capturedUrl).toContain("page=2");
+    expect(capturedUrl).toContain("limit=20");
+    expect(res.authenticators.length).toBe(1);
+    expect(res.authenticators[0].name).toBe("Bitwarden");
+    expect(res.total).toBe(56);
+  });
+
+  it("syncAuthenticators triggers POST /api/v1/admin/authenticators/sync", async () => {
+    let capturedUrl = "";
+    let capturedMethod = "";
+    (globalThis as any).fetch = mock(async (url: string, opts: any) => {
+      capturedUrl = url;
+      capturedMethod = opts?.method || "GET";
+      return new Response(
+        JSON.stringify({
+          code: 200,
+          status: "success",
+          data: {
+            synced_at: "2026-09-20T10:30:00Z",
+            total_synced: 56,
+          },
+        }),
+        { status: 200, headers: { "Content-Type": "application/json" } }
+      );
+    });
+
+    const res = await syncAuthenticators();
+    expect(capturedUrl).toContain("/api/v1/admin/authenticators/sync");
+    expect(capturedMethod).toBe("POST");
+    expect(res.total_synced).toBe(56);
+  });
+
+  it("verifies reset password token via /api/v1/auth/reset-password/verify", async () => {
+    let capturedUrl = "";
+    (globalThis as any).fetch = mock(async (url: string) => {
+      capturedUrl = url;
+      return new Response(
+        JSON.stringify({
+          code: 200,
+          status: "success",
+          data: {
+            valid: true,
+            status: "valid",
+            message: "token valid",
+            email: "j***@example.com",
+            username: "john_doe",
+          },
+        }),
+        { status: 200, headers: { "Content-Type": "application/json" } }
+      );
+    });
+
+    const res = await api<{ valid: boolean; username: string }>(
+      "/api/v1/auth/reset-password/verify?token=sample_tok_123",
+      { auth: false }
+    );
+    expect(capturedUrl).toContain("/api/v1/auth/reset-password/verify?token=sample_tok_123");
+    expect(res.valid).toBe(true);
+    expect(res.username).toBe("john_doe");
+  });
+
+  it("renames passkey via PATCH /api/v1/passkeys/:id", async () => {
+    let capturedUrl = "";
+    let capturedMethod = "";
+    let capturedBody = "";
+    (globalThis as any).fetch = mock(async (url: string, opts: any) => {
+      capturedUrl = url;
+      capturedMethod = opts?.method || "GET";
+      capturedBody = opts?.body || "";
+      return new Response(
+        JSON.stringify({
+          code: 200,
+          status: "success",
+          message: "Passkey name updated successfully",
+        }),
+        { status: 200, headers: { "Content-Type": "application/json" } }
+      );
+    });
+
+    const res = await api<{ message: string }>("/api/v1/passkeys/42", {
+      method: "PATCH",
+      body: JSON.stringify({ name: "Work MacBook Pro" }),
+    });
+
+    expect(capturedUrl).toContain("/api/v1/passkeys/42");
+    expect(capturedMethod).toBe("PATCH");
+    expect(JSON.parse(capturedBody)).toEqual({ name: "Work MacBook Pro" });
+    expect(res.message).toBe("Passkey name updated successfully");
+  });
 });
+
