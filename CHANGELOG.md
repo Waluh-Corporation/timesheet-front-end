@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+---
+
+## [0.6.0] - 2026-09-20
+
 ### Added
 - **Password Reset Link Validation**: When opening a password reset link, the system immediately checks if the link is still valid. If it has expired or was already used, users receive a clear notification and a direct option to request a new link instead of filling out an invalid form.
 - **Passkey Directory & Sync (Admin)**: Added an Authenticator Directory in Master Data. Administrators can search registered passkey providers (such as Bitwarden, Apple iCloud Keychain, Windows Hello, and YubiKey) and synchronize the list with the latest community registry at any time.
@@ -16,6 +20,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - **Passkey Privacy & Security**: Passkeys are recognized strictly as private credentials managed only by the individual employee. Administrators can view registered credentials and device types, while credential modification and removal remain exclusively in the hands of the user.
+
+### Fixed
+- **Accessibility Enhancements**: Improved form controls for screen readers by explicitly connecting input fields with labels and optimizing keyboard navigation during passkey management and password resets.
 
 ---
 
