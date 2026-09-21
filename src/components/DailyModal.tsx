@@ -189,7 +189,7 @@ export default function DailyModal({
 
           {form.app_impacted && (
             <div className="text-xs text-mr-muted">
-              App Impacted: <span className="font-semibold text-mr-ink">{form.app_impacted}</span>
+              Project Name: <span className="font-semibold text-mr-ink">{form.app_impacted}</span>
             </div>
           )}
 

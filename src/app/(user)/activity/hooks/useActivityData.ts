@@ -63,9 +63,8 @@ export const useActivityData = (initialId: string | null, defaultDate: string) =
           project_name: data.project_name || matchedProj?.name || "",
           project_id: data.project_id || matchedProj?.code || "",
           app_impacted:
-            data.app_impacted ||
-            data.project_ref?.app_impacted ||
-            matchedProj?.app_impacted ||
+            data.project_name ||
+            matchedProj?.name ||
             "",
         });
         setActiveId(initialId);
@@ -105,13 +104,21 @@ export const useActivityData = (initialId: string | null, defaultDate: string) =
         project_ref_id: p.id,
         project_id: p.code,
         project_name: p.name,
-        app_impacted: p.app_impacted || "",
+        app_impacted: p.name || "",
       }));
     }
   };
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (form.start_time && form.end_time) {
+      if (form.end_time <= form.start_time) {
+        notify("Time Out must be greater than Time In", "error");
+        return;
+      }
+    }
+
     setSaving(true);
     try {
       const payload = {

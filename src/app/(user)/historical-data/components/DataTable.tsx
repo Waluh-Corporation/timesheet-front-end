@@ -30,7 +30,7 @@ export function DataTable({ loading, activities }: DataTableProps) {
               <th className="p-4 font-extrabold uppercase">Time In</th>
               <th className="p-4 font-extrabold uppercase">Time Out</th>
               <th className="p-4 font-extrabold uppercase">Activity</th>
-              <th className="p-4 font-extrabold uppercase">App Impacted</th>
+              <th className="p-4 font-extrabold uppercase">Project Name</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-mr-ink">

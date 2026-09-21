@@ -70,6 +70,7 @@ export function NewUserForm({
             placeholder="BNI ID"
             value={form.bni_id}
             onChange={(e) => setForm({ ...form, bni_id: e.target.value.replace(/\D/g, "") })}
+            required
           />
         </div>
         <div className="grid grid-cols-2 gap-4">

@@ -85,8 +85,9 @@ export function ActivityDetailContent() {
             <label htmlFor="end_time" className="mb-1 block text-xs font-bold uppercase">Time Out</label>
             <input
               id="end_time"
-              className="input"
+              className={`input ${form.start_time && form.end_time && form.end_time <= form.start_time ? "bg-mr-surface2 text-mr-muted border-red-500" : ""}`}
               type="time"
+              min={form.start_time}
               value={form.end_time || ""}
               onChange={(e) => set("end_time", e.target.value)}
             />
@@ -124,7 +125,7 @@ export function ActivityDetailContent() {
           </select>
           {form.app_impacted && (
             <p className="mt-1 text-xs text-mr-muted">
-              App Impacted: <span className="font-semibold text-mr-ink">{form.app_impacted}</span>
+              Project Name: <span className="font-semibold text-mr-ink">{form.app_impacted}</span>
             </p>
           )}
         </div>
