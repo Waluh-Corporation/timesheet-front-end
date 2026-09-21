@@ -26,8 +26,9 @@ export function ProfileForm({ hasPending, onSuccess }: { hasPending: boolean, on
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
-          <label className="mb-1 block text-xs font-bold uppercase">Full name</label>
+          <label htmlFor="profile-full-name" className="mb-1 block text-xs font-bold uppercase">Full name</label>
           <input
+            id="profile-full-name"
             className="input"
             value={form.name}
             onChange={(e) => setFieldValue("name", e.target.value)}
@@ -35,8 +36,9 @@ export function ProfileForm({ hasPending, onSuccess }: { hasPending: boolean, on
           />
         </div>
         <div>
-          <label className="mb-1 block text-xs font-bold uppercase">Email</label>
+          <label htmlFor="profile-email" className="mb-1 block text-xs font-bold uppercase">Email</label>
           <input
+            id="profile-email"
             type="email"
             className="input"
             value={form.email}
@@ -45,8 +47,9 @@ export function ProfileForm({ hasPending, onSuccess }: { hasPending: boolean, on
           />
         </div>
         <div>
-          <label className="mb-1 block text-xs font-bold uppercase">Employee ID / MII ID</label>
+          <label htmlFor="profile-employee-id" className="mb-1 block text-xs font-bold uppercase">Employee ID / MII ID</label>
           <input
+            id="profile-employee-id"
             className="input"
             value={form.employee_id}
             onChange={(e) => setFieldValue("employee_id", e.target.value.replace(/\D/g, ""))}
@@ -54,8 +57,9 @@ export function ProfileForm({ hasPending, onSuccess }: { hasPending: boolean, on
           />
         </div>
         <div>
-          <label className="mb-1 block text-xs font-bold uppercase">BNI ID</label>
+          <label htmlFor="profile-bni-id" className="mb-1 block text-xs font-bold uppercase">BNI ID</label>
           <input
+            id="profile-bni-id"
             className="input"
             value={form.bni_id}
             onChange={(e) => setFieldValue("bni_id", e.target.value.replace(/\D/g, ""))}
@@ -64,9 +68,10 @@ export function ProfileForm({ hasPending, onSuccess }: { hasPending: boolean, on
           />
         </div>
         <div>
-          <label className="mb-1 block text-xs font-bold uppercase">Division</label>
+          <label htmlFor="profile-division" className="mb-1 block text-xs font-bold uppercase">Division</label>
           {divisions.length > 0 ? (
             <select
+              id="profile-division"
               className="input font-medium"
               value={form.division}
               onChange={(e) => setFieldValue("division", e.target.value)}
@@ -80,6 +85,7 @@ export function ProfileForm({ hasPending, onSuccess }: { hasPending: boolean, on
             </select>
           ) : (
             <input
+              id="profile-division"
               className="input"
               value={form.division}
               onChange={(e) => setFieldValue("division", e.target.value)}
@@ -88,8 +94,9 @@ export function ProfileForm({ hasPending, onSuccess }: { hasPending: boolean, on
           )}
         </div>
         <div>
-          <label className="mb-1 block text-xs font-bold uppercase">Company</label>
+          <label htmlFor="profile-company" className="mb-1 block text-xs font-bold uppercase">Company</label>
           <select
+            id="profile-company"
             className="input font-medium"
             value={form.company_id || ""}
             onChange={(e) => setFieldValue("company_id", Number(e.target.value))}
@@ -104,9 +111,10 @@ export function ProfileForm({ hasPending, onSuccess }: { hasPending: boolean, on
           </select>
         </div>
         <div>
-          <label className="mb-1 block text-xs font-bold uppercase">Department</label>
+          <label htmlFor="profile-department" className="mb-1 block text-xs font-bold uppercase">Department</label>
           {departments.length > 0 ? (
             <select
+              id="profile-department"
               className="input font-medium"
               value={form.department_id}
               onChange={(e) => {
@@ -125,6 +133,7 @@ export function ProfileForm({ hasPending, onSuccess }: { hasPending: boolean, on
             </select>
           ) : (
             <input
+              id="profile-department"
               className="input"
               value={form.department}
               onChange={(e) => setFieldValue("department", e.target.value)}
@@ -133,9 +142,10 @@ export function ProfileForm({ hasPending, onSuccess }: { hasPending: boolean, on
           )}
         </div>
         <div>
-          <label className="mb-1 block text-xs font-bold uppercase">Site / Location</label>
+          <label htmlFor="profile-site" className="mb-1 block text-xs font-bold uppercase">Site / Location</label>
           {sites.length > 0 ? (
             <select
+              id="profile-site"
               className="input font-medium"
               value={form.site}
               onChange={(e) => setFieldValue("site", e.target.value)}
@@ -149,6 +159,7 @@ export function ProfileForm({ hasPending, onSuccess }: { hasPending: boolean, on
             </select>
           ) : (
             <input
+              id="profile-site"
               className="input"
               value={form.site}
               onChange={(e) => setFieldValue("site", e.target.value)}
@@ -157,8 +168,9 @@ export function ProfileForm({ hasPending, onSuccess }: { hasPending: boolean, on
           )}
         </div>
         <div className="sm:col-span-2">
-          <label className="mb-1 block text-xs font-bold uppercase">Reason / Notes (Catatan Pengajuan)</label>
+          <label htmlFor="profile-notes" className="mb-1 block text-xs font-bold uppercase">Reason / Notes (Catatan Pengajuan)</label>
           <textarea
+            id="profile-notes"
             className="input min-h-[70px] w-full resize-y text-xs"
             value={form.notes}
             onChange={(e) => setFieldValue("notes", e.target.value)}
