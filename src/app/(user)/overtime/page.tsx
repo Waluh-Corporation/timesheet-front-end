@@ -120,6 +120,12 @@ export default function OvertimePage() {
       notify("Please fill in task description", "error");
       return;
     }
+    if (form.start_time && form.end_time) {
+      if (form.end_time <= form.start_time) {
+        notify("End Time must be greater than Start Time", "error");
+        return;
+      }
+    }
     setSaving(true);
     try {
       await upsertOvertime(form);
@@ -368,8 +374,9 @@ export default function OvertimePage() {
                 <div>
                   <label className="mb-1 block text-xs font-semibold">End Time</label>
                   <input
-                    className="input"
+                    className={`input ${form.start_time && form.end_time && form.end_time <= form.start_time ? "bg-mr-surface2 text-mr-muted border-red-500" : ""}`}
                     type="time"
+                    min={form.start_time}
                     value={form.end_time}
                     onChange={(e) => setForm({ ...form, end_time: e.target.value })}
                     required

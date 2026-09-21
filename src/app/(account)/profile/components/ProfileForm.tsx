@@ -50,6 +50,7 @@ export function ProfileForm({ hasPending, onSuccess }: { hasPending: boolean, on
             value={form.bni_id}
             onChange={(e) => setFieldValue("bni_id", e.target.value.replace(/\D/g, ""))}
             placeholder="e.g. 12345678"
+            required
           />
         </div>
         <div>
@@ -80,10 +81,11 @@ export function ProfileForm({ hasPending, onSuccess }: { hasPending: boolean, on
           <label className="mb-1 block text-xs font-bold uppercase">Company</label>
           <select
             className="input font-medium"
-            value={form.company_id}
+            value={form.company_id || ""}
             onChange={(e) => setFieldValue("company_id", Number(e.target.value))}
+            required
           >
-            <option value={0}>— Select Company —</option>
+            <option value="">— Select Company —</option>
             {companies.map((c) => (
               <option key={c.id} value={c.id}>
                 {c.name} ({c.code.toUpperCase()})
