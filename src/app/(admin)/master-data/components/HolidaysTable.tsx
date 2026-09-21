@@ -98,9 +98,28 @@ export function HolidaysTable() {
                   <td className="py-3 font-semibold whitespace-nowrap">{h.date}</td>
                   <td className="py-3">{h.description}</td>
                   <td className="py-3">
-                    <span className="chip bg-mr-surface2 text-xs font-semibold">
-                      {h.is_joint_leave ? "Cuti Bersama" : "Libur Nasional"}
-                    </span>
+                    <div className="flex flex-wrap gap-1.5">
+                      {h.is_joint_leave && (
+                        <span className="chip bg-mr-yellow text-mr-ink text-[11px] font-bold border border-mr-ink/30">
+                          Cuti Bersama
+                        </span>
+                      )}
+                      {h.is_religious && (
+                        <span className="chip bg-mr-purple text-white text-[11px] font-bold border border-mr-ink/30">
+                          Keagamaan
+                        </span>
+                      )}
+                      {h.is_civic && (
+                        <span className="chip bg-mr-cyan text-mr-ink text-[11px] font-bold border border-mr-ink/30">
+                          Nasional
+                        </span>
+                      )}
+                      {!h.is_joint_leave && !h.is_religious && !h.is_civic && (
+                        <span className="chip bg-mr-surface2 text-mr-ink text-[11px] font-semibold border border-mr-ink/30">
+                          Libur Nasional
+                        </span>
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))}

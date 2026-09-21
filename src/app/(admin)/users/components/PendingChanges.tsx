@@ -37,6 +37,7 @@ export function PendingChanges({
               <p className="text-mr-muted">
                 {[
                   c.name,
+                  c.email ? `Email: ${c.email}` : null,
                   c.employee_id || c.mii_id,
                   c.bni_id ? `BNI: ${c.bni_id}` : null,
                   c.division,
@@ -45,6 +46,11 @@ export function PendingChanges({
                   .filter(Boolean)
                   .join(" · ")}
               </p>
+              {c.notes && (
+                <p className="text-xs text-mr-ink italic mt-0.5 bg-mr-surface px-2 py-1 border border-mr-ink/20">
+                  Note: &quot;{c.notes}&quot;
+                </p>
+              )}
             </div>
             <div className="flex gap-2">
               <button

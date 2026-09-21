@@ -35,6 +35,16 @@ export function ProfileForm({ hasPending, onSuccess }: { hasPending: boolean, on
           />
         </div>
         <div>
+          <label className="mb-1 block text-xs font-bold uppercase">Email</label>
+          <input
+            type="email"
+            className="input"
+            value={form.email}
+            onChange={(e) => setFieldValue("email", e.target.value)}
+            placeholder="e.g. john@example.com"
+          />
+        </div>
+        <div>
           <label className="mb-1 block text-xs font-bold uppercase">Employee ID / MII ID</label>
           <input
             className="input"
@@ -122,7 +132,7 @@ export function ProfileForm({ hasPending, onSuccess }: { hasPending: boolean, on
             />
           )}
         </div>
-        <div className="sm:col-span-2">
+        <div>
           <label className="mb-1 block text-xs font-bold uppercase">Site / Location</label>
           {sites.length > 0 ? (
             <select
@@ -145,6 +155,15 @@ export function ProfileForm({ hasPending, onSuccess }: { hasPending: boolean, on
               placeholder="e.g. Jakarta, Sentul, Slipi"
             />
           )}
+        </div>
+        <div className="sm:col-span-2">
+          <label className="mb-1 block text-xs font-bold uppercase">Reason / Notes (Catatan Pengajuan)</label>
+          <textarea
+            className="input min-h-[70px] w-full resize-y text-xs"
+            value={form.notes}
+            onChange={(e) => setFieldValue("notes", e.target.value)}
+            placeholder="Jelaskan alasan perubahan data profil (mis. rotasi penempatan site baru, koreksi NIK/BNI ID)..."
+          />
         </div>
       </div>
 
