@@ -48,6 +48,11 @@ export function ChangeRequestsHistory({ changes, loading }: ChangeRequestsHistor
                     <span className="font-bold text-mr-muted">Name:</span> {c.name}
                   </div>
                 )}
+                {c.email && (
+                  <div>
+                    <span className="font-bold text-mr-muted">Email:</span> {c.email}
+                  </div>
+                )}
                 {(c.employee_id || c.mii_id) && (
                   <div>
                     <span className="font-bold text-mr-muted">Employee ID:</span>{" "}
@@ -75,6 +80,13 @@ export function ChangeRequestsHistory({ changes, loading }: ChangeRequestsHistor
                   </div>
                 )}
               </div>
+
+              {c.notes && (
+                <div className="text-xs border-l-2 border-mr-purple bg-mr-surface p-2 text-mr-ink">
+                  <span className="font-bold text-mr-muted block text-[10px] uppercase">Reason / Notes:</span>
+                  <p className="italic">{c.notes}</p>
+                </div>
+              )}
 
               {c.reviewed_at && (
                 <div className="mt-1 text-xs text-mr-muted bg-mr-surface p-2 border border-mr-ink/20">

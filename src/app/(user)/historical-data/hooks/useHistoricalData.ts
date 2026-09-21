@@ -40,8 +40,8 @@ export function useHistoricalData() {
           const matchedProj =
             (act.project_ref_id ? projById.get(act.project_ref_id) : undefined) ||
             act.project_ref ||
-            (act.project_id ? projByCode.get(act.project_id.toLowerCase()) : undefined) ||
-            (act.project_name ? projByName.get(act.project_name.toLowerCase()) : undefined);
+            (act.project_name ? projByName.get(act.project_name.toLowerCase()) : undefined) ||
+            (act.project_id ? projByCode.get(act.project_id.toLowerCase()) : undefined);
 
           const appImpacted =
             act.project_name?.trim() ||
