@@ -3,6 +3,7 @@
 import { useDashboardData } from "./hooks/useDashboardData";
 import { DashboardHeader } from "./components/DashboardHeader";
 import { MonthlyGrid } from "./components/MonthlyGrid";
+import { TimesheetJobsModal } from "./components/TimesheetJobsModal";
 
 export default function DashboardPage() {
   const {
@@ -15,6 +16,10 @@ export default function DashboardPage() {
     pushOn,
     handleTogglePush,
     pushSupported,
+    sendingTestPush,
+    handleSendTestPush,
+    isJobsModalOpen,
+    setIsJobsModalOpen,
     handleAddPasskey,
     passkeysSupported,
     year,
@@ -39,6 +44,9 @@ export default function DashboardPage() {
         pushOn={pushOn}
         onTogglePush={handleTogglePush}
         pushSupported={pushSupported()}
+        sendingTestPush={sendingTestPush}
+        onSendTestPush={handleSendTestPush}
+        onOpenJobsModal={() => setIsJobsModalOpen(true)}
         onAddPasskey={handleAddPasskey}
         passkeysSupported={passkeysSupported()}
       />
@@ -54,6 +62,13 @@ export default function DashboardPage() {
         page={page}
         setPage={setPage}
         ITEMS_PER_PAGE={ITEMS_PER_PAGE}
+      />
+
+      <TimesheetJobsModal
+        isOpen={isJobsModalOpen}
+        onClose={() => setIsJobsModalOpen(false)}
+        currentYear={year}
+        currentMonth={month}
       />
     </div>
   );

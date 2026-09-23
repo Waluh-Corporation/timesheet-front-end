@@ -415,3 +415,60 @@ export interface AuthenticatorSyncResponse {
   total_synced: number;
 }
 
+export type TimesheetJobStatus = "queued" | "processing" | "completed" | "failed";
+
+export interface TimesheetJobResponse {
+  id: string;
+  user_id: number;
+  month: number;
+  year: number;
+  status: TimesheetJobStatus;
+  download_url?: string;
+  error_message?: string;
+  expires_at?: string;
+  created_at: string;
+  updated_at?: string;
+}
+
+export interface GenerateRequest {
+  month: number;
+  year: number;
+}
+
+export interface HolidayDTO {
+  date: string;
+  description: string;
+  is_civic?: boolean;
+  is_cuti_bersama?: boolean;
+  is_joint_leave?: boolean;
+  is_religious?: boolean;
+}
+
+export interface AdminPasskeyResponse {
+  id: number;
+  friendly_name: string;
+  authenticator_aaguid?: string;
+  icon?: string;
+  created_at: string;
+}
+
+export interface UpdateDepartmentRequest {
+  code?: string;
+  name: string;
+  division?: string;
+  division_id?: number;
+  is_active?: boolean;
+}
+
+export interface UpdateDivisionRequest {
+  code?: string;
+  name: string;
+  is_active?: boolean;
+}
+
+export interface UpdateSiteRequest {
+  code?: string;
+  name: string;
+  is_active?: boolean;
+}
+
