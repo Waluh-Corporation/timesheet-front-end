@@ -38,7 +38,11 @@ export interface Holiday {
   date: string;
   description: string;
   company_id?: number;
+  is_civic?: boolean;
   is_joint_leave?: boolean;
+  is_religious?: boolean;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface User {
@@ -52,10 +56,12 @@ export interface User {
   employee_id?: string;
   bni_id?: string;
   division?: string;
+  division_id?: number;
   department?: string;
   department_id?: number;
   department_rel?: Department;
   site?: string;
+  site_id?: number;
   company?: string;
   company_id?: number;
   company_rel?: Company;
@@ -96,14 +102,20 @@ export interface ProfileChangeRequest {
   user_id: number;
   status: "pending" | "approved" | "rejected";
   name: string;
+  email?: string;
   mii_id?: string;
   employee_id?: string;
   bni_id?: string;
   division?: string;
+  division_id?: number;
   department?: string;
   department_id?: number;
   site?: string;
+  site_id?: number;
   company_id?: number;
+  notes?: string;
+  position?: string;
+  group_name?: string;
   reviewed_by?: number;
   reviewer_name?: string;
   reviewed_at?: string;
@@ -118,13 +130,17 @@ export interface AdminProfileChange {
   user_name?: string;
   user_email?: string;
   name?: string;
+  email?: string;
   employee_id?: string;
   bni_id?: string;
   division?: string;
+  division_id?: number;
   department?: string;
   department_id?: number;
   company_id?: number;
   site?: string;
+  site_id?: number;
+  notes?: string;
   status: "pending" | "approved" | "rejected";
   reviewed_by?: number;
   reviewer_name?: string;
@@ -134,13 +150,17 @@ export interface AdminProfileChange {
 
 export interface ProfileChangeRequestDTO {
   name?: string;
+  email?: string;
   employee_id?: string;
   bni_id?: string;
   company_id?: number;
   department?: string;
   department_id?: number;
   division?: string;
+  division_id?: number;
   site?: string;
+  site_id?: number;
+  notes?: string;
 }
 
 export interface Approver {
@@ -160,15 +180,19 @@ export interface OvertimeEntry {
   end_time: string;
   task_description: string;
   team_leader_id?: number;
+  team_leader_name?: string;
   department_head_id?: number;
+  department_head_name?: string;
   team_leader?: Approver;
   department_head?: Approver;
 }
 
 export interface PaginationMeta {
-  current_page: number;
+  current_page?: number;
+  page?: number;
   limit: number;
-  total_items: number;
+  total_items?: number;
+  total_rows?: number;
   total_pages: number;
 }
 
@@ -310,8 +334,26 @@ export interface DepartmentQueryParams {
 
 export interface UpdateUserRequestDTO {
   name?: string;
+  email?: string;
   role?: Role;
   is_active?: boolean;
+  employee_id?: string;
+  bni_id?: string;
+  company?: string;
+  company_id?: number;
+  division?: string;
+  division_id?: number;
+  department?: string;
+  department_id?: number;
+  site?: string;
+  site_id?: number;
+}
+
+export interface CreateUserRequestDTO {
+  username: string;
+  email: string;
+  role: Role;
+  name?: string;
   employee_id?: string;
   bni_id?: string;
   company?: string;
@@ -371,5 +413,62 @@ export interface AuthenticatorListResponse {
 export interface AuthenticatorSyncResponse {
   synced_at: string;
   total_synced: number;
+}
+
+export type TimesheetJobStatus = "queued" | "processing" | "completed" | "failed";
+
+export interface TimesheetJobResponse {
+  id: string;
+  user_id: number;
+  month: number;
+  year: number;
+  status: TimesheetJobStatus;
+  download_url?: string;
+  error_message?: string;
+  expires_at?: string;
+  created_at: string;
+  updated_at?: string;
+}
+
+export interface GenerateRequest {
+  month: number;
+  year: number;
+}
+
+export interface HolidayDTO {
+  date: string;
+  description: string;
+  is_civic?: boolean;
+  is_cuti_bersama?: boolean;
+  is_joint_leave?: boolean;
+  is_religious?: boolean;
+}
+
+export interface AdminPasskeyResponse {
+  id: number;
+  friendly_name: string;
+  authenticator_aaguid?: string;
+  icon?: string;
+  created_at: string;
+}
+
+export interface UpdateDepartmentRequest {
+  code?: string;
+  name: string;
+  division?: string;
+  division_id?: number;
+  is_active?: boolean;
+}
+
+export interface UpdateDivisionRequest {
+  code?: string;
+  name: string;
+  is_active?: boolean;
+}
+
+export interface UpdateSiteRequest {
+  code?: string;
+  name: string;
+  is_active?: boolean;
 }
 

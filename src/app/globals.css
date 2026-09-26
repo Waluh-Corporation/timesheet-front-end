@@ -1,8 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,600&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap');
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+@config "../../tailwind.config.ts";
 
 /* ---------------------------------------------------------------------------
    "Maman Racing" design tokens (from the claude_design project).
@@ -85,7 +84,11 @@
   }
 
   /* Neobrutalist button: 2px frame, hard shadow, lift on hover, press on click. */
-  .btn {
+  .btn,
+  .btn-primary,
+  .btn-accent,
+  .btn-ghost,
+  .btn-danger {
     @apply inline-flex items-center justify-center gap-2 border-2 border-mr-ink px-5 py-2.5
            font-extrabold uppercase tracking-wide transition-all duration-100
            hover:-translate-x-[2px] hover:-translate-y-[2px]
@@ -93,13 +96,21 @@
            disabled:opacity-60 disabled:pointer-events-none;
     box-shadow: 2px 2px 0 0 var(--ink);
   }
-  .btn:hover { box-shadow: 4px 4px 0 0 var(--ink); }
-  .btn:active { box-shadow: 0 0 0 0 var(--ink); }
+  .btn:hover,
+  .btn-primary:hover,
+  .btn-accent:hover,
+  .btn-ghost:hover,
+  .btn-danger:hover { box-shadow: 4px 4px 0 0 var(--ink); }
+  .btn:active,
+  .btn-primary:active,
+  .btn-accent:active,
+  .btn-ghost:active,
+  .btn-danger:active { box-shadow: 0 0 0 0 var(--ink); }
 
-  .btn-primary { @apply btn bg-mr-purple; color: var(--fg-inverse); }
-  .btn-accent { @apply btn bg-mr-yellow; color: var(--on-accent); }
-  .btn-ghost { @apply btn bg-mr-surface2 text-mr-ink; }
-  .btn-danger { @apply btn bg-mr-pink text-white; }
+  .btn-primary { @apply bg-mr-purple; color: var(--fg-inverse); }
+  .btn-accent { @apply bg-mr-yellow; color: var(--on-accent); }
+  .btn-ghost { @apply bg-mr-surface2 text-mr-ink; }
+  .btn-danger { @apply bg-mr-pink text-white; }
 
   /* Square input with a solid frame; focus deepens the hard shadow. */
   .input {

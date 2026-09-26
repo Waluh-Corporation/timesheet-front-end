@@ -106,7 +106,7 @@ export function Filters({
           value={filterApp}
           onChange={(e) => setFilterApp(e.target.value)}
         >
-          <option value="All">All Apps Impacted</option>
+          <option value="All">All Project</option>
           {uniqueApps.map((a) => (
             <option key={a as string} value={a as string}>{a as string}</option>
           ))}

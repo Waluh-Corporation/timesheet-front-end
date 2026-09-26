@@ -11,6 +11,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.7.0] - 2026-09-26
+
+### Added
+- **Background Timesheet Processing & Job Tracking**: Added an asynchronous jobs tracking modal accessible from the dashboard header, enabling users to monitor timesheet generation and export tasks with real-time status indicators and error logging.
+- **Enhanced Profile Change Requests**: Added support for additional employee information fields in profile change requests, including personal notes, contact email, division, and work site selection.
+- **Enriched Holiday Classification**: Expanded the holiday directory to distinguish between civic and religious holidays for accurate holiday calendar management.
+
+### Fixed
+- **Form Accessibility**: Associated all profile form labels directly with their corresponding input controls using explicit identifiers, ensuring full compatibility with screen readers and assistive technology.
+
+---
+
 ## [0.6.2] - 2026-09-20
 
 ### Fixed

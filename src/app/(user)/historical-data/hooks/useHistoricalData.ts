@@ -40,13 +40,12 @@ export function useHistoricalData() {
           const matchedProj =
             (act.project_ref_id ? projById.get(act.project_ref_id) : undefined) ||
             act.project_ref ||
-            (act.project_id ? projByCode.get(act.project_id.toLowerCase()) : undefined) ||
-            (act.project_name ? projByName.get(act.project_name.toLowerCase()) : undefined);
+            (act.project_name ? projByName.get(act.project_name.toLowerCase()) : undefined) ||
+            (act.project_id ? projByCode.get(act.project_id.toLowerCase()) : undefined);
 
           const appImpacted =
-            act.app_impacted?.trim() ||
-            act.project_ref?.app_impacted?.trim() ||
-            matchedProj?.app_impacted?.trim() ||
+            act.project_name?.trim() ||
+            matchedProj?.name?.trim() ||
             "";
 
           return {
@@ -76,8 +75,8 @@ export function useHistoricalData() {
     const apps = new Set<string>();
     // Fetch directly from projects API
     projects.forEach((p) => {
-      if (p.app_impacted && p.app_impacted.trim()) {
-        apps.add(p.app_impacted.trim());
+      if (p.name && p.name.trim()) {
+        apps.add(p.name.trim());
       }
     });
     // Include any app_impacted found in historical activities

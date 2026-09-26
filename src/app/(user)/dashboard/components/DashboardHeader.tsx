@@ -1,4 +1,13 @@
-import { Plus, Download, Bell, BellOff, Fingerprint, Loader2 } from "lucide-react";
+import {
+  Plus,
+  Download,
+  Bell,
+  BellOff,
+  Fingerprint,
+  Loader2,
+  FileSpreadsheet,
+  Send,
+} from "lucide-react";
 import { useRouter } from "next/navigation";
 
 interface DashboardHeaderProps {
@@ -10,6 +19,9 @@ interface DashboardHeaderProps {
   pushOn: boolean;
   onTogglePush: () => void;
   pushSupported: boolean;
+  sendingTestPush?: boolean;
+  onSendTestPush?: () => void;
+  onOpenJobsModal?: () => void;
   onAddPasskey: () => void;
   passkeysSupported: boolean;
 }
@@ -23,6 +35,9 @@ export function DashboardHeader({
   pushOn,
   onTogglePush,
   pushSupported,
+  sendingTestPush,
+  onSendTestPush,
+  onOpenJobsModal,
   onAddPasskey,
   passkeysSupported,
 }: Readonly<DashboardHeaderProps>) {
@@ -52,41 +67,86 @@ export function DashboardHeader({
         </div>
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <button
           onClick={onGenerate}
           disabled={generating}
           className="card flex items-center gap-3 p-4 text-left transition hover:shadow-hard"
         >
-          <div className="grid h-10 w-10 place-items-center  bg-mr-cyan text-mr-ink">
+          <div className="grid h-10 w-10 place-items-center bg-mr-cyan text-mr-ink">
             {generating ? <Loader2 size={18} className="animate-spin" /> : <Download size={18} />}
           </div>
           <div>
             <p className="text-sm font-bold">Generate</p>
-            <p className="text-xs text-mr-muted">Download & email .xlsx</p>
+            <p className="text-xs text-mr-muted">Export monthly timesheet</p>
           </div>
         </button>
 
         <button
-          onClick={onTogglePush}
-          disabled={pushBusy || !pushSupported}
-          className="card flex items-center gap-3 p-4 text-left transition hover:shadow-hard disabled:opacity-60"
+          onClick={onOpenJobsModal}
+          className="card flex items-center gap-3 p-4 text-left transition hover:shadow-hard"
         >
           <div className="grid h-10 w-10 place-items-center bg-mr-purple text-white">
-            {pushIcon}
+            <FileSpreadsheet size={18} />
           </div>
           <div>
-            <p className="text-sm font-bold">{pushOn ? "Disable reminders" : "Enable reminders"}</p>
-            <p className="text-xs text-mr-muted">Daily push at 17:00 WIB</p>
+            <p className="text-sm font-bold">Timesheet Jobs</p>
+            <p className="text-xs text-mr-muted">History & S3 downloads</p>
           </div>
         </button>
+
+        <div className="card flex flex-col justify-between p-4 text-left transition hover:shadow-hard">
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={onTogglePush}
+              disabled={pushBusy || !pushSupported}
+              className="grid h-10 w-10 shrink-0 place-items-center bg-mr-yellow text-mr-ink border border-mr-ink disabled:opacity-60"
+            >
+              {pushIcon}
+            </button>
+            <div className="flex-1 min-w-0">
+              <button
+                type="button"
+                onClick={onTogglePush}
+                disabled={pushBusy || !pushSupported}
+                className="text-left w-full disabled:opacity-60"
+              >
+                <p className="text-sm font-bold truncate">
+                  {pushOn ? "Disable reminders" : "Enable reminders"}
+                </p>
+                <p className="text-xs text-mr-muted">Daily push at 17:00</p>
+              </button>
+            </div>
+          </div>
+          {pushOn && onSendTestPush && (
+            <div className="mt-2.5 pt-2 border-t border-mr-ink/10 flex justify-end">
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onSendTestPush();
+                }}
+                disabled={sendingTestPush}
+                className="inline-flex items-center gap-1 text-[11px] font-bold text-mr-purple hover:underline disabled:opacity-50"
+              >
+                {sendingTestPush ? (
+                  <Loader2 size={11} className="animate-spin" />
+                ) : (
+                  <Send size={11} />
+                )}
+                Send test push
+              </button>
+            </div>
+          )}
+        </div>
 
         <button
           onClick={onAddPasskey}
           disabled={!passkeysSupported}
           className="card flex items-center gap-3 p-4 text-left transition hover:shadow-hard disabled:opacity-60"
         >
-          <div className="grid h-10 w-10 place-items-center  bg-mr-pink text-white">
+          <div className="grid h-10 w-10 place-items-center bg-mr-pink text-white">
             <Fingerprint size={18} />
           </div>
           <div>

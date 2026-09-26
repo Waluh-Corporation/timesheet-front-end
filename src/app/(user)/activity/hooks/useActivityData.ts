@@ -51,21 +51,18 @@ export const useActivityData = (initialId: string | null, defaultDate: string) =
           fetchProjects(),
         ]);
         if (projs) setProjects(projs);
-        const matchedProj = projs?.find(
-          (p) =>
-            p.id === data.project_ref_id ||
-            p.code === data.project_id ||
-            p.name === data.project_name
-        );
+        const matchedProj =
+          (data.project_ref_id ? projs?.find((p) => p.id === data.project_ref_id) : undefined) ||
+          (data.project_name ? projs?.find((p) => p.name?.trim().toLowerCase() === data.project_name.trim().toLowerCase()) : undefined) ||
+          (data.project_id ? projs?.find((p) => p.code?.trim().toLowerCase() === data.project_id.trim().toLowerCase()) : undefined);
         setForm({
           ...data,
           project_ref_id: data.project_ref_id || matchedProj?.id,
           project_name: data.project_name || matchedProj?.name || "",
           project_id: data.project_id || matchedProj?.code || "",
           app_impacted:
-            data.app_impacted ||
-            data.project_ref?.app_impacted ||
-            matchedProj?.app_impacted ||
+            data.project_name ||
+            matchedProj?.name ||
             "",
         });
         setActiveId(initialId);
@@ -105,13 +102,21 @@ export const useActivityData = (initialId: string | null, defaultDate: string) =
         project_ref_id: p.id,
         project_id: p.code,
         project_name: p.name,
-        app_impacted: p.app_impacted || "",
+        app_impacted: p.name || "",
       }));
     }
   };
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (form.start_time && form.end_time) {
+      if (form.end_time <= form.start_time) {
+        notify("Time Out must be greater than Time In", "error");
+        return;
+      }
+    }
+
     setSaving(true);
     try {
       const payload = {

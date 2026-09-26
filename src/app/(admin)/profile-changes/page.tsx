@@ -77,11 +77,13 @@ export default function AdminProfileChangesPage() {
         (c.user_name && c.user_name.toLowerCase().includes(q)) ||
         (c.user_email && c.user_email.toLowerCase().includes(q)) ||
         (c.name && c.name.toLowerCase().includes(q)) ||
+        (c.email && c.email.toLowerCase().includes(q)) ||
         (c.employee_id && c.employee_id.toLowerCase().includes(q)) ||
         (c.bni_id && c.bni_id.toLowerCase().includes(q)) ||
         (c.division && c.division.toLowerCase().includes(q)) ||
         (c.department && c.department.toLowerCase().includes(q)) ||
-        (c.site && c.site.toLowerCase().includes(q))
+        (c.site && c.site.toLowerCase().includes(q)) ||
+        (c.notes && c.notes.toLowerCase().includes(q))
       );
     });
   }, [changes, searchQuery]);
@@ -297,6 +299,12 @@ export default function AdminProfileChangesPage() {
                     <span className="font-semibold text-mr-ink">{c.name}</span>
                   </div>
                 )}
+                {c.email && (
+                  <div>
+                    <span className="font-bold text-mr-muted uppercase block text-[10px]">Proposed Email</span>
+                    <span className="font-semibold text-mr-ink">{c.email}</span>
+                  </div>
+                )}
                 {c.employee_id && (
                   <div>
                     <span className="font-bold text-mr-muted uppercase block text-[10px]">Employee ID</span>
@@ -334,6 +342,14 @@ export default function AdminProfileChangesPage() {
                   </div>
                 )}
               </div>
+
+              {/* Notes / Reason */}
+              {c.notes && (
+                <div className="border-l-4 border-mr-purple bg-mr-surface2 p-3 text-xs">
+                  <span className="font-bold text-mr-muted uppercase block text-[10px]">Reason / Notes</span>
+                  <p className="text-mr-ink mt-0.5 whitespace-pre-wrap">{c.notes}</p>
+                </div>
+              )}
 
               {/* Review History Footer if reviewed */}
               {c.reviewed_at && (
@@ -375,6 +391,7 @@ export default function AdminProfileChangesPage() {
               <p className="font-bold">Summary of changes to apply:</p>
               <ul className="list-disc pl-4 space-y-0.5 text-mr-muted">
                 {confirmModal.change.name && <li>Name: {confirmModal.change.name}</li>}
+                {confirmModal.change.email && <li>Email: {confirmModal.change.email}</li>}
                 {confirmModal.change.employee_id && (
                   <li>Employee ID: {confirmModal.change.employee_id}</li>
                 )}
@@ -382,6 +399,9 @@ export default function AdminProfileChangesPage() {
                 {confirmModal.change.division && <li>Division: {confirmModal.change.division}</li>}
                 {confirmModal.change.department && <li>Dept: {confirmModal.change.department}</li>}
                 {confirmModal.change.site && <li>Site: {confirmModal.change.site}</li>}
+                {confirmModal.change.notes && (
+                  <li className="font-medium text-mr-ink">Reason: {confirmModal.change.notes}</li>
+                )}
               </ul>
             </div>
 

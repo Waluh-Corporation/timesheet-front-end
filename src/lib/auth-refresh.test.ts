@@ -490,6 +490,79 @@ describe("Auth refresh & new endpoint integration tests", () => {
     expect(finishPayload.transports).toEqual(["internal"]);
     expect(finishPayload.response.transports).toEqual(["internal"]);
   });
+
+  it("submitProfileChange submits notes, email, division_id, and site_id in payload", async () => {
+    const { submitProfileChange } = await import("@/services/profileChange");
+
+    let capturedUrl = "";
+    let capturedBody: any = null;
+
+    (globalThis as any).fetch = mock(async (url: string, opts: any) => {
+      capturedUrl = url;
+      capturedBody = JSON.parse(opts.body);
+      return new Response(
+        JSON.stringify({
+          code: 200,
+          status: "success",
+          message: "Profile change request submitted",
+          data: { id: 101, ...capturedBody },
+        }),
+        { status: 200, headers: { "Content-Type": "application/json" } }
+      );
+    });
+
+    const res = await submitProfileChange({
+      name: "Jane Doe",
+      email: "jane.doe@example.com",
+      employee_id: "998877",
+      division: "Application Development",
+      division_id: 5,
+      site: "Slipi",
+      site_id: 12,
+      notes: "Relokasi kantor ke Slipi dan pembaruan email kerja",
+    });
+
+    expect(capturedUrl).toContain("/api/v1/profile/change");
+    expect(capturedBody.name).toBe("Jane Doe");
+    expect(capturedBody.email).toBe("jane.doe@example.com");
+    expect(capturedBody.division_id).toBe(5);
+    expect(capturedBody.site_id).toBe(12);
+    expect(capturedBody.notes).toBe("Relokasi kantor ke Slipi dan pembaruan email kerja");
+    expect(res).toBeDefined();
+  });
+
+  it("handles Holiday schema with is_civic and is_religious correctly", async () => {
+    const holiday: import("./types").Holiday = {
+      id: 1,
+      date: "2026-03-31",
+      description: "Hari Raya Idul Fitri 1447 H",
+      is_religious: true,
+      is_civic: false,
+      is_joint_leave: false,
+      created_at: "2026-01-01T00:00:00Z",
+    };
+
+    expect(holiday.is_religious).toBe(true);
+    expect(holiday.is_civic).toBe(false);
+    expect(holiday.is_joint_leave).toBe(false);
+  });
+
+  it("handles OvertimeEntry schema with flat team_leader_name and department_head_name", async () => {
+    const ot: import("./types").OvertimeEntry = {
+      id: 5,
+      date: "2026-09-20",
+      start_time: "18:00",
+      end_time: "21:00",
+      task_description: "Deployment release v0.7.0",
+      team_leader_id: 10,
+      team_leader_name: "Budi Santoso",
+      department_head_id: 20,
+      department_head_name: "Siti Rahma",
+    };
+
+    expect(ot.team_leader_name).toBe("Budi Santoso");
+    expect(ot.department_head_name).toBe("Siti Rahma");
+  });
 });
 
 

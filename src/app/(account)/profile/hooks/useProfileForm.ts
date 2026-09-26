@@ -11,6 +11,7 @@ export function useProfileForm(onSuccess?: () => void) {
 
   const [form, setForm] = useState({
     name: "",
+    email: "",
     employee_id: "",
     bni_id: "",
     division: "",
@@ -18,6 +19,7 @@ export function useProfileForm(onSuccess?: () => void) {
     company_id: 0,
     department_id: 0,
     department: "",
+    notes: "",
   });
 
   const [companies, setCompanies] = useState<Company[]>([]);
@@ -53,6 +55,7 @@ export function useProfileForm(onSuccess?: () => void) {
       );
       setForm({
         name: user.name || "",
+        email: user.email || "",
         employee_id: user.employee_id || user.mii_id || "",
         bni_id: user.bni_id || "",
         division: user.division || "",
@@ -60,6 +63,7 @@ export function useProfileForm(onSuccess?: () => void) {
         company_id: matchedCompany ? matchedCompany.id : user.company_id || 0,
         department_id: user.department_id || 0,
         department: user.department || "",
+        notes: "",
       });
     }
   }, [user, companies]);
@@ -82,15 +86,22 @@ export function useProfileForm(onSuccess?: () => void) {
     e.preventDefault();
     setSaving(true);
     try {
+      const selectedDiv = divisions.find((d) => d.name === form.division || d.code === form.division);
+      const selectedSite = sites.find((s) => s.name === form.site || s.code === form.site);
+
       const payload: ProfileChangeRequestDTO = {
         name: form.name.trim() || undefined,
+        email: form.email.trim() || undefined,
         employee_id: form.employee_id.trim() || undefined,
         bni_id: form.bni_id.trim() || undefined,
         division: form.division.trim() || undefined,
+        division_id: selectedDiv ? selectedDiv.id : undefined,
         site: form.site.trim() || undefined,
+        site_id: selectedSite ? selectedSite.id : undefined,
         company_id: form.company_id ? Number(form.company_id) : undefined,
         department_id: form.department_id ? Number(form.department_id) : undefined,
         department: form.department.trim() || undefined,
+        notes: form.notes.trim() || undefined,
       };
 
       await submitProfileChange(payload);
