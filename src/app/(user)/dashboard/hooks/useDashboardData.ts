@@ -1,8 +1,20 @@
 import { useState, useCallback, useEffect, useMemo } from "react";
-import { fetchDashboardActivities, fetchHolidays, downloadTimesheet } from "../services/api";
+import {
+  fetchDashboardActivities,
+  fetchHolidays,
+  downloadTimesheet,
+  requestTimesheetGeneration,
+} from "../services/api";
 import { useToast } from "@/components/Toast";
 import type { DailyActivity } from "@/lib/types";
-import { enablePush, disablePush, pushSupported, registerServiceWorker, isPushSubscribed } from "@/lib/push";
+import {
+  enablePush,
+  disablePush,
+  pushSupported,
+  registerServiceWorker,
+  isPushSubscribed,
+  sendTestPush,
+} from "@/lib/push";
 import { registerPasskey, passkeysSupported } from "@/lib/webauthn";
 import { useAuth } from "@/lib/auth";
 
@@ -23,6 +35,8 @@ export function useDashboardData() {
   const [generating, setGenerating] = useState(false);
   const [pushBusy, setPushBusy] = useState(false);
   const [pushOn, setPushOn] = useState(false);
+  const [sendingTestPush, setSendingTestPush] = useState(false);
+  const [isJobsModalOpen, setIsJobsModalOpen] = useState(false);
   const [page, setPage] = useState(1);
   const ITEMS_PER_PAGE = 7;
 
@@ -80,12 +94,35 @@ export function useDashboardData() {
   const generate = async () => {
     setGenerating(true);
     try {
-      await downloadTimesheet(year, month);
-      notify("Timesheet downloaded & emailed to you 📧", "success");
+      if (typeof requestTimesheetGeneration === "function") {
+        await requestTimesheetGeneration(year, month);
+        notify("Timesheet generation task queued! Tracking job... ⏳", "success");
+        setIsJobsModalOpen(true);
+      } else {
+        await downloadTimesheet(year, month);
+        notify("Timesheet downloaded & emailed to you 📧", "success");
+      }
     } catch (err: any) {
-      notify(err.message || "Generation failed", "error");
+      try {
+        await downloadTimesheet(year, month);
+        notify("Timesheet downloaded & emailed to you 📧", "success");
+      } catch (fallbackErr: any) {
+        notify(err.message || fallbackErr.message || "Generation failed", "error");
+      }
     } finally {
       setGenerating(false);
+    }
+  };
+
+  const handleSendTestPush = async () => {
+    setSendingTestPush(true);
+    try {
+      await sendTestPush();
+      notify("Test push notification sent! 🔔", "success");
+    } catch (err: any) {
+      notify(err.message || "Failed to send test push notification", "error");
+    } finally {
+      setSendingTestPush(false);
     }
   };
 
@@ -126,6 +163,8 @@ export function useDashboardData() {
     loading,
     generating, generate,
     pushBusy, pushOn, handleTogglePush, pushSupported,
+    sendingTestPush, handleSendTestPush,
+    isJobsModalOpen, setIsJobsModalOpen,
     handleAddPasskey, passkeysSupported,
     page, setPage, ITEMS_PER_PAGE,
     totalDays, byDay, now

@@ -8,6 +8,14 @@ mock.module("../services/api", () => ({
   fetchDashboardActivities: mock(async () => []),
   fetchHolidays: mock(async () => []),
   downloadTimesheet: mock(async () => {}),
+  requestTimesheetGeneration: mock(async () => ({
+    id: "job-1",
+    user_id: 1,
+    month: 9,
+    year: 2026,
+    status: "queued",
+    created_at: "2026-09-23T10:00:00Z",
+  })),
 }));
 
 // Stable mock for Toast
@@ -27,12 +35,14 @@ mock.module("@/lib/auth", () => ({
 }));
 
 // Mock @/lib/push
+const mockSendTestPush = mock(async () => {});
 mock.module("@/lib/push", () => ({
   enablePush: mock(async () => true),
   disablePush: mock(async () => {}),
   pushSupported: () => true,
   registerServiceWorker: mock(async () => ({})),
   isPushSubscribed: mock(async () => true),
+  sendTestPush: mockSendTestPush,
 }));
 
 describe("useDashboardData hook", () => {
@@ -65,6 +75,17 @@ describe("useDashboardData hook", () => {
       await captured.handleTogglePush();
     });
     expect(captured.pushBusy).toBe(false);
+
+    await (React as any).act(async () => {
+      await captured.handleSendTestPush();
+    });
+    expect(captured.sendingTestPush).toBe(false);
+
+    await (React as any).act(async () => {
+      await captured.generate();
+    });
+    expect(captured.generating).toBe(false);
+    expect(captured.isJobsModalOpen).toBe(true);
 
     await (React as any).act(async () => {
       root.unmount();
