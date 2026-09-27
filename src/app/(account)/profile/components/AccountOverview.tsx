@@ -17,7 +17,7 @@ export function AccountOverview() {
         </div>
         <div>
           <p className="text-xs font-bold uppercase text-mr-muted">Role</p>
-          <span className="chip bg-mr-purple text-white uppercase text-xs">{user?.role}</span>
+          <span className="chip bg-mr-purple text-white dark:text-black font-extrabold uppercase text-xs">{user?.role}</span>
         </div>
         <div>
           <p className="text-xs font-bold uppercase text-mr-muted">Company</p>

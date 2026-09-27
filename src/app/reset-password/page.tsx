@@ -86,8 +86,8 @@ function ResetPasswordInner() {
     <div className="flex min-h-screen items-center justify-center p-4">
       <div className="w-full max-w-md">
         <div className="mb-6 flex flex-col items-center text-center">
-          <div className="mb-3 grid h-16 w-16 place-items-center bg-mr-purple shadow-hard">
-            <ShieldCheck size={30} className="text-white" />
+          <div className="mb-3 grid h-16 w-16 place-items-center bg-mr-purple border-2 border-mr-ink shadow-hard">
+            <ShieldCheck size={30} className="text-white dark:text-black" />
           </div>
           <h1 className="text-2xl font-extrabold">Set your password</h1>
           <p className="mt-1 text-sm text-mr-muted">Choose a strong new password.</p>

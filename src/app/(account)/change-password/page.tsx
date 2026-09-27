@@ -80,7 +80,7 @@ export default function ChangePasswordPage() {
 
       <div className="card p-6 md:p-8">
         <div className="mb-6 flex items-center gap-3 border-b-2 border-mr-ink pb-4">
-          <div className="grid h-10 w-10 place-items-center bg-mr-purple text-white shadow-hard-sm">
+          <div className="grid h-10 w-10 place-items-center bg-mr-purple text-white dark:text-black shadow-hard-sm">
             <KeyRound size={20} />
           </div>
           <div>

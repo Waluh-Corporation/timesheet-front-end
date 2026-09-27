@@ -5,8 +5,11 @@ import { Loader2, RotateCw, Search, Fingerprint, ChevronLeft, ChevronRight } fro
 import { useToast } from "@/components/Toast";
 import type { AuthenticatorItem } from "@/lib/types";
 import { fetchAuthenticators, syncAuthenticators } from "@/app/(admin)/master-data/services/masterData";
+import { useTheme } from "@/lib/theme";
 
 export function AuthenticatorsTable() {
+  const { theme } = useTheme();
+  const isDark = theme === "dark";
   const { notify } = useToast();
   const [authenticators, setAuthenticators] = useState<AuthenticatorItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -76,7 +79,7 @@ export function AuthenticatorsTable() {
         <button
           onClick={handleSync}
           disabled={syncing}
-          className="btn border-2 border-mr-ink bg-mr-cyan text-mr-ink text-sm font-bold flex items-center justify-center gap-2"
+          className="btn border-2 border-mr-ink bg-mr-cyan text-black font-extrabold text-sm flex items-center justify-center gap-2"
         >
           <RotateCw size={16} className={syncing ? "animate-spin" : ""} />
           {syncing ? "Syncing..." : "Sync with Community Registry"}
@@ -117,7 +120,9 @@ export function AuthenticatorsTable() {
             </thead>
             <tbody>
               {authenticators.map((auth) => {
-                const iconSrc = auth.icon || auth.icon_light || auth.icon_dark;
+                const iconSrc = isDark
+                  ? (auth.icon_dark || auth.icon || auth.icon_light)
+                  : (auth.icon_light || auth.icon || auth.icon_dark);
                 return (
                   <tr key={auth.aaguid} className="border-b border-mr-ink/20 hover:bg-mr-surface2/50 transition-colors">
                     <td className="py-3 pr-2">

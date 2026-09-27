@@ -244,6 +244,7 @@ export default function LoginPage() {
           {!showForgot ? (
             <form onSubmit={handlePasswordLogin} className="flex flex-col gap-4">
               <div>
+                <label className="mb-1 block text-sm font-semibold">Username or Email</label>
                 <input
                   className="input"
                   value={identifier}

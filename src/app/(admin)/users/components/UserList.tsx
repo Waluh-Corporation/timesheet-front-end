@@ -2,6 +2,7 @@ import { Fragment } from "react";
 import { Loader2, ShieldCheck, KeyRound, Ban, Fingerprint, Edit2 } from "lucide-react";
 import type { User, Company, Passkey } from "@/lib/types";
 import { useAuth } from "@/lib/auth";
+import { useTheme } from "@/lib/theme";
 
 export function UserList({
   users,
@@ -29,6 +30,8 @@ export function UserList({
   onViewPasskeys: (u: User) => void;
 }>) {
   const { user: currentUser } = useAuth();
+  const { theme } = useTheme();
+  const isDark = theme === "dark";
 
   const renderPasskeyContent = (u: User) => {
     if (pkLoading) {
@@ -48,7 +51,9 @@ export function UserList({
     return (
       <div className="flex flex-col gap-2">
         {userPasskeys.map((pk) => {
-          const iconSrc = pk.icon || pk.icon_light || pk.icon_dark;
+          const iconSrc = isDark
+            ? (pk.icon_dark || pk.icon || pk.icon_light)
+            : (pk.icon_light || pk.icon || pk.icon_dark);
           return (
             <div
               key={pk.id}
@@ -148,7 +153,7 @@ export function UserList({
                       <span
                         className={`chip ${
                           u.role === "admin"
-                            ? "bg-mr-purple text-white"
+                            ? "bg-mr-purple text-white dark:text-black font-extrabold"
                             : "bg-mr-surface2 text-mr-muted"
                         }`}
                       >
@@ -167,7 +172,7 @@ export function UserList({
                         }
                         className={`chip ${
                           u.is_active
-                            ? "bg-mr-cyan text-mr-ink"
+                            ? "bg-mr-cyan text-black font-extrabold"
                             : "bg-mr-pink text-white"
                         } ${currentUser?.id === u.id ? "cursor-not-allowed opacity-60" : ""}`}
                       >
@@ -187,7 +192,7 @@ export function UserList({
                           onClick={() => onViewPasskeys(u)}
                           className={`border-2 border-mr-ink p-2 ${
                             passkeysFor === u.id
-                              ? "bg-mr-purple text-white"
+                              ? "bg-mr-purple text-white dark:text-black"
                               : "text-mr-muted hover:bg-mr-surface2"
                           }`}
                           title="Manage passkeys"

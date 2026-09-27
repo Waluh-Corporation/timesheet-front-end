@@ -33,10 +33,10 @@ const config: Config = {
         },
       },
       boxShadow: {
-        hard: "8px 8px 0 0 var(--ink)",
-        "hard-md": "4px 4px 0 0 var(--ink)",
-        "hard-sm": "2px 2px 0 0 var(--ink)",
-        "hard-lg": "10px 10px 0 0 var(--ink)",
+        hard: "8px 8px 0 0 var(--shadow)",
+        "hard-md": "4px 4px 0 0 var(--shadow)",
+        "hard-sm": "2px 2px 0 0 var(--shadow)",
+        "hard-lg": "10px 10px 0 0 var(--shadow)",
       },
       borderWidth: {
         DEFAULT: "2px",

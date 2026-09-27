@@ -47,7 +47,7 @@ export function MonthlyGrid({
               <button 
                 type="button"
                 onClick={() => setShowTooltip(!showTooltip)}
-                className="text-mr-muted hover:text-mr-ink hover:bg-mr-surface2 transition-colors cursor-pointer rounded-full border border-mr-muted/30 w-5 h-5 flex items-center justify-center text-xs font-bold"
+                className="chip bg-mr-surface2 text-mr-ink hover:bg-mr-yellow transition-colors cursor-pointer py-0.5 px-2"
                 aria-label="Toggle status definitions"
               >
                 ?
@@ -156,20 +156,20 @@ export function MonthlyGrid({
               }
 
               return (
-                <div className="flex items-center justify-between mt-2 pt-4 border-t border-mr-black/10">
+                <div className="flex items-center justify-between mt-2 pt-4 border-t-2 border-mr-ink">
                   <span className="text-sm text-mr-muted font-medium">
                     Page {currentPage} of {totalPages}
                   </span>
                   <div className="flex gap-2">
                     <button
-                      className="btn bg-mr-black/5 hover:bg-mr-black/10 text-black px-4 py-1.5 rounded text-sm font-bold disabled:opacity-50"
+                      className="btn-ghost text-xs px-3 py-1.5 disabled:opacity-40"
                       disabled={currentPage === 1}
                       onClick={() => setPage((p) => Math.max(1, p - 1))}
                     >
                       Prev
                     </button>
                     <button
-                      className="btn bg-mr-black/5 hover:bg-mr-black/10 text-black px-4 py-1.5 rounded text-sm font-bold disabled:opacity-50"
+                      className="btn-ghost text-xs px-3 py-1.5 disabled:opacity-40"
                       disabled={currentPage === totalPages}
                       onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                     >

@@ -17,7 +17,7 @@ export function PendingChanges({
         <div className="flex items-center gap-2">
           <ClipboardList size={18} className="text-mr-purple" />
           <h2 className="text-lg font-bold">Pending profile changes</h2>
-          <span className="chip bg-mr-yellow text-mr-ink">{changes.length}</span>
+          <span className="chip bg-mr-yellow text-black font-bold">{changes.length}</span>
         </div>
         <Link
           href="/profile-changes"
@@ -55,7 +55,7 @@ export function PendingChanges({
             <div className="flex gap-2">
               <button
                 onClick={() => onReview(c, "approve")}
-                className="btn border-2 border-mr-ink bg-mr-cyan text-mr-ink"
+                className="btn border-2 border-mr-ink bg-mr-cyan text-black font-extrabold"
               >
                 <Check size={16} /> Approve
               </button>

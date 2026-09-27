@@ -143,7 +143,7 @@ export function TimesheetJobsModal({
         );
       case "failed":
         return (
-          <span className="inline-flex items-center gap-1.5 border border-mr-ink/30 bg-mr-coral/30 px-2.5 py-1 text-xs font-bold text-rose-800 dark:text-rose-300">
+          <span className="inline-flex items-center gap-1.5 border border-mr-ink/30 bg-mr-pink/30 px-2.5 py-1 text-xs font-bold text-rose-800 dark:text-rose-300">
             <AlertCircle size={13} />
             Failed
           </span>
@@ -165,7 +165,7 @@ export function TimesheetJobsModal({
         {/* Header */}
         <div className="mb-4 flex items-center justify-between border-b-2 border-mr-ink pb-4">
           <div className="flex items-center gap-3">
-            <div className="grid h-10 w-10 place-items-center bg-mr-purple text-white shadow-mr-sm">
+            <div className="grid h-10 w-10 place-items-center bg-mr-purple text-white dark:text-black shadow-hard-sm">
               <FileSpreadsheet size={20} />
             </div>
             <div>

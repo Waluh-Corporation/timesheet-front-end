@@ -75,9 +75,9 @@ export default function Shell({ children }: { children: React.ReactNode }) {
                   <Link
                     key={item.href}
                     href={item.href}
-                    className={`flex items-center gap-3  px-4 py-2.5 text-sm font-semibold transition ${
+                    className={`flex items-center gap-3 px-4 py-2.5 text-sm font-semibold transition ${
                       active
-                        ? "bg-mr-purple text-white shadow-hard-sm"
+                        ? "bg-mr-purple text-white dark:text-black shadow-hard-sm font-extrabold"
                         : "text-mr-ink hover:bg-mr-surface2"
                     }`}
                   >
@@ -90,7 +90,7 @@ export default function Shell({ children }: { children: React.ReactNode }) {
 
             <div className="mt-6 border-t border-mr-ink pt-4">
               <div className="mb-3 flex items-center gap-3 px-2">
-                <div className="grid h-9 w-9 place-items-center rounded-full border-2 border-mr-ink bg-mr-yellow text-sm font-bold text-mr-ink">
+                <div className="grid h-9 w-9 place-items-center rounded-full border-2 border-mr-ink bg-mr-yellow text-sm font-bold text-black">
                   {(user?.name || user?.username || "?").charAt(0).toUpperCase()}
                 </div>
                 <div className="min-w-0">

@@ -515,7 +515,7 @@ export default function SetupPage() {
                 type="button"
                 onClick={handleFinishSetup}
                 disabled={submitting}
-                className="btn-primary flex items-center gap-2 bg-mr-cyan text-mr-ink"
+                className="btn flex items-center gap-2 border-2 border-mr-ink bg-mr-cyan text-black font-extrabold"
               >
                 {submitting ? (
                   <Loader2 size={16} className="animate-spin" />
