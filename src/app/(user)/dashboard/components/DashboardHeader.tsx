@@ -73,7 +73,7 @@ export function DashboardHeader({
           disabled={generating}
           className="card flex items-center gap-3 p-4 text-left transition hover:shadow-hard"
         >
-          <div className="grid h-10 w-10 place-items-center bg-mr-cyan text-mr-ink">
+          <div className="grid h-10 w-10 place-items-center bg-mr-cyan text-black">
             {generating ? <Loader2 size={18} className="animate-spin" /> : <Download size={18} />}
           </div>
           <div>
@@ -86,7 +86,7 @@ export function DashboardHeader({
           onClick={onOpenJobsModal}
           className="card flex items-center gap-3 p-4 text-left transition hover:shadow-hard"
         >
-          <div className="grid h-10 w-10 place-items-center bg-mr-purple text-white">
+          <div className="grid h-10 w-10 place-items-center bg-mr-purple text-white dark:text-black">
             <FileSpreadsheet size={18} />
           </div>
           <div>
@@ -101,7 +101,7 @@ export function DashboardHeader({
               type="button"
               onClick={onTogglePush}
               disabled={pushBusy || !pushSupported}
-              className="grid h-10 w-10 shrink-0 place-items-center bg-mr-yellow text-mr-ink border border-mr-ink disabled:opacity-60"
+              className="grid h-10 w-10 shrink-0 place-items-center bg-mr-yellow text-black border border-mr-ink disabled:opacity-60"
             >
               {pushIcon}
             </button>

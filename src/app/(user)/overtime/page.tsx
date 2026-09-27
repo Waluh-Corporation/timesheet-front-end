@@ -166,7 +166,7 @@ export default function OvertimePage() {
       <div className="card overflow-hidden">
         <div className="flex flex-wrap items-center justify-between gap-4 bg-mr-yellow p-6 text-black">
           <div className="flex items-center gap-4">
-            <div className="grid h-12 w-12 place-items-center border-2 border-black bg-white text-black">
+            <div className="grid h-12 w-12 place-items-center border-2 border-mr-ink bg-mr-surface text-mr-ink">
               <Clock size={26} />
             </div>
             <div>
@@ -187,7 +187,7 @@ export default function OvertimePage() {
         {/* Month selector card */}
         <div className="card flex items-center justify-between p-4">
           <div className="flex items-center gap-3">
-            <div className="grid h-10 w-10 place-items-center bg-mr-purple text-white">
+            <div className="grid h-10 w-10 place-items-center bg-mr-purple text-white dark:text-black">
               <Calendar size={18} />
             </div>
             <div>
@@ -224,7 +224,7 @@ export default function OvertimePage() {
 
         {/* Total Entries */}
         <div className="card flex items-center gap-3 p-4">
-          <div className="grid h-10 w-10 place-items-center bg-mr-cyan text-mr-ink">
+          <div className="grid h-10 w-10 place-items-center bg-mr-cyan text-black">
             <FileText size={18} />
           </div>
           <div>
@@ -303,7 +303,7 @@ export default function OvertimePage() {
                         <div className="flex items-center justify-end gap-2">
                           <button
                             onClick={() => openEditModal(item)}
-                            className="btn border border-mr-ink py-1 px-2.5 text-xs hover:bg-mr-yellow"
+                            className="btn border border-mr-ink py-1 px-2.5 text-xs hover:bg-mr-yellow hover:text-black"
                           >
                             Edit
                           </button>

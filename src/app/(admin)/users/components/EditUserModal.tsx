@@ -132,7 +132,7 @@ export function EditUserModal({
         </div>
 
         {error && (
-          <div className="mt-4 flex items-center gap-2 border-2 border-red-500 bg-red-100 p-3 text-xs text-red-800">
+          <div className="mt-4 flex items-center gap-2 border-2 border-mr-ink bg-mr-dangerBg p-3 text-xs font-semibold text-mr-dangerFg">
             <ShieldAlert size={16} className="shrink-0" />
             <span>{error}</span>
           </div>

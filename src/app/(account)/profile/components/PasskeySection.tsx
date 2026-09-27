@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Loader2, KeyRound, Plus, Fingerprint, Trash2, Pencil, Check, X } from "lucide-react";
 import { passkeysSupported } from "@/lib/webauthn";
 import type { Passkey } from "@/lib/types";
+import { useTheme } from "@/lib/theme";
 
 interface PasskeySectionProps {
   passkeys: Passkey[];
@@ -22,6 +23,8 @@ export function PasskeySection({
   renamePasskey,
   removePasskey,
 }: PasskeySectionProps) {
+  const { theme } = useTheme();
+  const isDark = theme === "dark";
   const [showAddModal, setShowAddModal] = useState(false);
   const [newKeyName, setNewKeyName] = useState("");
   const [editingId, setEditingId] = useState<number | null>(null);
@@ -87,7 +90,9 @@ export function PasskeySection({
       ) : (
         <div className="flex flex-col gap-2">
           {passkeys.map((pk) => {
-            const iconSrc = pk.icon || pk.icon_light || pk.icon_dark;
+            const iconSrc = isDark
+              ? (pk.icon_dark || pk.icon || pk.icon_light)
+              : (pk.icon_light || pk.icon || pk.icon_dark);
             const isEditing = editingId === pk.id;
 
             return (

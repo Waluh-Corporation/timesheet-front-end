@@ -23,12 +23,13 @@ const STORAGE_KEY = "ts_theme";
 
 // Inline script (rendered in <head>) that applies the persisted/system theme
 // before first paint so there's no flash of the wrong theme.
-export const themeInitScript = `(function(){try{var t=localStorage.getItem('${STORAGE_KEY}');if(!t){t=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}document.documentElement.setAttribute('data-theme',t);}catch(e){}})();`;
+export const themeInitScript = `(function(){try{var t=localStorage.getItem('${STORAGE_KEY}');if(!t){t=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}document.documentElement.setAttribute('data-theme',t);if(t==='dark'){document.documentElement.classList.add('dark');}else{document.documentElement.classList.remove('dark');}}catch(e){}})();`;
 
 function readInitialTheme(): Theme {
   if (typeof document !== "undefined") {
     const attr = document.documentElement.getAttribute("data-theme");
     if (attr === "dark" || attr === "light") return attr;
+    if (document.documentElement.classList.contains("dark")) return "dark";
   }
   return "light";
 }
@@ -38,12 +39,23 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 
   // Sync from whatever the no-FOUC script already applied.
   useEffect(() => {
-    setThemeState(readInitialTheme());
+    const initial = readInitialTheme();
+    setThemeState(initial);
+    if (initial === "dark") {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
   }, []);
 
   const apply = useCallback((t: Theme) => {
     setThemeState(t);
     document.documentElement.setAttribute("data-theme", t);
+    if (t === "dark") {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
     try {
       localStorage.setItem(STORAGE_KEY, t);
     } catch {

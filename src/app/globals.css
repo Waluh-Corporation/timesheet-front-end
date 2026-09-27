@@ -3,12 +3,14 @@
 @import "tailwindcss";
 @config "../../tailwind.config.ts";
 
+@custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *, .dark, .dark *));
+
 /* ---------------------------------------------------------------------------
    "Maman Racing" design tokens (from the claude_design project).
-   Structural color (--ink / --border / hard-shadow color) flips black→white in
-   dark mode so the neobrutalist borders + offset shadows stay visible; the
-   literal token kept borders black in dark, which would vanish on the dark
-   surface, so this is an intentional, documented deviation.
+   Structural color (--ink / --border) flips black→white in dark mode so the
+   neobrutalist borders stay visible. Hard shadows (--shadow) stay black (#000000)
+   in both themes to create genuine physical cutout depth without melting into
+   an opaque white border blob.
 --------------------------------------------------------------------------- */
 :root {
   --ink: #000000;
@@ -30,12 +32,14 @@
   --fg-inverse: #FFFFFF;    /* text on deep fills (primary button) */
   --on-accent: #000000;     /* text on bright accent fills (yellow/cyan) */
   --border: var(--ink);
+  --shadow: #000000;
   --bg-page: var(--paper);
   --bg-surface: var(--surface);
   --bg-surface-secondary: var(--surface-2);
   --text-body: var(--ink);
   --text-muted: var(--zinc-500);
   --link: var(--accent-purple);
+  color-scheme: light;
 }
 
 [data-theme="dark"] {
@@ -44,18 +48,26 @@
   --surface: oklch(26.5% 0.006 182.05);
   --surface-2: #272933;
   --main: oklch(70.54% 0.1525 162.97);
+  --accent-blue: #88AAEE;
+  --accent-yellow: #FACC00;
+  --accent-cyan: #00D696;
+  --accent-pink: #FF4D50;
   --accent-purple: #C88CFF;
+  --danger-bg: #450A0A;
+  --danger-fg: #FCA5A5;
 
   --fg: var(--ink);
   --fg-inverse: #000000;
   --on-accent: #000000;
   --border: var(--ink);
+  --shadow: #000000;
   --bg-page: var(--paper);
   --bg-surface: var(--surface);
   --bg-surface-secondary: var(--surface-2);
   --text-body: #FFFFFF;
   --text-muted: #A1A1AA;
   --link: #C88CFF;
+  color-scheme: dark;
 }
 
 @layer base {
@@ -80,7 +92,7 @@
   /* Bold framed surface: thick border + hard offset shadow, square corners. */
   .card {
     @apply border-[3px] border-mr-ink bg-mr-surface;
-    box-shadow: 8px 8px 0 0 var(--ink);
+    box-shadow: 8px 8px 0 0 var(--shadow);
   }
 
   /* Neobrutalist button: 2px frame, hard shadow, lift on hover, press on click. */
@@ -88,35 +100,39 @@
   .btn-primary,
   .btn-accent,
   .btn-ghost,
-  .btn-danger {
+  .btn-danger,
+  .btn-icon {
     @apply inline-flex items-center justify-center gap-2 border-2 border-mr-ink px-5 py-2.5
            font-extrabold uppercase tracking-wide transition-all duration-100
            hover:-translate-x-[2px] hover:-translate-y-[2px]
            active:translate-x-0 active:translate-y-0
            disabled:opacity-60 disabled:pointer-events-none;
-    box-shadow: 2px 2px 0 0 var(--ink);
+    box-shadow: 2px 2px 0 0 var(--shadow);
   }
   .btn:hover,
   .btn-primary:hover,
   .btn-accent:hover,
   .btn-ghost:hover,
-  .btn-danger:hover { box-shadow: 4px 4px 0 0 var(--ink); }
+  .btn-danger:hover,
+  .btn-icon:hover { box-shadow: 4px 4px 0 0 var(--shadow); }
   .btn:active,
   .btn-primary:active,
   .btn-accent:active,
   .btn-ghost:active,
-  .btn-danger:active { box-shadow: 0 0 0 0 var(--ink); }
+  .btn-danger:active,
+  .btn-icon:active { box-shadow: 0 0 0 0 var(--shadow); }
 
   .btn-primary { @apply bg-mr-purple; color: var(--fg-inverse); }
   .btn-accent { @apply bg-mr-yellow; color: var(--on-accent); }
   .btn-ghost { @apply bg-mr-surface2 text-mr-ink; }
   .btn-danger { @apply bg-mr-pink text-white; }
+  .btn-icon { @apply p-2; }
 
   /* Square input with a solid frame; focus deepens the hard shadow. */
   .input {
     @apply w-full border-2 border-mr-ink bg-mr-surface px-4 py-2.5 text-sm font-bold
            text-mr-ink outline-none transition-all placeholder:text-mr-muted
-           focus:shadow-[3px_3px_0_0_var(--ink)];
+           focus:shadow-[3px_3px_0_0_var(--shadow)];
   }
 
   /* Square tag with a frame. */
@@ -125,7 +141,6 @@
            text-xs font-extrabold uppercase;
   }
 }
-
 
 /* --- Hard-edged scrollbars --- */
 ::-webkit-scrollbar { width: 12px; height: 12px; }

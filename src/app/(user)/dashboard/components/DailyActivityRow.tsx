@@ -38,28 +38,28 @@ export function DailyActivityRow({
       <div className="flex items-center gap-3">
         <div className="flex flex-col">
           <span className={`font-bold ${isNonWorking ? "text-mr-muted" : "text-mr-ink"}`}>
-            {dayLabel} {dayStatus && <span className="text-mr-purple ml-1">{dayStatus}</span>}
+            {dayLabel} {dayStatus && <span className="text-mr-purple ml-1 font-bold">{dayStatus}</span>}
           </span>
           {!isNonWorking && (
-            <span className="text-xs text-mr-muted mt-0.5 max-h-0 opacity-0 group-hover:max-h-[20px] group-hover:opacity-100 group-focus-within:max-h-[20px] group-focus-within:opacity-100 overflow-hidden transition-all duration-200">
-              {activity?.start_time || ""} - {activity?.end_time || ""}
+            <span className="text-xs text-mr-muted font-mono mt-0.5 max-h-0 opacity-0 group-hover:max-h-[20px] group-hover:opacity-100 group-focus-within:max-h-[20px] group-focus-within:opacity-100 overflow-hidden transition-all duration-200">
+              {activity?.start_time ? `${activity.start_time} - ${activity.end_time || ""}` : "Click to log hours"}
             </span>
           )}
         </div>
         {holiday && (
-          <span className="text-xs px-2 py-0.5 rounded-full bg-mr-pink/20 text-mr-pink font-semibold">
-            Holiday
+          <span className="chip bg-mr-pink text-white border-mr-ink" title={holiday}>
+            Holiday: {holiday}
           </span>
         )}
         {isWeekend && !holiday && (
-          <span className="text-xs px-2 py-0.5 rounded-full bg-mr-surface text-mr-muted font-semibold border border-mr-muted/30">
+          <span className="chip bg-mr-surface2 text-mr-muted border-mr-ink">
             Weekend
           </span>
         )}
       </div>
       <div className="flex items-center justify-end gap-2">
         {activity?.status && (
-          <span className="font-bold text-sm px-3 py-1 rounded bg-mr-surface2 text-mr-ink border border-mr-ink/10">
+          <span className="chip bg-mr-yellow text-black border-mr-ink font-bold">
             {activity.status}
           </span>
         )}
@@ -67,10 +67,10 @@ export function DailyActivityRow({
     </div>
   );
 
-  const containerClasses = `group block flex-shrink-0 card overflow-hidden transition-all duration-200 relative ${
+  const containerClasses = `group block flex-shrink-0 card overflow-hidden transition-all duration-150 relative ${
     isNonWorking
-      ? "bg-mr-surface2"
-      : "bg-mr-surface hover:scale-[1.02] hover:shadow-none hover:z-10 cursor-pointer"
+      ? "bg-mr-surface2 opacity-80"
+      : "bg-mr-surface hover:-translate-x-[2px] hover:-translate-y-[2px] hover:shadow-hard-md cursor-pointer"
   }`;
 
   if (isNonWorking) {

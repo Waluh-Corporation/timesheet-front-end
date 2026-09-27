@@ -206,7 +206,7 @@ export default function AdminProfileChangesPage() {
               onClick={() => setStatusFilter(st)}
               className={`px-3 py-1.5 text-xs font-bold uppercase transition border-2 border-mr-ink ${
                 statusFilter === st
-                  ? "bg-mr-purple text-white shadow-hard-sm"
+                  ? "bg-mr-purple text-white dark:text-black font-extrabold shadow-hard-sm"
                   : "bg-mr-surface text-mr-ink hover:bg-mr-surface2"
               }`}
             >
@@ -275,7 +275,7 @@ export default function AdminProfileChangesPage() {
                       <button
                         onClick={() => setConfirmModal({ change: c, action: "approve" })}
                         disabled={reviewingId === c.id}
-                        className="btn border-2 border-mr-ink bg-mr-cyan text-mr-ink font-bold text-xs py-1.5 px-3 flex items-center gap-1 hover:brightness-105"
+                        className="btn border-2 border-mr-ink bg-mr-cyan text-black font-extrabold text-xs py-1.5 px-3 flex items-center gap-1 hover:brightness-105"
                       >
                         <Check size={14} /> Approve
                       </button>

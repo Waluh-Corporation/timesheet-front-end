@@ -11,6 +11,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.7.1] - 2026-09-27
+
+### Fixed
+- **Dark Mode Theme Synchronization & Tailwind v4 Custom Variant**: Added an explicit `@custom-variant dark` definition to reliably trigger dark utilities on both `[data-theme="dark"]` and `.dark` class selectors without depending on OS-level color scheme preferences.
+- **Neobrutalism Shadow & Border Decoupling**: Separated box shadow tokens from foreground ink/border colors, ensuring hard offset shadows remain black (`#000000`) in dark mode to preserve physical depth instead of melting into opaque white border blocks.
+- **WCAG AA Contrast Parity**: Fixed text and icon contrast on accent colored surfaces (`mr-yellow`, `mr-cyan`, and `mr-purple`), ensuring dark text on bright surfaces and high-contrast text on purple elements across navigation tabs, status chips, and action buttons.
+- **Adaptive Authenticator & Passkey Brand Icons**: Dynamically select `icon_dark` over `icon_light` when dark mode is enabled across passkey lists and authenticator directory tables.
+- **Native Form Theming**: Added `color-scheme` properties for light and dark themes to ensure browser-native date pickers, dropdown lists, and inputs render in their appropriate color scheme.
+- **Cleaned Component Styles**: Replaced undefined utility classes (`mr-coral`, `mr-black`, `shadow-mr-sm`) and hardcoded white backgrounds in tables and modals with consistent design tokens.
+
+---
+
 ## [0.7.0] - 2026-09-26
 
 ### Added

@@ -81,22 +81,22 @@ const HotGrid = forwardRef<any, HotGridProps>(function HotGrid(props, ref) {
         return (
           <div
             key={originalRowIndex}
-            className={`card border overflow-hidden transition-colors ${
+            className={`card overflow-hidden transition-colors ${
               isNonWorking
-                ? "border-mr-black/5 bg-mr-black/5"
-                : "border-mr-black/10 bg-white"
+                ? "bg-mr-surface2 opacity-80"
+                : "bg-mr-surface"
             }`}
           >
             <button
               onClick={() => toggleRow(originalRowIndex)}
-              className={`w-full flex items-center justify-between p-4 text-left transition hover:bg-mr-black/5`}
+              className={`w-full flex items-center justify-between p-4 text-left transition hover:bg-mr-surface2`}
             >
               <div className="flex items-center gap-3">
-                <span className={`font-bold ${isNonWorking ? "text-mr-muted" : "text-black"}`}>
-                  {dayLabel} {dayStatus && <span className="text-mr-purple ml-1">{dayStatus}</span>}
+                <span className={`font-bold ${isNonWorking ? "text-mr-muted" : "text-mr-ink"}`}>
+                  {dayLabel} {dayStatus && <span className="text-mr-purple ml-1 font-bold">{dayStatus}</span>}
                 </span>
-                {isHoliday && <span className="text-xs px-2 py-0.5 rounded-full bg-mr-pink/20 text-mr-pink font-semibold">Holiday</span>}
-                {isWeekend && !isHoliday && <span className="text-xs px-2 py-0.5 rounded-full bg-mr-black/10 text-mr-muted font-semibold">Weekend</span>}
+                {isHoliday && <span className="chip bg-mr-pink text-white border-mr-ink font-bold">Holiday</span>}
+                {isWeekend && !isHoliday && <span className="chip bg-mr-surface2 text-mr-muted border-mr-ink font-semibold">Weekend</span>}
               </div>
               <div className="text-mr-muted">
                 {expandedRows[originalRowIndex] ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
@@ -104,7 +104,7 @@ const HotGrid = forwardRef<any, HotGridProps>(function HotGrid(props, ref) {
             </button>
 
             {expandedRows[originalRowIndex] && (
-              <div className="p-4 border-t border-mr-black/10 bg-white grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="p-4 border-t-2 border-mr-ink bg-mr-surface2 grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {headers.slice(1).map((header, i) => {
                   const colIndex = i + 1;
                   const value = rowData[colIndex] || "";

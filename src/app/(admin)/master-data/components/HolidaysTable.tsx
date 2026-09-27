@@ -71,7 +71,7 @@ export function HolidaysTable() {
         <button
           onClick={handleSync}
           disabled={syncing}
-          className="btn border-2 border-mr-ink bg-mr-cyan text-mr-ink text-sm font-bold flex items-center gap-2"
+          className="btn border-2 border-mr-ink bg-mr-cyan text-black font-extrabold text-sm flex items-center gap-2"
         >
           <RotateCw size={16} className={syncing ? "animate-spin" : ""} />
           {syncing ? "Syncing..." : "Sync from Kemendesa API"}
@@ -100,17 +100,17 @@ export function HolidaysTable() {
                   <td className="py-3">
                     <div className="flex flex-wrap gap-1.5">
                       {h.is_joint_leave && (
-                        <span className="chip bg-mr-yellow text-mr-ink text-[11px] font-bold border border-mr-ink/30">
+                        <span className="chip bg-mr-yellow text-black text-[11px] font-bold border border-mr-ink/30">
                           Cuti Bersama
                         </span>
                       )}
                       {h.is_religious && (
-                        <span className="chip bg-mr-purple text-white text-[11px] font-bold border border-mr-ink/30">
+                        <span className="chip bg-mr-purple text-white dark:text-black text-[11px] font-extrabold border border-mr-ink/30">
                           Keagamaan
                         </span>
                       )}
                       {h.is_civic && (
-                        <span className="chip bg-mr-cyan text-mr-ink text-[11px] font-bold border border-mr-ink/30">
+                        <span className="chip bg-mr-cyan text-black text-[11px] font-bold border border-mr-ink/30">
                           Nasional
                         </span>
                       )}

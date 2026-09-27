@@ -12,7 +12,7 @@ export default function HistoricalDataPage() {
     <div className="flex flex-col gap-6">
       <div className="card overflow-hidden">
         <div className="flex items-center gap-4 bg-mr-yellow p-6 text-black">
-          <div className="grid h-12 w-12 place-items-center border-2 border-black bg-white text-black">
+          <div className="grid h-12 w-12 place-items-center border-2 border-mr-ink bg-mr-surface text-mr-ink">
             <History size={24} />
           </div>
           <div>
