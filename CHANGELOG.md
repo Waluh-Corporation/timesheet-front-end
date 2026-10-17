@@ -11,6 +11,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.8.0] - 2026-10-17
+
+### Added
+- **Berita Acara & Witness Assignment**: Added support for Berita Acara tracking on daily activity entries, including mandatory notes and witness selection from eligible coworkers (`GET /api/v1/users/witnesses`).
+- **Monthly Witness Bulk Configuration**: Added `MonthlyWitnessModal` accessible directly from the dashboard header quick action, enabling users to view and update the designated witness for all Berita Acara entries in a given month (`PUT /api/v1/activities/witness`).
+- **Copy Previous Day Activity**: Added quick autofill button ("Salin Kemarin") in both modal and detailed activity views to duplicate working hours, project, and status from the previous business day (`GET /api/v1/activities/previous`).
+- **User Anonymization & UU PDP Compliance**: Added admin workflow to permanently anonymize user personal data in compliance with personal data protection laws (`POST /api/v1/admin/users/:id/anonymize`), complete with a typed confirmation safety modal.
+- **Git Workflow SOP**: Added comprehensive standard operating procedure documentation in `docs/GIT_WORKFLOW.md` detailing the Dual-Branch GitFlow model, Conventional Commits, local quality gates, and release lifecycle.
+
+### Changed
+- **Adaptive Timesheet Archive Downloader**: Automatically detects whether generated export files include Berita Acara documents (downloaded as `.zip` containing both XLSX and DOCX) or standalone timesheet spreadsheets (`.xlsx`), preserving correct file types and clear button descriptions.
+- **Explicit Anonymization API Contract**: Adopted the backend's explicit `is_anonymized` boolean attribute in `User` entities and client-side guards, retaining heuristic fallbacks for full backward compatibility.
+
+### Fixed
+- **Anonymized Account Restrictions**: Hardened administrative UI controls to prevent unauthorized modifications on anonymized accounts, disabling company reassignments, account reactivation, user profile editing, and passkey views.
+
+---
+
 ## [0.7.1] - 2026-09-27
 
 ### Fixed
