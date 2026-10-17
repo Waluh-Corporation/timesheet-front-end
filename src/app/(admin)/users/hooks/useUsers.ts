@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect } from "react";
 import { useToast } from "@/components/Toast";
 import type { User, ProfileChangeRequest, Passkey, Company, UpdateUserRequestDTO } from "@/lib/types";
+import { isUserAnonymized } from "@/lib/types";
 import { usersService } from "../services/usersService";
 
 export function useUsers() {
@@ -11,6 +12,7 @@ export function useUsers() {
   const [loading, setLoading] = useState(true);
 
   const [editingUser, setEditingUser] = useState<User | null>(null);
+  const [anonymizingUser, setAnonymizingUser] = useState<User | null>(null);
   const [passkeysFor, setPasskeysFor] = useState<number | null>(null);
   const [userPasskeys, setUserPasskeys] = useState<Passkey[]>([]);
   const [pkLoading, setPkLoading] = useState(false);
@@ -39,6 +41,10 @@ export function useUsers() {
   }, [load]);
 
   const toggleActive = async (u: User) => {
+    if (isUserAnonymized(u)) {
+      notify("Akun yang telah dianonimkan tidak dapat diubah statusnya", "error");
+      return;
+    }
     try {
       await usersService.toggleActive(u.id, !u.is_active);
       load();
@@ -49,6 +55,10 @@ export function useUsers() {
   };
 
   const deactivateUser = async (u: User) => {
+    if (isUserAnonymized(u)) {
+      notify("Akun yang telah dianonimkan tidak dapat dinonaktifkan", "error");
+      return;
+    }
     // ponytail: [Need custom modal to replace native confirm]
     if (!window.confirm(`Deactivate ${u.username}? They keep their history and can be reactivated later.`)) return;
     try {
@@ -62,6 +72,10 @@ export function useUsers() {
   };
 
   const assignCompany = async (u: User, compId?: number, compObj?: Company) => {
+    if (isUserAnonymized(u)) {
+      notify("Akun yang telah dianonimkan tidak dapat diubah perusahaannya", "error");
+      return;
+    }
     try {
       await usersService.assignCompany(u.id, compId, compObj ? compObj.name : "");
       notify(`Assigned ${u.username} to ${compObj ? compObj.name : "Unassigned"}`, "success");
@@ -73,6 +87,10 @@ export function useUsers() {
   };
 
   const viewPasskeys = async (u: User) => {
+    if (isUserAnonymized(u)) {
+      notify("Akun yang telah dianonimkan tidak memiliki passkey aktif", "error");
+      return;
+    }
     if (passkeysFor === u.id) {
       setPasskeysFor(null);
       return;
@@ -103,6 +121,11 @@ export function useUsers() {
   };
 
   const handleUpdateUser = async (id: number, payload: Partial<UpdateUserRequestDTO>) => {
+    const target = users.find((u) => u.id === id);
+    if (target && isUserAnonymized(target)) {
+      notify("Akun yang telah dianonimkan tidak dapat diubah datanya", "error");
+      return;
+    }
     try {
       await usersService.updateUser(id, payload);
       notify("User updated successfully", "success");
@@ -121,6 +144,8 @@ export function useUsers() {
     loading,
     editingUser,
     setEditingUser,
+    anonymizingUser,
+    setAnonymizingUser,
     handleUpdateUser,
     passkeysFor,
     userPasskeys,
@@ -130,5 +155,6 @@ export function useUsers() {
     assignCompany,
     viewPasskeys,
     reviewChange,
+    reload: load,
   };
 }

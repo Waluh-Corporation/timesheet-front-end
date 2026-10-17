@@ -270,6 +270,14 @@ export function TimesheetJobsModal({
                   ? new Date(job.created_at).toLocaleString()
                   : "N/A";
 
+                const isZip = Boolean(
+                  job.download_url?.toLowerCase().includes(".zip") ||
+                  job.download_url?.toLowerCase().includes("berita_acara")
+                );
+                const downloadFileName = isZip
+                  ? `Timesheet_${job.month}_${job.year}_and_Berita_Acara.zip`
+                  : `Timesheet_${job.month}_${job.year}.xlsx`;
+
                 return (
                   <div
                     key={job.id}
@@ -281,6 +289,11 @@ export function TimesheetJobsModal({
                           {monthLabel} {job.year}
                         </span>
                         {getStatusBadge(job.status)}
+                        {isZip && (
+                          <span className="inline-flex items-center border border-mr-ink/30 bg-mr-cyan/20 px-2 py-0.5 text-[10px] font-bold text-cyan-900 dark:text-cyan-300">
+                            XLSX + Berita Acara DOCX
+                          </span>
+                        )}
                       </div>
                       <span className="text-[11px] text-mr-muted">
                         Requested: {createdDate}
@@ -299,11 +312,11 @@ export function TimesheetJobsModal({
                           href={job.download_url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          download={`Timesheet_${job.month}_${job.year}.xlsx`}
+                          download={downloadFileName}
                           className="btn-purple py-1.5 px-3 text-xs font-bold inline-flex items-center gap-1.5 shadow-sm"
                         >
                           <Download size={13} />
-                          Download XLSX
+                          {isZip ? "Unduh Arsip Lengkap (ZIP)" : "Download XLSX"}
                         </a>
                       ) : job.status === "queued" || job.status === "processing" ? (
                         <span className="inline-flex items-center gap-1 text-xs text-mr-muted font-medium py-1 px-2 border border-mr-ink/20 bg-mr-surface2">

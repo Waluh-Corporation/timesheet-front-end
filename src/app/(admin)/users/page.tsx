@@ -7,6 +7,7 @@ import { useUsers } from "./hooks/useUsers";
 import { PendingChanges } from "./components/PendingChanges";
 import { UserList } from "./components/UserList";
 import { EditUserModal } from "./components/EditUserModal";
+import { AnonymizeUserModal } from "./components/AnonymizeUserModal";
 
 // Admin console for provisioning accounts (the ONLY registration path) and
 // reviewing self-service profile change requests.
@@ -18,6 +19,8 @@ export default function UsersPage() {
     loading,
     editingUser,
     setEditingUser,
+    anonymizingUser,
+    setAnonymizingUser,
     handleUpdateUser,
     passkeysFor,
     userPasskeys,
@@ -27,6 +30,7 @@ export default function UsersPage() {
     assignCompany,
     viewPasskeys,
     reviewChange,
+    reload,
   } = useUsers();
 
   return (
@@ -62,6 +66,7 @@ export default function UsersPage() {
             onAssignCompany={assignCompany}
             onEditUser={setEditingUser}
             onViewPasskeys={viewPasskeys}
+            onAnonymizeUser={setAnonymizingUser}
           />
         </div>
       </div>
@@ -72,6 +77,13 @@ export default function UsersPage() {
         isOpen={!!editingUser}
         onClose={() => setEditingUser(null)}
         onSave={handleUpdateUser}
+      />
+
+      <AnonymizeUserModal
+        user={anonymizingUser}
+        isOpen={!!anonymizingUser}
+        onClose={() => setAnonymizingUser(null)}
+        onSuccess={reload}
       />
     </div>
   );

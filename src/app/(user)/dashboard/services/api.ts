@@ -1,5 +1,5 @@
-import { api, downloadFile } from "@/lib/api";
-import type { DailyActivity } from "@/lib/types";
+import { api, apiWithMeta, downloadFile } from "@/lib/api";
+import type { DailyActivity, WitnessResponse } from "@/lib/types";
 import {
   requestTimesheetGeneration,
   getTimesheetJobs,
@@ -8,8 +8,17 @@ import {
 
 export { requestTimesheetGeneration, getTimesheetJobs, getTimesheetJobStatus };
 
-export async function fetchDashboardActivities(year: number, month: number) {
-  return api<DailyActivity[]>(`/api/v1/activities?year=${year}&month=${month}&limit=-1`);
+export async function fetchDashboardActivities(
+  year: number,
+  month: number
+): Promise<{ activities: DailyActivity[]; monthlyWitness?: WitnessResponse }> {
+  const res = await apiWithMeta<DailyActivity[]>(
+    `/api/v1/activities?year=${year}&month=${month}&limit=-1`
+  );
+  return {
+    activities: Array.isArray(res?.data) ? res.data : [],
+    monthlyWitness: res?.monthly_witness,
+  };
 }
 
 export async function fetchHolidays(year: number, month: number) {

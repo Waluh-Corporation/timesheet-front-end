@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { fetchActivityById, createActivity } from "../services/api";
-import type { DailyActivity, Project, ActivityStatus } from "@/lib/types";
+import type { DailyActivity, Project, ActivityStatus, WitnessResponse } from "@/lib/types";
 import { fetchProjects, fetchActivityStatuses } from "@/app/(admin)/master-data/services/masterData";
+import { fetchEligibleWitnesses, fetchPreviousDayActivity } from "@/services/activityService";
 import { useToast } from "@/components/Toast";
 import { useRouter } from "next/navigation";
 
@@ -25,11 +26,16 @@ export const useActivityData = (initialId: string | null, defaultDate: string) =
     project_name: "",
     project_id: "",
     app_impacted: "",
+    is_berita_acara: false,
+    berita_acara_notes: "",
+    witness_id: undefined,
   });
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [copying, setCopying] = useState(false);
   const [projects, setProjects] = useState<Project[]>([]);
   const [statuses, setStatuses] = useState<ActivityStatus[]>(DEFAULT_STATUSES);
+  const [witnesses, setWitnesses] = useState<WitnessResponse[]>([]);
   const { notify } = useToast();
   const router = useRouter();
 
@@ -40,6 +46,10 @@ export const useActivityData = (initialId: string | null, defaultDate: string) =
 
     fetchProjects().then((data) => {
       if (data) setProjects(data);
+    });
+
+    fetchEligibleWitnesses().then((w) => {
+      if (w) setWitnesses(w);
     });
 
     const loadInitial = async () => {
@@ -64,6 +74,9 @@ export const useActivityData = (initialId: string | null, defaultDate: string) =
             data.project_name ||
             matchedProj?.name ||
             "",
+          is_berita_acara: !!data.is_berita_acara,
+          berita_acara_notes: data.berita_acara_notes || "",
+          witness_id: data.witness_id,
         });
         setActiveId(initialId);
       } catch (err) {
@@ -79,6 +92,37 @@ export const useActivityData = (initialId: string | null, defaultDate: string) =
 
   const set = <K extends keyof DailyActivity>(k: K, v: DailyActivity[K]) => {
     setForm((prev) => ({ ...prev, [k]: v }));
+  };
+
+  const copyPreviousDay = async () => {
+    setCopying(true);
+    try {
+      const prev = await fetchPreviousDayActivity(form.date);
+      if (prev) {
+        const matchedProj =
+          (prev.project_ref_id ? projects.find((p) => p.id === prev.project_ref_id) : undefined) ||
+          (prev.project_name ? projects.find((p) => p.name?.trim().toLowerCase() === prev.project_name.trim().toLowerCase()) : undefined) ||
+          (prev.project_id ? projects.find((p) => p.code?.trim().toLowerCase() === prev.project_id.trim().toLowerCase()) : undefined);
+
+        setForm((curr) => ({
+          ...curr,
+          activity: prev.activity || curr.activity,
+          start_time: prev.start_time || curr.start_time,
+          end_time: prev.end_time || curr.end_time,
+          status: prev.status || curr.status,
+          project_ref_id: prev.project_ref_id || matchedProj?.id || curr.project_ref_id,
+          project_id: prev.project_id || matchedProj?.code || curr.project_id,
+          project_name: prev.project_name || matchedProj?.name || curr.project_name,
+          app_impacted: prev.app_impacted || matchedProj?.app_impacted || curr.app_impacted,
+        }));
+        notify("Berhasil menyalin data kegiatan hari sebelumnya 📋", "success");
+      }
+    } catch (err) {
+      const error = err as Error;
+      notify(error.message || "Tidak ada data kegiatan hari sebelumnya", "error");
+    } finally {
+      setCopying(false);
+    }
   };
 
   const setProjectDetails = (projectIdStr: string) => {
@@ -135,5 +179,18 @@ export const useActivityData = (initialId: string | null, defaultDate: string) =
     }
   };
 
-  return { form, set, setProjectDetails, submit, loading, saving, activeId, projects, statuses };
+  return {
+    form,
+    set,
+    setProjectDetails,
+    submit,
+    loading,
+    saving,
+    copying,
+    copyPreviousDay,
+    activeId,
+    projects,
+    statuses,
+    witnesses,
+  };
 };

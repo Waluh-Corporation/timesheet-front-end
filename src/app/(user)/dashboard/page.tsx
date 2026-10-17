@@ -4,11 +4,14 @@ import { useDashboardData } from "./hooks/useDashboardData";
 import { DashboardHeader } from "./components/DashboardHeader";
 import { MonthlyGrid } from "./components/MonthlyGrid";
 import { TimesheetJobsModal } from "./components/TimesheetJobsModal";
+import { MonthlyWitnessModal } from "./components/MonthlyWitnessModal";
 
 export default function DashboardPage() {
   const {
     user,
     activities,
+    monthlyWitness,
+    beritaAcaraCount,
     loading,
     generating,
     generate,
@@ -20,6 +23,8 @@ export default function DashboardPage() {
     handleSendTestPush,
     isJobsModalOpen,
     setIsJobsModalOpen,
+    isWitnessModalOpen,
+    setIsWitnessModalOpen,
     handleAddPasskey,
     passkeysSupported,
     year,
@@ -31,6 +36,7 @@ export default function DashboardPage() {
     page,
     setPage,
     ITEMS_PER_PAGE,
+    reload,
   } = useDashboardData();
 
   return (
@@ -49,6 +55,9 @@ export default function DashboardPage() {
         onOpenJobsModal={() => setIsJobsModalOpen(true)}
         onAddPasskey={handleAddPasskey}
         passkeysSupported={passkeysSupported()}
+        monthlyWitness={monthlyWitness}
+        beritaAcaraCount={beritaAcaraCount}
+        onOpenWitnessModal={() => setIsWitnessModalOpen(true)}
       />
 
       <MonthlyGrid
@@ -69,6 +78,16 @@ export default function DashboardPage() {
         onClose={() => setIsJobsModalOpen(false)}
         currentYear={year}
         currentMonth={month}
+      />
+
+      <MonthlyWitnessModal
+        isOpen={isWitnessModalOpen}
+        onClose={() => setIsWitnessModalOpen(false)}
+        year={year}
+        month={month}
+        currentWitness={monthlyWitness}
+        beritaAcaraCount={beritaAcaraCount}
+        onWitnessUpdated={reload}
       />
     </div>
   );

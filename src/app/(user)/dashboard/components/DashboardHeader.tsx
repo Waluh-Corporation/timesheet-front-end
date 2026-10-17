@@ -7,8 +7,10 @@ import {
   Loader2,
   FileSpreadsheet,
   Send,
+  ShieldCheck,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import type { WitnessResponse } from "@/lib/types";
 
 interface DashboardHeaderProps {
   user: any;
@@ -24,6 +26,9 @@ interface DashboardHeaderProps {
   onOpenJobsModal?: () => void;
   onAddPasskey: () => void;
   passkeysSupported: boolean;
+  monthlyWitness?: WitnessResponse;
+  beritaAcaraCount?: number;
+  onOpenWitnessModal?: () => void;
 }
 
 export function DashboardHeader({
@@ -40,6 +45,9 @@ export function DashboardHeader({
   onOpenJobsModal,
   onAddPasskey,
   passkeysSupported,
+  monthlyWitness,
+  beritaAcaraCount = 0,
+  onOpenWitnessModal,
 }: Readonly<DashboardHeaderProps>) {
   const router = useRouter();
 
@@ -61,9 +69,25 @@ export function DashboardHeader({
               {filledCount} day{filledCount === 1 ? "" : "s"} filled this month.
             </p>
           </div>
-          <button onClick={() => router.push("/activity")} className="btn-primary">
-            <Plus size={18} /> Today&apos;s Activity
-          </button>
+          <div className="flex flex-wrap items-center gap-2">
+            {onOpenWitnessModal && (
+              <button
+                type="button"
+                onClick={onOpenWitnessModal}
+                className="btn border-2 border-mr-ink bg-mr-surface text-mr-ink font-bold text-xs inline-flex items-center gap-1.5 py-2 px-3 shadow-hard-sm hover:bg-mr-surface2 transition-transform active:translate-y-0.5"
+                title="Atur saksi untuk seluruh entri Berita Acara bulan ini"
+              >
+                <ShieldCheck size={16} className="text-mr-purple" />
+                <span>
+                  Saksi BA: {monthlyWitness ? monthlyWitness.name : "Atur Saksi"}
+                  {beritaAcaraCount > 0 ? ` (${beritaAcaraCount} hari)` : ""}
+                </span>
+              </button>
+            )}
+            <button onClick={() => router.push("/activity")} className="btn-primary">
+              <Plus size={18} /> Today&apos;s Activity
+            </button>
+          </div>
         </div>
       </div>
 
