@@ -51,6 +51,7 @@ export interface User {
   email: string;
   role: Role;
   is_active: boolean;
+  is_anonymized?: boolean;
   name: string;
   mii_id?: string;
   employee_id?: string;
@@ -489,9 +490,12 @@ export interface UpdateSiteRequest {
 }
 
 export function isUserAnonymized(
-  u?: { username?: string; name?: string; email?: string } | null
+  u?: { username?: string; name?: string; email?: string; is_anonymized?: boolean } | null
 ): boolean {
   if (!u) return false;
+  if (typeof u.is_anonymized === "boolean") {
+    return u.is_anonymized;
+  }
   return Boolean(
     u.username?.startsWith("deleted_user_") ||
     u.name?.startsWith("ANONYMIZED_USER_") ||

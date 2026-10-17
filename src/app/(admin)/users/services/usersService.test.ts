@@ -79,6 +79,8 @@ describe("usersService integration tests", () => {
   it("isUserAnonymized accurately identifies anonymized accounts", async () => {
     const { isUserAnonymized } = await import("@/lib/types");
 
+    expect(isUserAnonymized({ is_anonymized: true, username: "custom_name" })).toBe(true);
+    expect(isUserAnonymized({ is_anonymized: false, username: "normal_user" })).toBe(false);
     expect(isUserAnonymized({ username: "deleted_user_1935", name: "ANONYMIZED_USER_1935" })).toBe(true);
     expect(isUserAnonymized({ username: "john_doe", name: "ANONYMIZED_USER_10" })).toBe(true);
     expect(isUserAnonymized({ username: "deleted_user_42", email: "deleted_42@timesheet.local" })).toBe(true);
