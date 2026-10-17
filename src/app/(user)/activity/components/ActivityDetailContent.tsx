@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { CalendarDays, Loader2, ArrowLeft } from "lucide-react";
+import { CalendarDays, Loader2, ArrowLeft, Copy, ShieldCheck } from "lucide-react";
 import { useActivityData } from "../hooks/useActivityData";
 
 function todayISO(): string {
@@ -14,7 +14,20 @@ export function ActivityDetailContent() {
   const id = params.get("id");
   const defaultDate = params.get("date") || todayISO();
 
-  const { form, set, setProjectDetails, submit, loading, saving, activeId, projects, statuses } = useActivityData(id, defaultDate);
+  const {
+    form,
+    set,
+    setProjectDetails,
+    submit,
+    loading,
+    saving,
+    copying,
+    copyPreviousDay,
+    activeId,
+    projects,
+    statuses,
+    witnesses,
+  } = useActivityData(id, defaultDate);
 
   if (loading) {
     return (
@@ -33,7 +46,7 @@ export function ActivityDetailContent() {
           <ArrowLeft size={16} />
         </button>
         <div className="flex items-center gap-3">
-          <div className="grid h-11 w-11 place-items-center border-2 border-mr-ink bg-mr-yellow text-black">
+          <div className="grid h-11 w-11 place-items-center border-2 border-mr-ink bg-mr-yellow text-black shadow-hard-sm">
             <CalendarDays size={22} />
           </div>
           <div>
@@ -45,10 +58,26 @@ export function ActivityDetailContent() {
         </div>
       </div>
 
-      <form onSubmit={submit} className="card flex flex-col gap-4 p-6">
+      <form onSubmit={submit} className="card flex flex-col gap-4 p-6 shadow-hard">
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
-            <label htmlFor="date" className="mb-1 block text-xs font-bold uppercase">Date</label>
+            <div className="mb-1 flex items-center justify-between">
+              <label htmlFor="date" className="text-xs font-bold uppercase">Date</label>
+              <button
+                type="button"
+                onClick={copyPreviousDay}
+                disabled={copying}
+                title="Salin aktivitas dari hari aktif sebelumnya"
+                className="inline-flex items-center gap-1 text-[11px] font-bold text-mr-purple hover:underline disabled:opacity-50"
+              >
+                {copying ? (
+                  <Loader2 size={12} className="animate-spin" />
+                ) : (
+                  <Copy size={12} />
+                )}
+                Salin Hari Sebelumnya
+              </button>
+            </div>
             <div id="date" className="input bg-mr-surface2 flex items-center text-mr-muted cursor-not-allowed">
               {form.date ? form.date.split("T")[0] : "-"}
             </div>
@@ -105,7 +134,6 @@ export function ActivityDetailContent() {
           />
         </div>
 
-
         <div>
           <label htmlFor="project_ref_id" className="mb-1 block text-xs font-semibold">
             Project / Aplikasi
@@ -130,7 +158,59 @@ export function ActivityDetailContent() {
           )}
         </div>
 
-        <div className="mt-2 flex justify-end gap-2">
+        {/* Berita Acara Section */}
+        <div className="border-2 border-mr-ink/30 bg-mr-surface2/50 p-3 mt-1">
+          <label className="flex items-center gap-2 cursor-pointer font-bold text-xs select-none">
+            <input
+              type="checkbox"
+              checked={!!form.is_berita_acara}
+              onChange={(e) => set("is_berita_acara", e.target.checked)}
+              className="h-4 w-4 border-2 border-mr-ink accent-mr-purple cursor-pointer"
+            />
+            <span className="flex items-center gap-1.5">
+              <ShieldCheck size={14} className={form.is_berita_acara ? "text-mr-purple" : "text-mr-muted"} />
+              Perlu Berita Acara (Lupa tap absen / Kendala kehadiran)
+            </span>
+          </label>
+
+          {form.is_berita_acara && (
+            <div className="flex flex-col gap-2.5 pt-3 mt-2 border-t border-mr-ink/20 animate-in fade-in duration-150">
+              <div>
+                <label className="mb-1 block text-[11px] font-bold uppercase text-mr-muted">
+                  Catatan / Alasan Berita Acara <span className="text-rose-500">*</span>
+                </label>
+                <input
+                  className="input text-xs"
+                  type="text"
+                  placeholder="Contoh: Lupa tap absen masuk / Mesin absen maintenance"
+                  value={form.berita_acara_notes || ""}
+                  onChange={(e) => set("berita_acara_notes", e.target.value)}
+                  required={form.is_berita_acara}
+                />
+              </div>
+
+              <div>
+                <label className="mb-1 block text-[11px] font-bold uppercase text-mr-muted">
+                  Saksi Berita Acara (Rekan Kerja)
+                </label>
+                <select
+                  className="input text-xs font-semibold"
+                  value={form.witness_id || ""}
+                  onChange={(e) => set("witness_id", e.target.value ? Number(e.target.value) : undefined)}
+                >
+                  <option value="">— Pilih Saksi —</option>
+                  {witnesses.map((w) => (
+                    <option key={w.id} value={w.id}>
+                      {w.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          )}
+        </div>
+
+        <div className="mt-2 flex justify-end gap-2 border-t-2 border-mr-ink pt-3">
           <button type="button" onClick={() => router.push("/dashboard")} className="btn-ghost">
             Cancel
           </button>

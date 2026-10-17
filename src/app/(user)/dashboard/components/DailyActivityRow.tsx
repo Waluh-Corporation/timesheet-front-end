@@ -2,6 +2,7 @@
 
 import type { DailyActivity } from "@/lib/types";
 import Link from "next/link";
+import { ShieldCheck } from "lucide-react";
 
 interface DailyActivityRowProps {
   day: number;
@@ -25,7 +26,7 @@ export function DailyActivityRow({
   holiday,
   isWeekend,
   activity,
-}: DailyActivityRowProps) {
+}: Readonly<DailyActivityRowProps>) {
   const isNonWorking = isWeekend || !!holiday;
 
   const dayLabel = `${monthName} ${day} · ${dow}`;
@@ -58,6 +59,21 @@ export function DailyActivityRow({
         )}
       </div>
       <div className="flex items-center justify-end gap-2">
+        {activity?.is_berita_acara && (
+          <span
+            className="chip bg-mr-yellow/50 text-amber-900 dark:text-amber-300 border-mr-ink font-bold inline-flex items-center gap-1"
+            title={
+              activity.berita_acara_notes
+                ? `Berita Acara: ${activity.berita_acara_notes}${
+                    activity.witness?.name ? ` (Saksi: ${activity.witness.name})` : ""
+                  }`
+                : "Berita Acara"
+            }
+          >
+            <ShieldCheck size={12} />
+            BA
+          </span>
+        )}
         {activity?.status && (
           <span className="chip bg-mr-yellow text-black border-mr-ink font-bold">
             {activity.status}

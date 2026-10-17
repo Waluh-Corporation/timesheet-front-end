@@ -1,6 +1,7 @@
 import { Fragment } from "react";
-import { Loader2, ShieldCheck, KeyRound, Ban, Fingerprint, Edit2 } from "lucide-react";
+import { Loader2, ShieldCheck, KeyRound, Ban, Fingerprint, Edit2, UserX } from "lucide-react";
 import type { User, Company, Passkey } from "@/lib/types";
+import { isUserAnonymized } from "@/lib/types";
 import { useAuth } from "@/lib/auth";
 import { useTheme } from "@/lib/theme";
 
@@ -16,6 +17,7 @@ export function UserList({
   onAssignCompany,
   onEditUser,
   onViewPasskeys,
+  onAnonymizeUser,
 }: Readonly<{
   users: User[];
   companies: Company[];
@@ -28,6 +30,7 @@ export function UserList({
   onAssignCompany: (u: User, compId?: number, compObj?: Company) => void;
   onEditUser: (u: User) => void;
   onViewPasskeys: (u: User) => void;
+  onAnonymizeUser?: (u: User) => void;
 }>) {
   const { user: currentUser } = useAuth();
   const { theme } = useTheme();
@@ -110,7 +113,9 @@ export function UserList({
               </tr>
             </thead>
             <tbody>
-              {users.map((u) => (
+              {users.map((u) => {
+                const isAnonymized = isUserAnonymized(u);
+                return (
                 <Fragment key={u.id}>
                   <tr className="border-t border-mr-ink">
                     <td className="py-3">
@@ -126,6 +131,14 @@ export function UserList({
                             (u.company && c.code?.toLowerCase() === u.company.toLowerCase())
                         );
                         const currentVal = matchedCompany ? String(matchedCompany.id) : "";
+
+                        if (isAnonymized) {
+                          return (
+                            <span className="inline-block text-xs text-mr-muted font-semibold border border-dashed border-mr-ink/30 px-2.5 py-1 bg-mr-surface2 cursor-not-allowed select-none">
+                              {matchedCompany ? `${matchedCompany.code.toUpperCase()} — ${matchedCompany.name}` : "— Unassigned —"}
+                            </span>
+                          );
+                        }
 
                         return (
                           <select
@@ -162,51 +175,74 @@ export function UserList({
                       </span>
                     </td>
                     <td className="py-3">
-                      <button
-                        onClick={() => onToggleActive(u)}
-                        disabled={currentUser?.id === u.id}
-                        title={
-                          currentUser?.id === u.id
-                            ? "You cannot deactivate your own account"
-                            : undefined
-                        }
-                        className={`chip ${
-                          u.is_active
-                            ? "bg-mr-cyan text-black font-extrabold"
-                            : "bg-mr-pink text-white"
-                        } ${currentUser?.id === u.id ? "cursor-not-allowed opacity-60" : ""}`}
-                      >
-                        {u.is_active ? "Active" : "Disabled"}
-                      </button>
+                      {isAnonymized ? (
+                        <span className="chip bg-mr-surface2 text-mr-muted border border-dashed border-mr-ink font-semibold">
+                          Anonymized
+                        </span>
+                      ) : (
+                        <button
+                          onClick={() => onToggleActive(u)}
+                          disabled={currentUser?.id === u.id}
+                          title={
+                            currentUser?.id === u.id
+                              ? "You cannot deactivate your own account"
+                              : undefined
+                          }
+                          className={`chip ${
+                            u.is_active
+                              ? "bg-mr-cyan text-black font-extrabold"
+                              : "bg-mr-pink text-white"
+                          } ${currentUser?.id === u.id ? "cursor-not-allowed opacity-60" : ""}`}
+                        >
+                          {u.is_active ? "Active" : "Disabled"}
+                        </button>
+                      )}
                     </td>
                     <td className="py-3">
                       <div className="flex items-center justify-end gap-2">
-                        <button
-                          onClick={() => onEditUser(u)}
-                          className="border-2 border-mr-ink p-2 text-mr-muted hover:bg-mr-surface2 hover:text-mr-ink"
-                          title="Edit user details"
-                        >
-                          <Edit2 size={16} />
-                        </button>
-                        <button
-                          onClick={() => onViewPasskeys(u)}
-                          className={`border-2 border-mr-ink p-2 ${
-                            passkeysFor === u.id
-                              ? "bg-mr-purple text-white dark:text-black"
-                              : "text-mr-muted hover:bg-mr-surface2"
-                          }`}
-                          title="Manage passkeys"
-                        >
-                          <KeyRound size={16} />
-                        </button>
-                        {u.is_active && currentUser?.id !== u.id && (
-                          <button
-                            onClick={() => onDeactivateUser(u)}
-                            className="border-2 border-mr-ink p-2 text-mr-muted hover:bg-mr-pink hover:text-white"
-                            title="Deactivate user"
-                          >
-                            <Ban size={16} />
-                          </button>
+                        {isAnonymized ? (
+                          <span className="text-[11px] font-bold text-mr-muted border border-mr-ink/20 px-2 py-1 bg-mr-surface2">
+                            Dianonimkan
+                          </span>
+                        ) : (
+                          <>
+                            <button
+                              onClick={() => onEditUser(u)}
+                              className="border-2 border-mr-ink p-2 text-mr-muted hover:bg-mr-surface2 hover:text-mr-ink"
+                              title="Edit user details"
+                            >
+                              <Edit2 size={16} />
+                            </button>
+                            <button
+                              onClick={() => onViewPasskeys(u)}
+                              className={`border-2 border-mr-ink p-2 ${
+                                passkeysFor === u.id
+                                  ? "bg-mr-purple text-white dark:text-black"
+                                  : "text-mr-muted hover:bg-mr-surface2"
+                              }`}
+                              title="Manage passkeys"
+                            >
+                              <KeyRound size={16} />
+                            </button>
+                            {u.is_active && currentUser?.id !== u.id && (
+                              <button
+                                onClick={() => onDeactivateUser(u)}
+                                className="border-2 border-mr-ink p-2 text-mr-muted hover:bg-mr-pink hover:text-white"
+                                title="Deactivate user"
+                              >
+                                <Ban size={16} />
+                              </button>
+                            )}
+                            {onAnonymizeUser && currentUser?.id !== u.id && (
+                              <button
+                                onClick={() => onAnonymizeUser(u)}
+                                className="border-2 border-mr-ink p-2 text-mr-muted hover:bg-rose-600 hover:text-white transition-colors"
+                                title="Anonimkan data pengguna (UU PDP)"
+                              >
+                                <UserX size={16} />
+                              </button>
+                            )}
+                          </>
                         )}
                       </div>
                     </td>
@@ -222,7 +258,8 @@ export function UserList({
                     </tr>
                   )}
                 </Fragment>
-              ))}
+              );
+            })}
             </tbody>
           </table>
         </div>

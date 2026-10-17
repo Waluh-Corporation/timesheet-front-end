@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { X, Loader2, Save, ShieldAlert } from "lucide-react";
 import type { User, Company, Division, Department, Site, Role, UpdateUserRequestDTO } from "@/lib/types";
+import { isUserAnonymized } from "@/lib/types";
 import { fetchDivisions, fetchDepartments, fetchSites } from "@/app/(admin)/master-data/services/masterData";
 
 interface EditUserModalProps {
@@ -76,7 +77,7 @@ export function EditUserModal({
     }
   }, [user, isOpen]);
 
-  if (!isOpen || !user) return null;
+  if (!isOpen || !user || isUserAnonymized(user)) return null;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

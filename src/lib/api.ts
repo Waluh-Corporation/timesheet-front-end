@@ -234,7 +234,7 @@ export async function api<T = any>(
 export async function apiWithMeta<T = any>(
   path: string,
   opts: RequestOptions = {}
-): Promise<{ data: T; pagination?: any; code?: number; status?: string }> {
+): Promise<{ data: T; pagination?: any; code?: number; status?: string; [key: string]: any }> {
   const { res, contentType } = await fetchWithRetry(path, opts);
   if (contentType.includes("application/json")) {
     return await res.json();

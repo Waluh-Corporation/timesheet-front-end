@@ -24,4 +24,7 @@ export const usersService = {
     
   reviewChange: (id: number, action: "approve" | "reject") => 
     api(`/api/v1/admin/profile-changes/${id}/review?action=${action}`, { method: "POST", body: JSON.stringify({}) }),
+
+  anonymizeUser: (id: number) =>
+    api<{ message: string }>(`/api/v1/admin/users/${id}/anonymize`, { method: "POST" }),
 };
