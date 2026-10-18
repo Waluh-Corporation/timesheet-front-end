@@ -37,20 +37,22 @@ export function useNewUser() {
   const [form, setForm] = useState(emptyForm);
 
   useEffect(() => {
-    Promise.all([
+    void Promise.all([
       fetchCompanies(),
       fetchDepartments(),
       fetchDivisions(),
       fetchSites(),
-    ]).then(([comps, depts, divs, sts]) => {
-      setCompanies(comps || []);
-      setRawDepartments(depts || []);
-      setRawDivisions(divs || []);
-      setRawSites(sts || []);
-      setDepartments(depts ? depts.map(d => d.name || (d as any).department_name || (d as any).title) : []);
-      setDivisions(divs ? divs.map(d => d.name || (d as any).title || (d as any).division_name) : []);
-      setSites(sts ? sts.map(s => s.name || (s as any).site_name || (s as any).location) : []);
-    });
+    ])
+      .then(([comps, depts, divs, sts]) => {
+        setCompanies(comps || []);
+        setRawDepartments(depts || []);
+        setRawDivisions(divs || []);
+        setRawSites(sts || []);
+        setDepartments(depts ? depts.map((d) => d.name || (d as any).department_name || (d as any).title) : []);
+        setDivisions(divs ? divs.map((d) => d.name || (d as any).title || (d as any).division_name) : []);
+        setSites(sts ? sts.map((s) => s.name || (s as any).site_name || (s as any).location) : []);
+      })
+      .catch(() => {});
   }, []);
 
   const createUser = async (e: React.FormEvent) => {

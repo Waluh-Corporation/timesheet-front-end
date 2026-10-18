@@ -42,17 +42,23 @@ export const useActivityData = (initialId: string | null, defaultDate: string) =
   const router = useRouter();
 
   useEffect(() => {
-    fetchActivityStatuses().then((res) => {
-      if (res && res.length > 0) setStatuses(res);
-    });
+    void fetchActivityStatuses()
+      .then((res) => {
+        if (res && res.length > 0) setStatuses(res);
+      })
+      .catch(() => {});
 
-    fetchProjects().then((data) => {
-      if (data) setProjects(data);
-    });
+    void fetchProjects()
+      .then((data) => {
+        if (data) setProjects(data);
+      })
+      .catch(() => {});
 
-    fetchEligibleWitnesses().then((w) => {
-      if (w) setWitnesses(w);
-    });
+    void fetchEligibleWitnesses()
+      .then((w) => {
+        if (w) setWitnesses(w);
+      })
+      .catch(() => {});
 
     const loadInitial = async () => {
       if (!initialId) return;

@@ -28,7 +28,7 @@ export function useHistoricalData() {
         setLoading(false);
       }
     }
-    load();
+    void load();
   }, []);
 
   const uniqueYears = useMemo(() => {
@@ -47,7 +47,7 @@ export function useHistoricalData() {
     activities.forEach((act) => {
       if (act.status) statuses.add(act.status);
     });
-    return Array.from(statuses).sort();
+    return Array.from(statuses).sort((a, b) => a.localeCompare(b));
   }, [activities]);
 
   const uniqueApps = useMemo(() => {
@@ -56,7 +56,7 @@ export function useHistoricalData() {
       const app = act.app_impacted || act.project_ref?.app_impacted;
       if (app) apps.add(app);
     });
-    return Array.from(apps).sort();
+    return Array.from(apps).sort((a, b) => a.localeCompare(b));
   }, [activities]);
 
   const filteredActivities = useMemo(() => {

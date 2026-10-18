@@ -49,7 +49,7 @@ export function useProfileForm(onSuccess?: () => void) {
       setSites(sts || []);
       setLoading(false);
     }
-    init();
+    void init();
   }, []);
 
   useEffect(() => {
@@ -76,9 +76,13 @@ export function useProfileForm(onSuccess?: () => void) {
   }, [user, companies]);
 
   useEffect(() => {
-    fetchDepartments({ division: form.division || undefined }).then((depts) => {
-      setDepartments(depts || []);
-    });
+    void fetchDepartments({ division: form.division || undefined })
+      .then((depts) => {
+        setDepartments(depts || []);
+      })
+      .catch(() => {
+        setDepartments([]);
+      });
   }, [form.division]);
 
   const setFieldValue = (k: keyof typeof form, v: any) =>

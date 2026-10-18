@@ -85,7 +85,7 @@ export default function LoginForm() {
         console.error("Setup check error on login", err);
       }
     }
-    checkSetup();
+    void checkSetup();
   }, [router]);
 
   useEffect(() => {
@@ -116,7 +116,7 @@ export default function LoginForm() {
       }
     }
 
-    startConditionalUI();
+    void startConditionalUI();
 
     return () => {
       active = false;
@@ -183,7 +183,7 @@ export default function LoginForm() {
   const handleForgot = async (e: React.FormEvent) => {
     e.preventDefault();
     const cleanEmail = forgotEmail.trim();
-    if (!cleanEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)) {
+    if (!cleanEmail || !cleanEmail.includes("@") || !cleanEmail.includes(".")) {
       const msg = "Please provide a valid email address.";
       setErrorMessage(msg);
       notify(msg, "error");
@@ -232,8 +232,9 @@ export default function LoginForm() {
             {!showForgot ? (
               <form onSubmit={handlePasswordLogin}>
                 <div className="mb-3">
-                  <label className="form-label required">Username or Email</label>
+                  <label htmlFor="login-identifier" className="form-label required">Username or Email</label>
                   <input
+                    id="login-identifier"
                     className="form-control"
                     value={identifier}
                     onChange={(e) => setIdentifier(e.target.value)}
@@ -245,7 +246,7 @@ export default function LoginForm() {
 
                 <div className="mb-3">
                   <div className="d-flex justify-content-between align-items-center mb-1">
-                    <label className="form-label required mb-0">Password</label>
+                    <label htmlFor="login-password" className="form-label required mb-0">Password</label>
                     <button
                       type="button"
                       onClick={() => {
@@ -259,6 +260,7 @@ export default function LoginForm() {
                   </div>
                   <div className="input-group input-group-flat">
                     <input
+                      id="login-password"
                       className="form-control"
                       type={showPassword ? "text" : "password"}
                       value={password}
@@ -293,7 +295,9 @@ export default function LoginForm() {
                   {passkeysSupported() && (
                     <button
                       type="button"
-                      onClick={handlePasskeyLogin}
+                      onClick={() => {
+                        void handlePasskeyLogin();
+                      }}
                       className="btn btn-outline-primary w-100"
                       disabled={busy}
                     >
@@ -305,8 +309,9 @@ export default function LoginForm() {
             ) : (
               <form onSubmit={handleForgot}>
                 <div className="mb-3">
-                  <label className="form-label required">Email address</label>
+                  <label htmlFor="forgot-email" className="form-label required">Email address</label>
                   <input
+                    id="forgot-email"
                     className="form-control"
                     type="email"
                     value={forgotEmail}

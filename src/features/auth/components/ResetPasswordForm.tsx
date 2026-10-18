@@ -37,7 +37,7 @@ export default function ResetPasswordForm() {
     }
 
     let isMounted = true;
-    (async () => {
+    void (async () => {
       try {
         const res = await verifyResetToken(rawToken);
         if (!isMounted) return;
@@ -133,8 +133,9 @@ export default function ResetPasswordForm() {
                 </div>
               )}
               <div className="mb-3">
-                <label className="form-label required">New password</label>
+                <label htmlFor="reset-new-password" className="form-label required">New password</label>
                 <input
+                  id="reset-new-password"
                   className="form-control"
                   type="password"
                   value={password}
@@ -145,8 +146,9 @@ export default function ResetPasswordForm() {
                 />
               </div>
               <div className="mb-3">
-                <label className="form-label required">Confirm password</label>
+                <label htmlFor="reset-confirm-password" className="form-label required">Confirm password</label>
                 <input
+                  id="reset-confirm-password"
                   className="form-control"
                   type="password"
                   value={confirm}

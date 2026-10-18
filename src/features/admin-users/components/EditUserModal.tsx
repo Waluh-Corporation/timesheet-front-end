@@ -55,21 +55,25 @@ export function EditUserModal({
   // Load master data once modal opens
   useEffect(() => {
     if (!isOpen) return;
-    Promise.all([fetchDivisions(), fetchSites()]).then(([divs, sts]) => {
-      setDivisions(divs || []);
-      setSites(sts || []);
-    });
+    void Promise.all([fetchDivisions(), fetchSites()])
+      .then(([divs, sts]) => {
+        setDivisions(divs || []);
+        setSites(sts || []);
+      })
+      .catch(() => {});
   }, [isOpen]);
 
   // Load departments when division changes
   useEffect(() => {
     if (!isOpen) return;
     const selectedDiv = divisions.find((d) => d.name === division || d.code === division);
-    fetchDepartments(
+    void fetchDepartments(
       selectedDiv ? { division_id: selectedDiv.id } : division ? { division } : undefined
-    ).then((depts) => {
-      setDepartments(depts || []);
-    });
+    )
+      .then((depts) => {
+        setDepartments(depts || []);
+      })
+      .catch(() => {});
   }, [isOpen, division, divisions]);
 
   // Sync user values into local form state
@@ -153,8 +157,9 @@ export function EditUserModal({
 
         <div className="row g-3">
           <div className="col-12 col-sm-6">
-            <label className="form-label">Full Name</label>
+            <label htmlFor="edit-user-name" className="form-label">Full Name</label>
             <input
+              id="edit-user-name"
               type="text"
               className="form-control"
               value={name}
@@ -164,8 +169,9 @@ export function EditUserModal({
           </div>
 
           <div className="col-12 col-sm-6">
-            <label className="form-label">Role</label>
+            <label htmlFor="edit-user-role" className="form-label">Role</label>
             <select
+              id="edit-user-role"
               className="form-select"
               value={role}
               onChange={(e) => setRole(e.target.value as Role)}
@@ -176,8 +182,9 @@ export function EditUserModal({
           </div>
 
           <div className="col-12 col-sm-6">
-            <label className="form-label">Employee ID / MII ID</label>
+            <label htmlFor="edit-user-employee-id" className="form-label">Employee ID / MII ID</label>
             <input
+              id="edit-user-employee-id"
               type="text"
               className="form-control"
               value={employeeId}
@@ -187,8 +194,9 @@ export function EditUserModal({
           </div>
 
           <div className="col-12 col-sm-6">
-            <label className="form-label">BNI ID</label>
+            <label htmlFor="edit-user-bni-id" className="form-label">BNI ID</label>
             <input
+              id="edit-user-bni-id"
               type="text"
               className="form-control"
               value={bniId}
@@ -198,8 +206,9 @@ export function EditUserModal({
           </div>
 
           <div className="col-12 col-sm-6">
-            <label className="form-label">Company</label>
+            <label htmlFor="edit-user-company" className="form-label">Company</label>
             <select
+              id="edit-user-company"
               className="form-select"
               value={companyId || ""}
               disabled={isSelf}
@@ -218,9 +227,10 @@ export function EditUserModal({
           </div>
 
           <div className="col-12 col-sm-6">
-            <label className="form-label">Division</label>
+            <label htmlFor="edit-user-division" className="form-label">Division</label>
             {divisions.length > 0 ? (
               <select
+                id="edit-user-division"
                 className="form-select"
                 value={division}
                 onChange={(e) => setDivision(e.target.value)}
@@ -234,6 +244,7 @@ export function EditUserModal({
               </select>
             ) : (
               <input
+                id="edit-user-division"
                 type="text"
                 className="form-control"
                 value={division}
@@ -244,9 +255,10 @@ export function EditUserModal({
           </div>
 
           <div className="col-12 col-sm-6">
-            <label className="form-label">Department</label>
+            <label htmlFor="edit-user-department" className="form-label">Department</label>
             {departments.length > 0 ? (
               <select
+                id="edit-user-department"
                 className="form-select"
                 value={department}
                 onChange={(e) => setDepartment(e.target.value)}
@@ -260,6 +272,7 @@ export function EditUserModal({
               </select>
             ) : (
               <input
+                id="edit-user-department"
                 type="text"
                 className="form-control"
                 value={department}
@@ -270,9 +283,10 @@ export function EditUserModal({
           </div>
 
           <div className="col-12 col-sm-6">
-            <label className="form-label">Site / Location</label>
+            <label htmlFor="edit-user-site" className="form-label">Site / Location</label>
             {sites.length > 0 ? (
               <select
+                id="edit-user-site"
                 className="form-select"
                 value={site}
                 onChange={(e) => setSite(e.target.value)}
@@ -286,6 +300,7 @@ export function EditUserModal({
               </select>
             ) : (
               <input
+                id="edit-user-site"
                 type="text"
                 className="form-control"
                 value={site}

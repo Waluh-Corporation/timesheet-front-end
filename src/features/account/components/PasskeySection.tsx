@@ -61,8 +61,8 @@ export function PasskeySection({
     }
   };
 
-  const handleCreatePasskey = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleCreatePasskey = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
     await addPasskey(newKeyName.trim() || undefined);
     setShowAddModal(false);
     setNewKeyName("");
@@ -147,13 +147,15 @@ export function PasskeySection({
                             aria-label="Rename passkey"
                             disabled={savingRename}
                             onKeyDown={(e) => {
-                              if (e.key === "Enter") handleSaveRename(pk);
+                              if (e.key === "Enter") void handleSaveRename(pk);
                               if (e.key === "Escape") handleCancelRename();
                             }}
                           />
                           <button
                             type="button"
-                            onClick={() => handleSaveRename(pk)}
+                            onClick={() => {
+                              void handleSaveRename(pk);
+                            }}
                             disabled={savingRename || !editName.trim()}
                             className="btn btn-sm btn-icon btn-success"
                             title="Save"
@@ -195,7 +197,9 @@ export function PasskeySection({
 
                   <button
                     type="button"
-                    onClick={() => removePasskey(pk)}
+                    onClick={() => {
+                      void removePasskey(pk);
+                    }}
                     className="btn btn-sm btn-ghost-danger btn-icon flex-shrink-0"
                     title="Remove passkey"
                   >
@@ -224,7 +228,9 @@ export function PasskeySection({
             </button>
             <button
               type="button"
-              onClick={handleCreatePasskey}
+              onClick={() => {
+                void handleCreatePasskey();
+              }}
               disabled={addingKey}
               className="btn btn-primary d-inline-flex align-items-center gap-1"
             >
@@ -234,7 +240,11 @@ export function PasskeySection({
           </>
         }
       >
-        <form onSubmit={handleCreatePasskey}>
+        <form
+          onSubmit={(e) => {
+            void handleCreatePasskey(e);
+          }}
+        >
           <p className="text-secondary small mb-3">
             You can give this passkey a friendly nickname (e.g. <em>Work Laptop</em> or <em>iPhone</em>), or leave it empty to use your authenticator&apos;s default name.
           </p>

@@ -86,7 +86,7 @@ export default function SetupWizard() {
         setChecking(false);
       }
     }
-    check();
+    void check();
   }, [notify, router]);
 
   const handleApplyTemplates = () => {
@@ -109,7 +109,7 @@ export default function SetupWizard() {
       notify("Username must be at least 3 characters", "error");
       return;
     }
-    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    if (!email || !email.includes("@") || !email.includes(".")) {
       notify("Please enter a valid administrator email address", "error");
       return;
     }
@@ -213,8 +213,9 @@ export default function SetupWizard() {
             </div>
             <div className="card-body">
               <div className="mb-3">
-                <label className="form-label required">Full Name</label>
+                <label htmlFor="setup-admin-name" className="form-label required">Full Name</label>
                 <input
+                  id="setup-admin-name"
                   className="form-control"
                   placeholder="e.g. John Administrator"
                   value={adminForm.name}
@@ -225,8 +226,9 @@ export default function SetupWizard() {
 
               <div className="row g-2 mb-3">
                 <div className="col-sm-6">
-                  <label className="form-label required">Username</label>
+                  <label htmlFor="setup-admin-username" className="form-label required">Username</label>
                   <input
+                    id="setup-admin-username"
                     className="form-control"
                     placeholder="admin"
                     value={adminForm.username}
@@ -236,8 +238,9 @@ export default function SetupWizard() {
                   />
                 </div>
                 <div className="col-sm-6">
-                  <label className="form-label required">Email Address</label>
+                  <label htmlFor="setup-admin-email" className="form-label required">Email Address</label>
                   <input
+                    id="setup-admin-email"
                     className="form-control"
                     type="email"
                     placeholder="admin@company.com"
@@ -250,8 +253,9 @@ export default function SetupWizard() {
 
               <div className="row g-2">
                 <div className="col-sm-6">
-                  <label className="form-label required">Password (min. 8 chars)</label>
+                  <label htmlFor="setup-admin-password" className="form-label required">Password (min. 8 chars)</label>
                   <input
+                    id="setup-admin-password"
                     className="form-control"
                     type="password"
                     placeholder="••••••••"
@@ -262,8 +266,9 @@ export default function SetupWizard() {
                   />
                 </div>
                 <div className="col-sm-6">
-                  <label className="form-label required">Confirm Password</label>
+                  <label htmlFor="setup-admin-confirm" className="form-label required">Confirm Password</label>
                   <input
+                    id="setup-admin-confirm"
                     className="form-control"
                     type="password"
                     placeholder="••••••••"

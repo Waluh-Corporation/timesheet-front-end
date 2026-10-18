@@ -154,12 +154,12 @@ export function AdminProfileChangesView() {
         </div>
 
         <div className="col-6 col-sm-3">
-          <div
-            className={`card cursor-pointer ${
+          <button
+            type="button"
+            className={`card text-start w-100 ${
               statusFilter === "pending" ? "border-warning shadow-sm" : ""
             }`}
             onClick={() => setStatusFilter("pending")}
-            style={{ cursor: "pointer" }}
           >
             <div className="card-body">
               <div className="d-flex align-items-center justify-content-between">
@@ -168,16 +168,16 @@ export function AdminProfileChangesView() {
               </div>
               <div className="h1 text-warning mb-0 mt-1">{stats.pending}</div>
             </div>
-          </div>
+          </button>
         </div>
 
         <div className="col-6 col-sm-3">
-          <div
-            className={`card cursor-pointer ${
+          <button
+            type="button"
+            className={`card text-start w-100 ${
               statusFilter === "approved" ? "border-success shadow-sm" : ""
             }`}
             onClick={() => setStatusFilter("approved")}
-            style={{ cursor: "pointer" }}
           >
             <div className="card-body">
               <div className="d-flex align-items-center justify-content-between">
@@ -186,16 +186,16 @@ export function AdminProfileChangesView() {
               </div>
               <div className="h1 text-success mb-0 mt-1">{stats.approved}</div>
             </div>
-          </div>
+          </button>
         </div>
 
         <div className="col-6 col-sm-3">
-          <div
-            className={`card cursor-pointer ${
+          <button
+            type="button"
+            className={`card text-start w-100 ${
               statusFilter === "rejected" ? "border-danger shadow-sm" : ""
             }`}
             onClick={() => setStatusFilter("rejected")}
-            style={{ cursor: "pointer" }}
           >
             <div className="card-body">
               <div className="d-flex align-items-center justify-content-between">
@@ -204,7 +204,7 @@ export function AdminProfileChangesView() {
               </div>
               <div className="h1 text-danger mb-0 mt-1">{stats.rejected}</div>
             </div>
-          </div>
+          </button>
         </div>
       </div>
 
