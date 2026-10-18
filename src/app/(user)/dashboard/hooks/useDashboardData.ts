@@ -6,7 +6,7 @@ import {
   requestTimesheetGeneration,
 } from "../services/api";
 import { useToast } from "@/components/Toast";
-import type { DailyActivity } from "@/lib/types";
+import type { DailyActivity, WitnessResponse } from "@/lib/types";
 import {
   enablePush,
   disablePush,
@@ -30,6 +30,7 @@ export function useDashboardData() {
   const [year, setYear] = useState(now.getFullYear());
   const [month, setMonth] = useState(now.getMonth() + 1);
   const [activities, setActivities] = useState<DailyActivity[]>([]);
+  const [monthlyWitness, setMonthlyWitness] = useState<WitnessResponse | undefined>();
   const [holidays, setHolidays] = useState<Record<number, string>>({});
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
@@ -37,17 +38,22 @@ export function useDashboardData() {
   const [pushOn, setPushOn] = useState(false);
   const [sendingTestPush, setSendingTestPush] = useState(false);
   const [isJobsModalOpen, setIsJobsModalOpen] = useState(false);
+  const [isWitnessModalOpen, setIsWitnessModalOpen] = useState(false);
   const [page, setPage] = useState(1);
   const ITEMS_PER_PAGE = 7;
 
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const [acts, hols] = await Promise.all([
+      const [actRes, hols] = await Promise.all([
         fetchDashboardActivities(year, month),
         fetchHolidays(year, month),
       ]);
-      setActivities(acts || []);
+      const acts = Array.isArray(actRes) ? actRes : (actRes?.activities || []);
+      const mWitness = Array.isArray(actRes) ? undefined : actRes?.monthlyWitness;
+      setActivities(acts);
+      setMonthlyWitness(mWitness);
+
       const hmap: Record<number, string> = {};
       (hols || []).forEach((h) => {
         const d = Number.parseInt(h.date.split("-")[2], 10);
@@ -89,6 +95,10 @@ export function useDashboardData() {
       map.set(d, a);
     });
     return map;
+  }, [activities]);
+
+  const beritaAcaraCount = useMemo(() => {
+    return activities.filter((a) => a.is_berita_acara).length;
   }, [activities]);
 
   const generate = async () => {
@@ -159,14 +169,18 @@ export function useDashboardData() {
     year, setYear,
     month, setMonth,
     activities,
+    monthlyWitness,
+    beritaAcaraCount,
     holidays,
     loading,
     generating, generate,
     pushBusy, pushOn, handleTogglePush, pushSupported,
     sendingTestPush, handleSendTestPush,
     isJobsModalOpen, setIsJobsModalOpen,
+    isWitnessModalOpen, setIsWitnessModalOpen,
     handleAddPasskey, passkeysSupported,
     page, setPage, ITEMS_PER_PAGE,
-    totalDays, byDay, now
+    totalDays, byDay, now,
+    reload: load,
   };
 }

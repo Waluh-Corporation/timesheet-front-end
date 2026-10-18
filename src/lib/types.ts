@@ -51,6 +51,7 @@ export interface User {
   email: string;
   role: Role;
   is_active: boolean;
+  is_anonymized?: boolean;
   name: string;
   mii_id?: string;
   employee_id?: string;
@@ -71,6 +72,17 @@ export interface User {
   updated_at?: string;
 }
 
+export interface WitnessResponse {
+  id: number;
+  name: string;
+}
+
+export interface UpdateMonthlyWitnessRequest {
+  year: number;
+  month: number;
+  witness_id: number;
+}
+
 export interface DailyActivity {
   id?: number;
   date: string; // YYYY-MM-DD
@@ -84,6 +96,10 @@ export interface DailyActivity {
   project_ref_id?: number;
   project_ref?: Project;
   status_ref?: ActivityStatus;
+  is_berita_acara?: boolean;
+  berita_acara_notes?: string;
+  witness_id?: number | null;
+  witness?: WitnessResponse;
 }
 
 export interface Passkey {
@@ -201,6 +217,7 @@ export interface PaginatedResponse<T> {
   status: string;
   data: T;
   pagination?: PaginationMeta;
+  monthly_witness?: WitnessResponse;
 }
 
 export interface OvertimeRequest {
@@ -470,5 +487,19 @@ export interface UpdateSiteRequest {
   code?: string;
   name: string;
   is_active?: boolean;
+}
+
+export function isUserAnonymized(
+  u?: { username?: string; name?: string; email?: string; is_anonymized?: boolean } | null
+): boolean {
+  if (!u) return false;
+  if (typeof u.is_anonymized === "boolean") {
+    return u.is_anonymized;
+  }
+  return Boolean(
+    u.username?.startsWith("deleted_user_") ||
+    u.name?.startsWith("ANONYMIZED_USER_") ||
+    (u.email?.startsWith("deleted_") && u.email?.endsWith("@timesheet.local"))
+  );
 }
 
