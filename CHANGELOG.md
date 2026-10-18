@@ -9,6 +9,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.0] - 2026-10-19
+
+### Added
+- **Tabler UI System Overhaul**: Completely overhauled the frontend design system using `@tabler/core` and `@tabler/icons-react` for a modern, highly accessible enterprise dashboard experience across all pages.
+- **Feature-Based Architecture**: Refactored the entire application into self-contained feature modules under `src/features/` (`auth`, `setup`, `dashboard`, `activity`, `overtime`, `historical-data`, `account`, `admin-users`, `admin-master-data`, `admin-profile-changes`), turning App Router pages into thin route adapters.
+- **Tabler Reusable UI Primitives**: Introduced `PageHeader` and pure React-controlled `Modal` in `src/components/tabler/` with smooth backdrop transitions, scrollable modal dialogs (`modal-dialog-scrollable`), and keyboard accessibility.
+- **Full Sidebar Navigation Suite**: Restored and organized all application menus into structured sidebar sections (`Timesheet`, `Administration` including `/users`, `/profile-changes`, `/master-data`, and `Account`) with role-aware visibility and seamless mobile drawer toggling.
+
+### Changed
+- **Navigation & Layout Shell**: Migrated navigation to native Tabler vertical sidebar layout with strict role segregation: administrators see `Administration` and `Account` sections, while standard employees see `Timesheet` and `Account` sections.
+- **Master Data Tab Navigation**: Resolved tab squashing/clipping on `/master-data` by switching to Tabler's `nav nav-bordered` navigation bar with smooth horizontal scrolling for departments, divisions, sites, companies, approvers, holidays, and authenticators.
+- **Mobile Responsiveness & Viewport Hardening**: Fixed mobile navbar toggle closure by excluding toggle ref from click-outside listener, removed redundant avatar dropdown overlay from top bar, constrained viewport widths, and enabled smooth touch scrolling.
+- **Passkey Aesthetic**: Cleaned up the Passkeys section by removing circular avatar badges in favor of crisp, direct authenticator branding and icon presentation.
+- **Admin Profile Customization**: Hid employee-specific "Profile Details" (change request form) and "Change Requests History" for administrator accounts on `/profile`.
+- **User Management Company Assignment**: Expanded the Company column width to display full company names without truncation (`min-width: 320px`), and locked the company selection dropdown for the administrator's own account.
+- **User Actions & Modal Simplification**: Added dedicated reactivation action button in the table Actions column for deactivated accounts, and removed redundant "Account Active" switch from the Edit User modal.
+- **Theme Engine**: Synchronized dark mode switching across both `data-bs-theme` and `data-theme` attributes on `document.documentElement` for seamless light/dark mode parity.
+
+### Removed
+- **Legacy Neobrutalist Components**: Pruned obsolete legacy files (`DailyModal.tsx`, `HotGrid.tsx`) and deprecated custom neobrutalist borders in favor of the Tabler design system.
+
 ---
 
 ## [0.8.0] - 2026-10-17

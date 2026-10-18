@@ -202,7 +202,7 @@ export function UserList({
                       <div className="flex items-center justify-end gap-2">
                         {isAnonymized ? (
                           <span className="text-[11px] font-bold text-mr-muted border border-mr-ink/20 px-2 py-1 bg-mr-surface2">
-                            Dianonimkan
+                            Anonymized
                           </span>
                         ) : (
                           <>

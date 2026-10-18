@@ -29,10 +29,12 @@ export default function Guard({
 
   if (loading || !user || (role && user.role !== role)) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="flex flex-col items-center gap-3">
-          <div className="h-10 w-10 animate-spin rounded-full border-4 border-mr-surface2 border-t-mr-purple" />
-          <p className="text-sm text-mr-muted">Loading your portal…</p>
+      <div className="page page-center min-vh-100 d-flex align-items-center justify-content-center">
+        <div className="container container-tight py-4 text-center">
+          <div className="spinner-border text-primary mb-3" role="status">
+            <span className="visually-hidden">Loading...</span>
+          </div>
+          <p className="text-secondary small mb-0">Loading your portal…</p>
         </div>
       </div>
     );

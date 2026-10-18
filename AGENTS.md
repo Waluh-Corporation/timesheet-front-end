@@ -47,21 +47,39 @@ src/
 ├── app/                        # Next.js App Router pages and route handlers
 │   ├── (account)/              # Profile, passkeys, and password management
 │   ├── (admin)/                # Admin consoles (users, master-data, profile-changes)
-│   ├── (user)/                 # Employee features (dashboard, activity, overtime, history)
-│   ├── globals.css             # Theme tokens, font variables, and core styles
+src/
+├── app/                        # Next.js App Router thin route adapters & layouts
+│   ├── (account)/              # Route adapters for profile & password management
+│   ├── (admin)/                # Route adapters for admin consoles (users, master-data, profile-changes)
+│   ├── (user)/                 # Route adapters for employee features (dashboard, activity, overtime, history)
+│   ├── globals.css             # Theme tokens, Tabler CSS imports, and font variables
 │   └── layout.tsx              # Root HTML shell, providers, and toast mounting
-├── components/                 # Shared design system components (Shell, Toast, HotGrid)
+├── components/                 # Global layout & shared primitives (Shell, Toast, Guard, tabler/...)
+├── features/                   # Feature-based domain modules
+│   ├── account/                # Self-service profile, password change, passkeys
+│   ├── activity/               # Daily activity logging & timesheet entries
+│   ├── admin-master-data/      # Master data management (departments, divisions, sites, holidays, etc.)
+│   ├── admin-profile-changes/  # Admin approval workflow for employee profile updates
+│   ├── admin-users/            # User account provisioning & UU PDP compliance
+│   ├── auth/                   # Authentication, passkey login, reset password
+│   ├── dashboard/              # Employee monthly timesheet overview & quick actions
+│   ├── historical-data/        # Historical activity records & filters
+│   ├── overtime/               # Overtime tracking & approval flows
+│   └── setup/                  # First-run administrator wizard
 ├── lib/                        # Core utilities and shared infrastructure
 │   ├── api.ts                  # Central HTTP client with retry and refresh token rotation
 │   ├── auth.tsx                # Authentication context, session checks, and login flows
 │   ├── push.ts                 # WebPush subscription and service worker interaction
-│   ├── theme.tsx               # Theme state manager (light/dark) with system fallback
+│   ├── theme.tsx               # Theme state manager (light/dark) synchronized with data-bs-theme
 │   ├── types.ts                # TypeScript contract definitions and domain interfaces
 │   └── webauthn.ts             # FIDO2 / WebAuthn passkey registration and assertion
-└── services/                   # Business domain API services (activityService, etc.)
+└── services/                   # Shared business domain API clients (activityService, etc.)
 ```
 
 ### Architectural Rules:
+- **Feature-Based Architecture**:
+  - Keep domain logic, custom hooks, presentation components, and feature services co-located in `src/features/<feature>/`.
+  - App Router files (`src/app/**/page.tsx`) must remain thin wrappers that render feature views.
 - **Single Source of Truth for Types**:
   - Always maintain TypeScript interfaces in [`src/lib/types.ts`](src/lib/types.ts). Keep frontend contracts strictly synchronized with the backend Swagger/OpenAPI spec (`http://localhost:8080/swagger/doc.json`).
 - **Centralized API Communication**:
@@ -77,15 +95,13 @@ src/
 
 All frontend code in this repository must maintain the established design language and performance standards:
 
-### 3.1. Neobrutalism Design System
-- **Signature Styling Tokens**:
-  - High-contrast black borders (`border-2 border-mr-ink` / `border-black`).
-  - Solid, offset drop shadows (`shadow-hard` / `shadow-hard-sm`).
-  - Playful, vibrant accent chips (`bg-mr-yellow`, `bg-mr-cyan`, `bg-mr-purple`, `bg-mr-pink`).
-  - Crisp typography with font pairings (Outfit, Inter, or Space Grotesk) and high legibility.
+### 3.1. Tabler UI Design System
+- **Core Architecture**:
+  - Uses `@tabler/core` and `@tabler/icons-react` for a clean, accessible, enterprise dashboard aesthetic.
+  - Native Tabler styling classes: `card`, `card-header`, `card-body`, `table table-vcenter card-table`, `badge`, `btn btn-primary`, `form-control`, `form-select`.
+  - Pure React-controlled interactive components (modals, dropdowns, tabs) to avoid bootstrap.js DOM mutations conflicting with React 19 Virtual DOM and hydration.
 - **Dark Mode Parity**:
-  - Retain dark mode compatibility via `@custom-variant dark`.
-  - Offset shadows must remain black (`#000000`) in dark mode to retain physical depth rather than blending into opaque borders.
+  - Both `data-bs-theme="dark" | "light"` and `data-theme="dark" | "light"` are synchronized on `document.documentElement` by `ThemeProvider`.
   - Maintain WCAG AA contrast standards across all accent badges and action buttons.
 
 ### 3.2. Accessibility & Assistive Technology (WCAG AA)
