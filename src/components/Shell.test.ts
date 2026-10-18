@@ -40,6 +40,25 @@ describe("Shell component", () => {
     expect(html).toContain("Sign out");
   });
 
+  it("renders admin navigation without employee timesheet menus for admin users", () => {
+    const adminAuthValue: any = {
+      user: { name: "Admin User", username: "admin", role: "admin" },
+      logout: mockLogout,
+      loading: false,
+    };
+    const html = renderToString(
+      React.createElement(
+        AuthContext.Provider,
+        { value: adminAuthValue },
+        React.createElement(Shell, null, React.createElement("div", null, "Admin Content"))
+      )
+    );
+    expect(html).toContain("Administration");
+    expect(html).toContain("Users");
+    expect(html).toContain("Master Data");
+    expect(html).not.toContain("Daily Activity");
+  });
+
   it("handles logout click and redirects to /login", async () => {
     let capturedHandler: any = null;
     function Consumer() {
@@ -47,7 +66,16 @@ describe("Shell component", () => {
       function findClick(node: any) {
         if (!node) return;
         if (typeof node.props?.onClick === "function") {
-          capturedHandler = node.props.onClick;
+          const text = Array.isArray(node.props.children)
+            ? node.props.children
+                .map((c: any) => (typeof c === "string" ? c : ""))
+                .join(" ")
+            : typeof node.props.children === "string"
+              ? node.props.children
+              : "";
+          if (text.includes("Sign out")) {
+            capturedHandler = node.props.onClick;
+          }
         }
         if (Array.isArray(node.props?.children)) {
           node.props.children.forEach(findClick);

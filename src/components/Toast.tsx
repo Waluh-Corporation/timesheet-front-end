@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useCallback, useContext, useState, ReactNode } from "react";
-import { CheckCircle2, XCircle, Info } from "lucide-react";
+import { IconCircleCheck, IconAlertCircle, IconInfoCircle, IconX } from "@tabler/icons-react";
 
 type ToastKind = "success" | "error" | "info";
 interface Toast {
@@ -21,34 +21,52 @@ let toastCounter = 0;
 export function ToastProvider({ children }: { children: ReactNode }) {
   const [toasts, setToasts] = useState<Toast[]>([]);
 
+  const removeToast = useCallback((id: number) => {
+    setToasts((t) => t.filter((x) => x.id !== id));
+  }, []);
+
   const notify = useCallback((message: string, kind: ToastKind = "info") => {
     const id = Date.now() + (++toastCounter);
     setToasts((t) => [...t, { id, kind, message }]);
     setTimeout(() => {
       setToasts((t) => t.filter((x) => x.id !== id));
-    }, 4000);
+    }, 4500);
   }, []);
 
   return (
     <ToastContext.Provider value={{ notify }}>
       {children}
-      <div className="pointer-events-none fixed bottom-4 right-4 z-50 flex flex-col gap-2">
+      <div className="toast-container position-fixed bottom-0 end-0 p-3" style={{ zIndex: 1090 }}>
         {toasts.map((t) => {
           const Icon =
-            t.kind === "success" ? CheckCircle2 : t.kind === "error" ? XCircle : Info;
-          const color =
-            t.kind === "success"
-              ? "text-mr-cyan"
-              : t.kind === "error"
-              ? "text-mr-pink"
-              : "text-mr-purple";
+            t.kind === "success" ? IconCircleCheck : t.kind === "error" ? IconAlertCircle : IconInfoCircle;
+          const statusClass =
+            t.kind === "success" ? "status-green" : t.kind === "error" ? "status-red" : "status-blue";
+          const iconColor =
+            t.kind === "success" ? "text-success" : t.kind === "error" ? "text-danger" : "text-primary";
+
           return (
             <div
               key={t.id}
-              className="card pointer-events-auto flex items-center gap-3 px-4 py-3 shadow-hard"
+              className="toast show shadow-sm mb-2"
+              role="alert"
+              aria-live="assertive"
+              aria-atomic="true"
             >
-              <Icon size={18} className={color} />
-              <span className="text-sm font-medium">{t.message}</span>
+              <div className="toast-header">
+                <span className={`status-dot ${statusClass} me-2`}></span>
+                <strong className="me-auto text-capitalize">{t.kind}</strong>
+                <button
+                  type="button"
+                  className="btn-close"
+                  aria-label="Close"
+                  onClick={() => removeToast(t.id)}
+                ></button>
+              </div>
+              <div className="toast-body d-flex align-items-center gap-2">
+                <Icon size={18} className={iconColor} />
+                <span className="small">{t.message}</span>
+              </div>
             </div>
           );
         })}
