@@ -94,9 +94,10 @@ export function ChangePasswordForm() {
           <div className="card-body">
             {/* Current Password */}
             <div className="mb-3">
-              <label className="form-label required">Current Password</label>
+              <label htmlFor="change-pw-current" className="form-label required">Current Password</label>
               <div className="input-group input-group-flat">
                 <input
+                  id="change-pw-current"
                   type={showOld ? "text" : "password"}
                   className="form-control"
                   placeholder="Enter current password"
@@ -120,9 +121,10 @@ export function ChangePasswordForm() {
 
             {/* New Password */}
             <div className="mb-3">
-              <label className="form-label required">New Password</label>
+              <label htmlFor="change-pw-new" className="form-label required">New Password</label>
               <div className="input-group input-group-flat">
                 <input
+                  id="change-pw-new"
                   type={showNew ? "text" : "password"}
                   className="form-control"
                   placeholder="Enter new password (min. 8 characters)"
@@ -147,9 +149,10 @@ export function ChangePasswordForm() {
 
             {/* Confirm New Password */}
             <div className="mb-3">
-              <label className="form-label required">Confirm New Password</label>
+              <label htmlFor="change-pw-confirm" className="form-label required">Confirm New Password</label>
               <div className="input-group input-group-flat">
                 <input
+                  id="change-pw-confirm"
                   type={showConfirm ? "text" : "password"}
                   className="form-control"
                   placeholder="Re-enter new password"
