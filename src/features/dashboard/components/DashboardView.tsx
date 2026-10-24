@@ -1,21 +1,23 @@
 "use client";
 
+import { useState } from "react";
 import {
   IconShieldCheck,
-  IconAlertTriangle,
-  IconClock,
-  IconCheck,
-  IconX,
-  IconSend,
   IconLoader2,
   IconArrowBackUp,
+  IconAlertTriangle,
+  IconTable,
+  IconLayoutList,
 } from "@tabler/icons-react";
 import { useDashboardData } from "../hooks/useDashboardData";
 import { DashboardHeader } from "./DashboardHeader";
 import { MonthlyGrid } from "./MonthlyGrid";
+import { ActivitiesTable } from "./ActivitiesTable";
+import { MonthlyWitnessCard } from "./MonthlyWitnessCard";
 import { TimesheetJobsModal } from "./TimesheetJobsModal";
 import { MonthlyWitnessModal } from "./MonthlyWitnessModal";
 import { WitnessReviewModal } from "./WitnessReviewModal";
+import { UnsignedBeritaAcaraModal } from "./UnsignedBeritaAcaraModal";
 
 export default function DashboardView() {
   const {
@@ -49,6 +51,9 @@ export default function DashboardView() {
     setIsJobsModalOpen,
     isWitnessModalOpen,
     setIsWitnessModalOpen,
+    isUnsignedBAModalOpen,
+    setIsUnsignedBAModalOpen,
+    unsignedActivities,
     handleAddPasskey,
     passkeysSupported,
     year,
@@ -63,231 +68,38 @@ export default function DashboardView() {
     reload,
   } = useDashboardData();
 
-  const witnessName =
-    beritaAcaraStatus?.witness_name ||
-    monthlyWitness?.name ||
-    (beritaAcaraStatus?.witness_id ? `Saksi #${beritaAcaraStatus.witness_id}` : "Saksi");
+  const [viewMode, setViewMode] = useState<"table" | "grid">("table");
 
+  const isTimesheetSigned = Boolean(
+    timesheetStatus?.is_signed || timesheetStatus?.status === "signed"
+  );
   const isBaSigned =
     beritaAcaraStatus?.status === "signed" || beritaAcaraStatus?.status === "approved";
   const isBaPending =
     beritaAcaraStatus?.status === "pending_witness" || beritaAcaraStatus?.status === "submitted";
   const isBaRejected = beritaAcaraStatus?.status === "rejected";
-  const isBaRevoked = beritaAcaraStatus?.status === "revoked";
-  const isBaUnsubmitted = !beritaAcaraStatus || beritaAcaraStatus.status === "draft";
-  const isTimesheetSigned = timesheetStatus?.status === "signed";
+
+  const handleGenerateWithGuard = async () => {
+    if (beritaAcaraCount > 0 && !isBaSigned) {
+      setIsUnsignedBAModalOpen(true);
+      return;
+    }
+    await generate();
+  };
 
   return (
     <div className="d-flex flex-column gap-3">
-      {/* Witness pending review notification alert banner */}
-      {witnessRequests.length > 0 && (
-        <div className="alert alert-warning border border-warning shadow-sm d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-3 mb-0" role="alert">
-          <div className="d-flex align-items-center gap-2">
-            <span className="avatar avatar-sm bg-warning text-warning-fg rounded">
-              <IconShieldCheck size={20} />
-            </span>
-            <div>
-              <div className="fw-bold">Permohonan Tanda Tangan Saksi Tertunda ({witnessRequests.length})</div>
-              <div className="small text-secondary">
-                Anda ditunjuk sebagai saksi untuk {witnessRequests.length} Berita Acara bulanan yang memerlukan persetujuan & tanda tangan Anda.
-              </div>
-            </div>
-          </div>
-          <button
-            type="button"
-            className="btn btn-warning btn-sm d-flex align-items-center gap-1 shrink-0"
-            onClick={() => setIsWitnessReviewModalOpen(true)}
-          >
-            <IconCheck size={16} />
-            <span>Tinjau Permohonan</span>
-          </button>
-        </div>
-      )}
-
-      {/* Berita Acara Guard Banner for Month Period */}
-      {beritaAcaraCount > 0 && (
-        <>
-          {isBaUnsubmitted && (
-            <div className="alert alert-warning border-warning shadow-sm d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-3 mb-0" role="alert">
-              <div className="d-flex align-items-center gap-2">
-                <span className="avatar avatar-sm bg-warning-lt text-warning rounded">
-                  <IconAlertTriangle size={20} />
-                </span>
-                <div>
-                  <div className="fw-bold">⚠️ Berita Acara Belum Diajukan ke Saksi</div>
-                  <div className="small text-secondary">
-                    Terdapat {beritaAcaraCount} catatan Berita Acara pada periode ini yang belum diajukan ke saksi. Dokumen timesheet belum dapat dibuat sebelum Berita Acara disetujui & ditandatangani oleh saksi.
-                  </div>
-                </div>
-              </div>
-              <div className="d-flex align-items-center gap-2 shrink-0">
-                {!monthlyWitness && (
-                  <button
-                    type="button"
-                    className="btn btn-outline-primary btn-sm"
-                    onClick={() => setIsWitnessModalOpen(true)}
-                  >
-                    Atur Saksi
-                  </button>
-                )}
-                <button
-                  type="button"
-                  className="btn btn-primary btn-sm d-flex align-items-center gap-1"
-                  onClick={() => handleSubmitBeritaAcara()}
-                  disabled={submittingBA || !monthlyWitness}
-                  title={!monthlyWitness ? "Atur saksi bulanan terlebih dahulu" : "Ajukan Berita Acara ke saksi"}
-                >
-                  {submittingBA ? (
-                    <IconLoader2 size={16} className="animate-spin" />
-                  ) : (
-                    <IconSend size={16} />
-                  )}
-                  <span>Ajukan ke Saksi</span>
-                </button>
-              </div>
-            </div>
-          )}
-
-          {isBaPending && (
-            <div className="alert alert-info border-info shadow-sm d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-3 mb-0" role="alert">
-              <div className="d-flex align-items-center gap-2">
-                <span className="avatar avatar-sm bg-info-lt text-info rounded shrink-0">
-                  <IconClock size={20} />
-                </span>
-                <div>
-                  <div className="fw-bold">Menunggu Tanda Tangan Saksi</div>
-                  <div className="small text-secondary">
-                    Pengajuan Berita Acara telah terkirim. Dokumen belum dapat dibuat karena masih menunggu persetujuan dan tanda tangan dari saksi {witnessName}.
-                  </div>
-                </div>
-              </div>
-              <button
-                type="button"
-                className="btn btn-outline-danger btn-sm d-flex align-items-center gap-1 shrink-0"
-                onClick={() => {
-                  if (window.confirm("Batalkan permintaan tanda tangan saksi untuk Berita Acara periode ini?")) {
-                    handleRevokeBeritaAcara();
-                  }
-                }}
-                disabled={revokingBA}
-                title="Batalkan permintaan tanda tangan saksi ini"
-              >
-                {revokingBA ? (
-                  <IconLoader2 size={16} className="animate-spin" />
-                ) : (
-                  <IconArrowBackUp size={16} />
-                )}
-                <span>Batalkan Permintaan</span>
-              </button>
-            </div>
-          )}
-
-          {isBaRevoked && (
-            <div className="alert alert-warning border-warning shadow-sm d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-3 mb-0" role="alert">
-              <div className="d-flex align-items-center gap-2">
-                <span className="avatar avatar-sm bg-warning-lt text-warning rounded shrink-0">
-                  <IconArrowBackUp size={20} />
-                </span>
-                <div>
-                  <div className="fw-bold">Pengajuan Berita Acara Dibatalkan</div>
-                  <div className="small text-secondary">
-                    Permintaan tanda tangan saksi untuk periode ini telah dibatalkan. Anda dapat mengoreksi aktivitas harian atau mengajukan kembali ke saksi.
-                  </div>
-                </div>
-              </div>
-              <button
-                type="button"
-                className="btn btn-primary btn-sm d-flex align-items-center gap-1 shrink-0"
-                onClick={() => handleSubmitBeritaAcara()}
-                disabled={submittingBA || !monthlyWitness}
-                title={!monthlyWitness ? "Atur saksi bulanan terlebih dahulu" : "Ajukan kembali Berita Acara ke saksi"}
-              >
-                {submittingBA ? (
-                  <IconLoader2 size={16} className="animate-spin" />
-                ) : (
-                  <IconSend size={16} />
-                )}
-                <span>Ajukan Kembali ke Saksi</span>
-              </button>
-            </div>
-          )}
-
-          {isBaRejected && (
-            <div className="alert alert-danger border-danger shadow-sm d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-3 mb-0" role="alert">
-              <div className="d-flex align-items-center gap-2">
-                <span className="avatar avatar-sm bg-danger-lt text-danger rounded shrink-0">
-                  <IconX size={20} />
-                </span>
-                <div>
-                  <div className="fw-bold">❌ Pengajuan Berita Acara Ditolak oleh Saksi ({witnessName})</div>
-                  <div className="small text-secondary">
-                    Catatan revisi saksi: <em>&ldquo;{beritaAcaraStatus?.witness_rejection_notes || beritaAcaraStatus?.notes || "Periksa catatan harian"}&rdquo;</em>. Harap periksa catatan revisi dan ajukan kembali.
-                  </div>
-                </div>
-              </div>
-              <button
-                type="button"
-                className="btn btn-danger btn-sm d-flex align-items-center gap-1 shrink-0"
-                onClick={() => handleSubmitBeritaAcara()}
-                disabled={submittingBA}
-              >
-                {submittingBA ? (
-                  <IconLoader2 size={16} className="animate-spin" />
-                ) : (
-                  <IconSend size={16} />
-                )}
-                <span>Ajukan Kembali ke Saksi</span>
-              </button>
-            </div>
-          )}
-
-          {isBaSigned && (
-            <div className="alert alert-success border-success shadow-sm d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-3 mb-0" role="alert">
-              <div className="d-flex align-items-center gap-2">
-                <span className="avatar avatar-sm bg-success-lt text-success rounded shrink-0">
-                  <IconCheck size={20} />
-                </span>
-                <div>
-                  <div className="fw-bold">Berita Acara Telah Disetujui & Ditandatangani Saksi</div>
-                  <div className="small text-secondary">
-                    Seluruh catatan Berita Acara telah diverifikasi oleh saksi. Dokumen timesheet siap untuk di-generate.
-                  </div>
-                </div>
-              </div>
-              <button
-                type="button"
-                className="btn btn-outline-danger btn-sm d-flex align-items-center gap-1 shrink-0"
-                onClick={() => {
-                  if (window.confirm("Batalkan/revoke tanda tangan Berita Acara ini? Status akan kembali ke draft dan aktivitas harian dapat diedit kembali.")) {
-                    handleRevokeBeritaAcara();
-                  }
-                }}
-                disabled={revokingBA}
-                title="Batalkan tanda tangan Berita Acara agar aktivitas dapat diedit"
-              >
-                {revokingBA ? (
-                  <IconLoader2 size={16} className="animate-spin" />
-                ) : (
-                  <IconArrowBackUp size={16} />
-                )}
-                <span>Revoke Tanda Tangan Berita Acara</span>
-              </button>
-            </div>
-          )}
-        </>
-      )}
-
-      {/* Timesheet Signature Status Banner */}
+      {/* Timesheet Signature Status Banner (Audit Indicator) */}
       {isTimesheetSigned ? (
         <div className="alert alert-info border-info shadow-sm d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-3 mb-0" role="alert">
           <div className="d-flex align-items-center gap-2">
             <span className="avatar avatar-sm bg-info-lt text-info rounded shrink-0">
-              <IconShieldCheck size={20} />
+              <IconShieldCheck size={20} aria-hidden="true" />
             </span>
             <div>
-              <div className="fw-bold">🔒 Timesheet Telah Ditandatangani & Terkunci</div>
+              <div className="fw-bold">🔒 Timesheet Signed & Locked</div>
               <div className="small text-secondary">
-                Timesheet periode ini telah ditandatangani digital oleh karyawan. Seluruh mutasi aktivitas harian terkunci.
+                The monthly timesheet has been digitally signed by the employee. All daily activity mutations are locked.
               </div>
             </div>
           </div>
@@ -295,28 +107,29 @@ export default function DashboardView() {
             type="button"
             className="btn btn-outline-danger btn-sm d-flex align-items-center gap-1 shrink-0"
             onClick={() => {
-              if (window.confirm("Batalkan/revoke tanda tangan timesheet periode ini? Penguncian aktivitas akan dibuka kembali.")) {
+              if (window.confirm("Revoke digital signature for this timesheet period? Activity locking will be released.")) {
                 handleRevokeTimesheet();
               }
             }}
             disabled={revokingTimesheet}
-            title="Batalkan tanda tangan timesheet agar aktivitas harian dapat dimodifikasi"
+            title="Revoke timesheet signature to unlock daily activity editing"
           >
             {revokingTimesheet ? (
-              <IconLoader2 size={16} className="animate-spin" />
+              <IconLoader2 size={16} className="animate-spin" aria-hidden="true" />
             ) : (
-              <IconArrowBackUp size={16} />
+              <IconArrowBackUp size={16} aria-hidden="true" />
             )}
-            <span>Revoke Tanda Tangan Timesheet</span>
+            <span>Revoke Timesheet Signature</span>
           </button>
         </div>
       ) : null}
 
+      {/* Header with Quick Action Cards */}
       <DashboardHeader
         user={user}
         filledCount={activities.length}
         generating={generating}
-        onGenerate={generate}
+        onGenerate={handleGenerateWithGuard}
         pushBusy={pushBusy}
         pushOn={pushOn}
         onTogglePush={handleTogglePush}
@@ -328,24 +141,88 @@ export default function DashboardView() {
         passkeysSupported={passkeysSupported()}
         monthlyWitness={monthlyWitness}
         beritaAcaraCount={beritaAcaraCount}
+        beritaAcaraStatus={beritaAcaraStatus}
+        submittingBA={submittingBA}
+        onSubmitBeritaAcara={() => handleSubmitBeritaAcara()}
         onOpenWitnessModal={() => setIsWitnessModalOpen(true)}
         witnessRequestsCount={witnessRequests.length}
         onOpenWitnessReviewModal={() => setIsWitnessReviewModalOpen(true)}
+        timesheetStatus={timesheetStatus}
+        signingTimesheet={signingTimesheet}
+        onSignTimesheet={handleSignTimesheet}
+        revokingTimesheet={revokingTimesheet}
+        onRevokeTimesheet={handleRevokeTimesheet}
       />
 
-      <MonthlyGrid
-        loading={loading}
-        year={year}
+      {/* Unified Monthly Witness & Berita Acara Card (Single Source of Truth) */}
+      <MonthlyWitnessCard
         month={month}
-        totalDays={totalDays}
-        now={now}
-        byDay={byDay}
-        holidays={holidays}
-        page={page}
-        setPage={setPage}
-        ITEMS_PER_PAGE={ITEMS_PER_PAGE}
+        year={year}
+        monthlyWitness={monthlyWitness}
+        beritaAcaraStatus={beritaAcaraStatus}
+        beritaAcaraCount={beritaAcaraCount}
+        submittingBA={submittingBA}
+        onSubmitBeritaAcara={() => handleSubmitBeritaAcara()}
+        onRevokeBeritaAcara={handleRevokeBeritaAcara}
+        revokingBA={revokingBA}
+        onOpenUnsignedModal={() => setIsUnsignedBAModalOpen(true)}
+        onOpenWitnessModal={() => setIsWitnessModalOpen(true)}
       />
 
+      {/* Table vs Grid View Selector */}
+      <div className="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-1">
+        <h3 className="h3 mb-0 fw-bold text-slate-900">Timesheet Entries</h3>
+        <div className="btn-group btn-group-sm" role="group" aria-label="View toggle">
+          <button
+            type="button"
+            onClick={() => setViewMode("table")}
+            className={`btn d-inline-flex align-items-center gap-1.5 ${
+              viewMode === "table" ? "btn-dark fw-bold" : "btn-outline-secondary"
+            }`}
+            aria-pressed={viewMode === "table"}
+          >
+            <IconTable size={16} aria-hidden="true" />
+            <span>Table View</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setViewMode("grid")}
+            className={`btn d-inline-flex align-items-center gap-1.5 ${
+              viewMode === "grid" ? "btn-dark fw-bold" : "btn-outline-secondary"
+            }`}
+            aria-pressed={viewMode === "grid"}
+          >
+            <IconLayoutList size={16} aria-hidden="true" />
+            <span>Cards View</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Render Table or Grid View */}
+      {viewMode === "table" ? (
+        <ActivitiesTable
+          beritaAcaraStatus={beritaAcaraStatus}
+          onOpenWitnessModal={() => setIsWitnessModalOpen(true)}
+        />
+      ) : (
+        <MonthlyGrid
+          loading={loading}
+          year={year}
+          month={month}
+          totalDays={totalDays}
+          now={now}
+          byDay={byDay}
+          holidays={holidays}
+          page={page}
+          setPage={setPage}
+          ITEMS_PER_PAGE={ITEMS_PER_PAGE}
+          monthlyWitness={monthlyWitness}
+          beritaAcaraStatus={beritaAcaraStatus}
+          onOpenWitnessModal={() => setIsWitnessModalOpen(true)}
+        />
+      )}
+
+      {/* Modals */}
       <TimesheetJobsModal
         isOpen={isJobsModalOpen}
         onClose={() => setIsJobsModalOpen(false)}
@@ -360,6 +237,11 @@ export default function DashboardView() {
         month={month}
         currentWitness={monthlyWitness}
         beritaAcaraCount={beritaAcaraCount}
+        beritaAcaraStatus={beritaAcaraStatus}
+        onRevokeBeritaAcara={handleRevokeBeritaAcara}
+        revokingBA={revokingBA}
+        onSubmitBeritaAcara={() => handleSubmitBeritaAcara()}
+        submittingBA={submittingBA}
         onWitnessUpdated={reload}
       />
 
@@ -369,7 +251,21 @@ export default function DashboardView() {
         requests={witnessRequests}
         onActionCompleted={reload}
       />
+
+      <UnsignedBeritaAcaraModal
+        isOpen={isUnsignedBAModalOpen}
+        onClose={() => setIsUnsignedBAModalOpen(false)}
+        month={month}
+        year={year}
+        monthlyWitness={monthlyWitness}
+        unsignedActivities={unsignedActivities}
+        beritaAcaraStatus={beritaAcaraStatus}
+        onSubmitBeritaAcara={() => handleSubmitBeritaAcara()}
+        submittingBA={submittingBA}
+        onRevokeBeritaAcara={handleRevokeBeritaAcara}
+        revokingBA={revokingBA}
+        onOpenWitnessModal={() => setIsWitnessModalOpen(true)}
+      />
     </div>
   );
 }
-

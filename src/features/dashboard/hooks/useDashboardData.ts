@@ -66,6 +66,7 @@ export function useDashboardData() {
   const [isJobsModalOpen, setIsJobsModalOpen] = useState(false);
   const [isWitnessModalOpen, setIsWitnessModalOpen] = useState(false);
   const [isWitnessReviewModalOpen, setIsWitnessReviewModalOpen] = useState(false);
+  const [isUnsignedBAModalOpen, setIsUnsignedBAModalOpen] = useState(false);
   const [page, setPage] = useState(1);
   const ITEMS_PER_PAGE = 7;
 
@@ -139,10 +140,10 @@ export function useDashboardData() {
     try {
       const targetWitness = witnessId || monthlyWitness?.id;
       await submitBeritaAcara(year, month, targetWitness);
-      notify("Berita Acara berhasil diajukan ke saksi! 📋", "success");
+      notify("Attendance Incident Reports successfully submitted to witness! 📋", "success");
       await load();
     } catch (err: any) {
-      notify(err.message || "Gagal mengajukan Berita Acara", "error");
+      notify(err.message || "Failed to submit Attendance Incident Reports", "error");
     } finally {
       setSubmittingBA(false);
     }
@@ -153,10 +154,10 @@ export function useDashboardData() {
     setRevokingBA(true);
     try {
       await revokeBeritaAcara(beritaAcaraStatus.id);
-      notify("Permintaan tanda tangan saksi berhasil dibatalkan.", "success");
+      notify("Witness signature request successfully cancelled.", "success");
       await load();
     } catch (err: any) {
-      notify(err.message || "Gagal membatalkan permintaan tanda tangan saksi", "error");
+      notify(err.message || "Failed to cancel witness signature request", "error");
     } finally {
       setRevokingBA(false);
     }
@@ -166,10 +167,10 @@ export function useDashboardData() {
     setSigningTimesheet(true);
     try {
       await signTimesheet(year, month);
-      notify("Timesheet berhasil ditandatangani! Dokumen dan periode aktivitas kini terkunci. ✍️", "success");
+      notify("Timesheet signed successfully! Document and activity period are now locked. ✍️", "success");
       await load();
     } catch (err: any) {
-      notify(err.message || "Gagal menandatangani timesheet", "error");
+      notify(err.message || "Failed to sign timesheet", "error");
     } finally {
       setSigningTimesheet(false);
     }
@@ -179,14 +180,18 @@ export function useDashboardData() {
     setRevokingTimesheet(true);
     try {
       await revokeTimesheet(year, month);
-      notify("Tanda tangan timesheet berhasil dibatalkan. Periode aktivitas kini terbuka kembali. 🔄", "success");
+      notify("Timesheet signature revoked. Activity period is unlocked. 🔄", "success");
       await load();
     } catch (err: any) {
-      notify(err.message || "Gagal membatalkan tanda tangan timesheet", "error");
+      notify(err.message || "Failed to revoke timesheet signature", "error");
     } finally {
       setRevokingTimesheet(false);
     }
   };
+
+  const unsignedActivities = useMemo(() => {
+    return activities.filter((a) => a.is_berita_acara);
+  }, [activities]);
 
   const generate = async () => {
     setGenerating(true);
@@ -204,15 +209,28 @@ export function useDashboardData() {
       if (
         msg.includes("Berita Acara") ||
         msg.includes("dokumen belum dapat dibuat") ||
-        msg.includes("terdapat catatan")
+        msg.includes("terdapat catatan") ||
+        msg.includes("saksi")
       ) {
+        setIsUnsignedBAModalOpen(true);
         notify(msg, "error");
       } else {
         try {
           await downloadTimesheet(year, month);
           notify("Timesheet downloaded & emailed to you 📧", "success");
         } catch (fallbackErr: any) {
-          notify(err.message || fallbackErr.message || "Generation failed", "error");
+          const fallbackMsg = fallbackErr.message || "";
+          if (
+            fallbackMsg.includes("Berita Acara") ||
+            fallbackMsg.includes("dokumen belum dapat dibuat") ||
+            fallbackMsg.includes("terdapat catatan") ||
+            fallbackMsg.includes("saksi")
+          ) {
+            setIsUnsignedBAModalOpen(true);
+            notify(fallbackMsg, "error");
+          } else {
+            notify(err.message || fallbackMsg || "Generation failed", "error");
+          }
         }
       }
     } finally {
@@ -287,6 +305,8 @@ export function useDashboardData() {
     sendingTestPush, handleSendTestPush,
     isJobsModalOpen, setIsJobsModalOpen,
     isWitnessModalOpen, setIsWitnessModalOpen,
+    isUnsignedBAModalOpen, setIsUnsignedBAModalOpen,
+    unsignedActivities,
     handleAddPasskey, passkeysSupported,
     page, setPage, ITEMS_PER_PAGE,
     totalDays, byDay, now,

@@ -68,7 +68,7 @@ describe("WitnessReviewModal Component", () => {
       );
     });
 
-    expect(document.body.innerHTML).toContain("Tidak Ada Permohonan Tertunda");
+    expect(document.body.innerHTML).toContain("No Pending Requests");
   });
 
   it("renders pending requests and triggers approve action", async () => {
@@ -82,7 +82,7 @@ describe("WitnessReviewModal Component", () => {
         year: 2026,
         status: "pending",
         submitted_at: "2026-10-24T10:00:00Z",
-        notes: "Mohon tanda tangan",
+        notes: "Please review and sign",
       },
     ];
 
@@ -99,12 +99,12 @@ describe("WitnessReviewModal Component", () => {
     });
 
     expect(document.body.innerHTML).toContain("Budi Santoso");
-    expect(document.body.innerHTML).toContain("Oktober 2026");
+    expect(document.body.innerHTML).toContain("October 2026");
 
     // Find and click approve button
     const buttons = document.body.querySelectorAll("button");
     const approveBtn = Array.from(buttons).find((b) =>
-      b.textContent?.includes("Tanda Tangani / Setujui")
+      b.textContent?.includes("Sign & Approve")
     );
     expect(approveBtn).toBeDefined();
 

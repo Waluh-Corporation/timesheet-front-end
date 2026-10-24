@@ -152,7 +152,7 @@ describe("useDashboardData hook (Feature)", () => {
     });
 
     expect(mockSubmitBeritaAcara).toHaveBeenCalled();
-    expect(mockNotify).toHaveBeenCalledWith("Berita Acara berhasil diajukan ke saksi! 📋", "success");
+    expect(mockNotify).toHaveBeenCalledWith("Attendance Incident Reports successfully submitted to witness! 📋", "success");
 
     root.unmount();
     container.remove();
@@ -211,7 +211,7 @@ describe("useDashboardData hook (Feature)", () => {
     });
 
     expect(mockRevokeBeritaAcara).toHaveBeenCalledWith("ba-1");
-    expect(mockNotify).toHaveBeenCalledWith("Permintaan tanda tangan saksi berhasil dibatalkan.", "success");
+    expect(mockNotify).toHaveBeenCalledWith("Witness signature request successfully cancelled.", "success");
 
     root.unmount();
     container.remove();
@@ -236,7 +236,7 @@ describe("useDashboardData hook (Feature)", () => {
     });
     expect(mockSignTimesheet).toHaveBeenCalledWith(2026, 10);
     expect(mockNotify).toHaveBeenCalledWith(
-      "Timesheet berhasil ditandatangani! Dokumen dan periode aktivitas kini terkunci. ✍️",
+      "Timesheet signed successfully! Document and activity period are now locked. ✍️",
       "success"
     );
 
@@ -246,7 +246,7 @@ describe("useDashboardData hook (Feature)", () => {
     });
     expect(mockRevokeTimesheet).toHaveBeenCalledWith(2026, 10);
     expect(mockNotify).toHaveBeenCalledWith(
-      "Tanda tangan timesheet berhasil dibatalkan. Periode aktivitas kini terbuka kembali. 🔄",
+      "Timesheet signature revoked. Activity period is unlocked. 🔄",
       "success"
     );
 

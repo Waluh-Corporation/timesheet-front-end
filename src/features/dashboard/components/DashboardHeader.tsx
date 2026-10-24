@@ -10,9 +10,12 @@ import {
   IconFileSpreadsheet,
   IconSend,
   IconShieldCheck,
+  IconClock,
+  IconAlertTriangle,
+  IconArrowBackUp,
 } from "@tabler/icons-react";
 import { useRouter } from "next/navigation";
-import type { WitnessResponse } from "@/lib/types";
+import type { WitnessResponse, BeritaAcaraStatusResponse, TimesheetStatusResponse } from "@/lib/types";
 
 interface DashboardHeaderProps {
   user: any;
@@ -30,9 +33,17 @@ interface DashboardHeaderProps {
   passkeysSupported: boolean;
   monthlyWitness?: WitnessResponse;
   beritaAcaraCount?: number;
+  beritaAcaraStatus?: BeritaAcaraStatusResponse | null;
+  submittingBA?: boolean;
+  onSubmitBeritaAcara?: () => void;
   onOpenWitnessModal?: () => void;
   witnessRequestsCount?: number;
   onOpenWitnessReviewModal?: () => void;
+  timesheetStatus?: TimesheetStatusResponse | null;
+  signingTimesheet?: boolean;
+  onSignTimesheet?: () => void;
+  revokingTimesheet?: boolean;
+  onRevokeTimesheet?: () => void;
 }
 
 export function DashboardHeader({
@@ -51,11 +62,35 @@ export function DashboardHeader({
   passkeysSupported,
   monthlyWitness,
   beritaAcaraCount = 0,
+  beritaAcaraStatus,
+  submittingBA = false,
+  onSubmitBeritaAcara,
   onOpenWitnessModal,
   witnessRequestsCount = 0,
   onOpenWitnessReviewModal,
+  timesheetStatus,
+  signingTimesheet = false,
+  onSignTimesheet,
+  revokingTimesheet = false,
+  onRevokeTimesheet,
 }: Readonly<DashboardHeaderProps>) {
   const router = useRouter();
+
+  const isTimesheetSigned = Boolean(
+    timesheetStatus?.is_signed || timesheetStatus?.status === "signed"
+  );
+
+  const isBaSigned =
+    beritaAcaraStatus?.status === "signed" || beritaAcaraStatus?.status === "approved";
+  const isBaPending =
+    beritaAcaraStatus?.status === "pending_witness" || beritaAcaraStatus?.status === "submitted";
+  const isBaRejected = beritaAcaraStatus?.status === "rejected";
+  const isBaRevoked = beritaAcaraStatus?.status === "revoked";
+  const isBaUnsubmitted = !beritaAcaraStatus || beritaAcaraStatus.status === "draft";
+  const witnessName =
+    beritaAcaraStatus?.witness_name ||
+    monthlyWitness?.name ||
+    (beritaAcaraStatus?.witness_id ? `Witness #${beritaAcaraStatus.witness_id}` : "Witness");
 
   let pushIcon = <IconBell size={20} />;
   if (pushBusy) {
@@ -80,39 +115,81 @@ export function DashboardHeader({
               </div>
             </div>
             <div className="col-auto ms-auto d-flex flex-wrap gap-2 mt-2 mt-sm-0">
+              {/* Timesheet Sign / Revoke Action Button */}
+              {isTimesheetSigned ? (
+                onRevokeTimesheet && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (
+                        window.confirm(
+                          "Revoke digital signature for this timesheet period? Activity locking will be released."
+                        )
+                      ) {
+                        onRevokeTimesheet();
+                      }
+                    }}
+                    disabled={revokingTimesheet}
+                    className="btn btn-outline-danger d-inline-flex align-items-center gap-1.5"
+                    style={{ minHeight: 44 }}
+                    title="Revoke timesheet signature to unlock daily activity editing"
+                  >
+                    {revokingTimesheet ? (
+                      <IconLoader2 size={18} className="animate-spin" />
+                    ) : (
+                      <IconArrowBackUp size={18} />
+                    )}
+                    <span>Revoke Timesheet Signature</span>
+                  </button>
+                )
+              ) : (
+                onSignTimesheet && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (beritaAcaraCount > 0 && !isBaSigned) {
+                        onGenerate();
+                      } else {
+                        onSignTimesheet();
+                      }
+                    }}
+                    disabled={signingTimesheet}
+                    className="btn btn-outline-success d-inline-flex align-items-center gap-1.5"
+                    style={{ minHeight: 44 }}
+                    title="Digitally sign and lock monthly timesheet"
+                  >
+                    {signingTimesheet ? (
+                      <IconLoader2 size={18} className="animate-spin" />
+                    ) : (
+                      <IconShieldCheck size={18} />
+                    )}
+                    <span>Sign Timesheet</span>
+                  </button>
+                )
+              )}
+
               {witnessRequestsCount > 0 && onOpenWitnessReviewModal && (
                 <button
                   type="button"
                   onClick={onOpenWitnessReviewModal}
                   className="btn btn-outline-danger d-flex align-items-center gap-1"
-                  title="Tinjau permohonan Berita Acara rekan kerja yang menunggu tanda tangan Anda sebagai saksi"
+                  title="Review coworker attendance incident reports awaiting your witness signature"
+                  style={{ minHeight: 44 }}
                 >
                   <IconShieldCheck size={18} />
                   <span>
-                    Tanda Tangan Saksi ({witnessRequestsCount})
-                  </span>
-                </button>
-              )}
-              {onOpenWitnessModal && (
-                <button
-                  type="button"
-                  onClick={onOpenWitnessModal}
-                  className="btn btn-outline-primary d-flex align-items-center gap-1"
-                  title="Atur saksi untuk seluruh entri Berita Acara bulan ini"
-                >
-                  <IconShieldCheck size={18} />
-                  <span>
-                    Saksi BA: {monthlyWitness ? monthlyWitness.name : "Atur Saksi"}
-                    {beritaAcaraCount > 0 ? ` (${beritaAcaraCount} hari)` : ""}
+                    Witness Signatures ({witnessRequestsCount})
                   </span>
                 </button>
               )}
               <button
                 type="button"
                 onClick={() => router.push("/activity")}
-                className="btn btn-primary d-flex align-items-center gap-1"
+                className="btn btn-primary d-inline-flex align-items-center gap-1.5"
+                style={{ minHeight: 44 }}
               >
-                <IconPlus size={18} /> Today&apos;s Activity
+                <IconPlus size={18} />
+                <span>Today&apos;s Activity</span>
               </button>
             </div>
           </div>
@@ -121,19 +198,34 @@ export function DashboardHeader({
 
       {/* 4 Tabler Quick Action Metric Cards */}
       <div className="row row-cards mb-3">
-        {/* Card 1: Generate */}
+        {/* Card 1: Generate Timesheet (Consistent Card) */}
         <div className="col-sm-6 col-lg-3">
           <div
-            className="card card-sm shadow-sm h-100 cursor-pointer hover-shadow"
+            className={`card card-sm shadow-sm h-100 cursor-pointer hover-shadow ${
+              beritaAcaraCount > 0 && !isBaSigned ? "border-warning-subtle" : ""
+            }`}
             onClick={onGenerate}
             role="button"
             tabIndex={0}
             onKeyDown={(e) => {
               if (e.key === "Enter" || e.key === " ") onGenerate();
             }}
+            title={
+              beritaAcaraCount > 0 && !isBaSigned
+                ? `Timesheet locked: ${beritaAcaraCount} attendance incident ${
+                    beritaAcaraCount === 1 ? "report requires" : "reports require"
+                  } witness signature`
+                : "Generate and export monthly timesheet"
+            }
           >
             <div className="card-body d-flex align-items-center">
-              <span className="avatar bg-green-lt text-green me-3 rounded">
+              <span
+                className={`avatar ${
+                  beritaAcaraCount > 0 && !isBaSigned
+                    ? "bg-warning-lt text-warning"
+                    : "bg-green-lt text-green"
+                } me-3 rounded`}
+              >
                 {generating ? (
                   <IconLoader2 size={22} className="animate-spin" />
                 ) : (
@@ -141,8 +233,28 @@ export function DashboardHeader({
                 )}
               </span>
               <div className="min-w-0">
-                <div className="fw-bold">Generate</div>
-                <div className="text-secondary small">Export monthly timesheet</div>
+                <div className="fw-bold d-flex align-items-center gap-1.5">
+                  <span>Generate</span>
+                  {beritaAcaraCount > 0 && !isBaSigned && (
+                    <span className="badge bg-warning-lt text-warning small px-1.5 py-0.5">
+                      Locked
+                    </span>
+                  )}
+                  {isTimesheetSigned && (
+                    <span className="badge bg-info-lt text-info small px-1.5 py-0.5">
+                      Signed
+                    </span>
+                  )}
+                </div>
+                <div className="text-secondary small text-truncate">
+                  {beritaAcaraCount > 0 && !isBaSigned
+                    ? `${beritaAcaraCount} ${
+                        beritaAcaraCount === 1 ? "report needs" : "reports need"
+                      } witness signature`
+                    : isTimesheetSigned
+                    ? "Timesheet signed & locked"
+                    : "Export monthly timesheet"}
+                </div>
               </div>
             </div>
           </div>

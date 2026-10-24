@@ -24,8 +24,8 @@ interface WitnessReviewModalProps {
 }
 
 const MONTH_NAMES = [
-  "Januari", "Februari", "Maret", "April", "Mei", "Juni",
-  "Juli", "Agustus", "September", "Oktober", "November", "Desember",
+  "January", "February", "March", "April", "May", "June",
+  "July", "August", "September", "October", "November", "December",
 ];
 
 export function WitnessReviewModal({
@@ -43,11 +43,11 @@ export function WitnessReviewModal({
     setProcessingId(id);
     try {
       await witnessAction(id, "approve");
-      notify("Berita Acara berhasil ditandatangani dan disetujui sebagai saksi! ✍️", "success");
+      notify("Incident Report signed and approved as witness! ✍️", "success");
       onActionCompleted();
     } catch (err: unknown) {
       notify(
-        err instanceof Error ? err.message : "Gagal menandatangani Berita Acara",
+        err instanceof Error ? err.message : "Failed to sign Incident Report",
         "error"
       );
     } finally {
@@ -58,19 +58,19 @@ export function WitnessReviewModal({
   const handleReject = async (id: string | number) => {
     const notes = rejectNotes[id]?.trim();
     if (!notes) {
-      notify("Harap berikan catatan revisi alasan penolakan Berita Acara", "error");
+      notify("Please provide revision notes explaining the rejection reason", "error");
       return;
     }
 
     setProcessingId(id);
     try {
       await witnessAction(id, "reject", notes);
-      notify("Berita Acara telah ditolak dengan catatan revisi", "info");
+      notify("Incident Report has been rejected with revision notes", "info");
       setRejectingId(null);
       onActionCompleted();
     } catch (err: unknown) {
       notify(
-        err instanceof Error ? err.message : "Gagal memproses penolakan",
+        err instanceof Error ? err.message : "Failed to process rejection",
         "error"
       );
     } finally {
@@ -87,13 +87,13 @@ export function WitnessReviewModal({
           <div className="avatar avatar-xs bg-primary-lt rounded">
             <IconShieldCheck size={18} className="text-primary" />
           </div>
-          <span className="fw-bold">Peninjauan Tanda Tangan Saksi Berita Acara</span>
+          <span className="fw-bold">Witness Review - Attendance Incident Reports</span>
         </div>
       }
       size="lg"
       footer={
         <button type="button" className="btn btn-outline-secondary ms-auto" onClick={onClose}>
-          Tutup
+          Close
         </button>
       }
     >
@@ -103,9 +103,9 @@ export function WitnessReviewModal({
             <div className="avatar avatar-md bg-success-lt rounded-circle mb-3">
               <IconCheck size={28} className="text-success" />
             </div>
-            <h4 className="fw-bold mb-1">Tidak Ada Permohonan Tertunda</h4>
+            <h4 className="fw-bold mb-1">No Pending Requests</h4>
             <p className="text-secondary small mb-0">
-              Semua permohonan Berita Acara yang menunjuk Anda sebagai saksi telah selesai ditinjau.
+              All attendance incident reports requesting your witness signature have been reviewed.
             </p>
           </div>
         ) : (
@@ -113,13 +113,13 @@ export function WitnessReviewModal({
             <div className="alert alert-info py-2 px-3 small d-flex align-items-center gap-2 mb-1">
               <IconAlertCircle size={18} className="text-info flex-shrink-0" />
               <span>
-                Anda ditunjuk sebagai saksi untuk <strong>{requests.length}</strong> Berita Acara bulanan berikut. Silakan periksa dan berikan tanda tangan persetujuan Anda.
+                You have been designated as witness for <strong>{requests.length}</strong> monthly incident report(s). Please review and provide your approval signature.
               </span>
             </div>
 
             <div className="list-group list-group-flush border rounded">
               {requests.map((item) => {
-                const monthName = MONTH_NAMES[(item.month ?? 1) - 1] || `Bulan ${item.month}`;
+                const monthName = MONTH_NAMES[(item.month ?? 1) - 1] || `Month ${item.month}`;
                 const isProcessing = processingId === item.id;
                 const isRejecting = rejectingId === item.id;
 
@@ -129,40 +129,40 @@ export function WitnessReviewModal({
                       <div>
                         <div className="d-flex align-items-center gap-2">
                           <IconUser size={16} className="text-primary" />
-                          <span className="fw-bold fs-3 text-body">{item.user_name || "Pegawai"}</span>
+                          <span className="fw-bold fs-3 text-body">{item.user_name || "Employee"}</span>
                         </div>
                         <div className="text-secondary small d-flex align-items-center gap-2 mt-1">
                           <IconCalendar size={14} />
                           <span>
-                            Periode: <strong>{monthName} {item.year}</strong>
+                            Period: <strong>{monthName} {item.year}</strong>
                           </span>
                           <span>•</span>
                           <span>
-                            Diajukan: {item.submitted_at ? new Date(item.submitted_at).toLocaleDateString("id-ID", { dateStyle: "medium" }) : "-"}
+                            Submitted: {item.submitted_at ? new Date(item.submitted_at).toLocaleDateString("en-US", { dateStyle: "medium" }) : "-"}
                           </span>
                         </div>
                       </div>
                       <span className="badge bg-warning-lt text-capitalize px-2 py-1">
-                        Menunggu Tanda Tangan Saksi
+                        Awaiting Witness Signature
                       </span>
                     </div>
 
                     {item.notes && (
                       <div className="bg-light p-2 rounded small text-secondary mb-3">
-                        <strong>Catatan:</strong> {item.notes}
+                        <strong>Notes:</strong> {item.notes}
                       </div>
                     )}
 
                     {isRejecting ? (
                       <div className="bg-danger-subtle p-3 rounded border border-danger-subtle mt-2">
                         <label className="form-label small fw-bold text-danger mb-1" htmlFor={`reject-notes-${item.id}`}>
-                          Alasan / Catatan Revisi untuk {item.user_name || "Pemohon"}:
+                          Reason / Revision Notes for {item.user_name || "Requester"}:
                         </label>
                         <textarea
                           id={`reject-notes-${item.id}`}
                           className="form-control form-control-sm mb-2"
                           rows={2}
-                          placeholder="Misal: Mohon perbaiki entri tanggal 15 karena deskripsi aktivitas kurang lengkap"
+                          placeholder="e.g.: Please correct the entries on the 15th because activity description is incomplete"
                           value={rejectNotes[item.id] || ""}
                           onChange={(e) =>
                             setRejectNotes((prev) => ({
@@ -179,7 +179,7 @@ export function WitnessReviewModal({
                             onClick={() => setRejectingId(null)}
                             disabled={isProcessing}
                           >
-                            Batal
+                            Cancel
                           </button>
                           <button
                             type="button"
@@ -192,7 +192,7 @@ export function WitnessReviewModal({
                             ) : (
                               <IconX size={14} />
                             )}
-                            Kirim Penolakan
+                            Send Rejection
                           </button>
                         </div>
                       </div>
@@ -204,7 +204,7 @@ export function WitnessReviewModal({
                           onClick={() => setRejectingId(item.id)}
                           disabled={isProcessing}
                         >
-                          <IconX size={14} /> Tolak / Revisi
+                          <IconX size={14} /> Reject / Request Revision
                         </button>
                         <button
                           type="button"
@@ -217,7 +217,7 @@ export function WitnessReviewModal({
                           ) : (
                             <IconCheck size={14} />
                           )}
-                          Tanda Tangani / Setujui
+                          Sign & Approve
                         </button>
                       </div>
                     )}

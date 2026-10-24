@@ -295,7 +295,7 @@ export function TimesheetJobsModal({
                           className="btn btn-sm btn-primary d-inline-flex align-items-center gap-1"
                         >
                           <IconDownload size={14} />
-                          {isZip ? "Unduh ZIP" : "Download XLSX"}
+                          {isZip ? "Download ZIP" : "Download XLSX"}
                         </a>
                       ) : job.status === "queued" || job.status === "processing" ? (
                         <span className="badge bg-secondary-lt d-inline-flex align-items-center gap-1">
