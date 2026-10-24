@@ -10,6 +10,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Timesheet Digital Signing & Revocation Controls**:
+  - Added dedicated timesheet sign-off and signature revocation action buttons (`Sign Timesheet` and `Revoke Timesheet Signature`) to the dashboard header, enabling employees to digitally lock their timesheet or unlock it if changes are necessary.
+- **Witness Request Cancellation & Signature Revocation**:
+  - Added direct action buttons to `MonthlyWitnessCard` and `UnsignedBeritaAcaraModal`:
+    - `Cancel Witness Request`: Allows employees to cancel pending witness review requests when status is `pending_witness` or `submitted`.
+    - `Revoke BA Signature`: Allows employees to revoke approved/signed Berita Acara signatures and return them to draft when revisions are needed.
+- **TanStack Query v5 & Zustand Client Architecture**:
+  - Integrated **Zustand** store (`useTimesheetStore`) managing active month, year, page, and rows-per-page limit.
+  - Implemented **TanStack Query v5** hooks (`useActivities`, `useAssignMonthlyWitness`, `useGenerateTimesheet`) with `placeholderData: keepPreviousData` preventing layout flicker during pagination and caching active queries.
+- **TanStack Table v8 Server-Side Pagination**:
+  - Added `ActivitiesTable` with `manualPagination: true` consuming standard backend envelope `response.pagination` (`page`, `limit`, `total_rows`, `total_pages`).
+  - Implemented accessible range counter (`Showing X to Y of Z results`), rows-per-page selector (`10`, `25`, `50`, `100`), smart page pills with ellipsis, and bi-directional URL query sync (`?page=X&limit=Y`).
+- **UI/UX Pro Max Monthly Witness Designation Card**:
+  - Added `MonthlyWitnessCard` with WCAG 2.2 AA contrast, responsive layout, unassigned amber callout, and locked witness badge (`Locked Witness for [Month] [Year]`) with touch targets $\ge 44\times 44\text{px}$.
+- **Public Verification Portal & Fingerprint Normalization**:
+  - Standardized public verification routes (`/verify/{token}` and `/verify/doc/{token}`) with English-only UI, dynamic `APP_NAME` branding (no hardcoded organization names), uppercase SHA-256 hash formatting, and timezone-aware timestamps (`formatLocalTimestamp`).
+- **Domain Labeling Standardization**:
+  - Formally labeled attendance incident documents as **"Berita Acara - Attendance Incident Report"** (distinguished from overtime/SPL) across all tables, cards, dialogs, and verification views.
 - **Interactive Typed Digital Signature**: Added tabbed signature creation on `/profile` with a **"Ketik Nama" (Type Name)** mode supporting cursive web fonts (*Caveat*, *Dancing Script*, *Great Vibes*), rendered to a 2x Retina transparent HTML5 canvas and uploaded via `POST /api/v1/user/signature` alongside freehand drawing and image upload tabs.
 - **Berita Acara Witness Signature Guard on Generation**: Integrated backend validation guard for monthly timesheet generation (`POST /api/v1/timesheet/generate`), surfacing status alerts when Berita Acara entries are unsubmitted, awaiting witness sign-off, or rejected with revision notes:
   - Added dynamic status banners and quick **"Ajukan ke Saksi"** action on the dashboard utilizing optional `witness_id` in `SubmitBeritaAcaraRequest`.
@@ -24,7 +42,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - **Domain Model Relations**: Expanded `User`, `Company`, `Department`, `Division`, `Site`, `Project`, `Approver`, and `ProfileChangeRequest` with relational model links and audit timestamps.
 
 ### Changed
+- **Dashboard Witness & Incident Report UX Streamlining**:
+  - Removed duplicate monthly witness section embedded inside `MonthlyGrid`, eliminating redundant stacked witness cards.
+  - Removed redundant "Saksi BA" button next to "Today's Activity" in `DashboardHeader` in favor of centralized monthly card interactions.
+  - Re-anchored Card 1 in the quick action grid as a permanent, consistent **"Generate Timesheet"** card (showing `Locked: Butuh Saksi` indicator and tooltip when unsigned incident reports exist), maintaining symmetry across all 4 dashboard action cards.
+  - Consolidated monthly witness identity, lock states, incident report count badges (`Laporan Menunggu Pengajuan`, `Menunggu Saksi`, `Ditolak Saksi`, `Telah Ditandatangani`), and the direct `[Ajukan ke Saksi]` action into a unified **`MonthlyWitnessCard`** as the single source of truth.
+- **Dynamic Generate Metric Card & Berita Acara Integration**:
+  - Replaced the top Berita Acara notification banners with a dynamic, context-aware "Generate" action card on the dashboard that transitions seamlessly through BA states: **"Ajukan ke Saksi"** (draft), **"Menunggu Saksi"** (pending approval), **"Ditolak Saksi"** (review revisions), and clean **"Generate"** once witness verification is completed.
+  - Centralized Berita Acara signature revocation, pending cancellation, and rejection review into the **Monthly Witness Modal** via the header action.
+  - Removed redundant top banner for inbound witness review requests in favor of the persistent header notification button.
+- **Daily Activity Form Simplification**: Removed redundant per-activity "Saksi Berita Acara (Rekan Kerja)" select dropdown on `/activity` in favor of centralized monthly witness assignment and sign-off locking.
 - **Previous Activity Copying (Attendance Time Reset)**: Updated `copyPreviousDay` on `/activity` to leave `start_time` and `end_time` empty for accurate daily attendance tracking while autofilling task description, project reference, status, and Berita Acara notes from `GET /api/v1/activities/previous`.
+
+### Removed
+- **Redundant Error Banner**: Removed `ErrorSummaryAlert` banner from the dashboard in favor of the interactive `UnsignedBeritaAcaraModal` modal and centralized witness card indicators.
 
 ## [0.9.0] - 2026-10-19
 
