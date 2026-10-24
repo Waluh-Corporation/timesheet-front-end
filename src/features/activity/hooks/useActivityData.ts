@@ -115,13 +115,15 @@ export const useActivityData = (initialId: string | null, defaultDate: string) =
         setForm((curr) => ({
           ...curr,
           activity: prev.activity || curr.activity,
-          start_time: prev.start_time || curr.start_time,
-          end_time: prev.end_time || curr.end_time,
+          start_time: "",
+          end_time: "",
           status: prev.status || curr.status,
           project_ref_id: prev.project_ref_id || matchedProj?.id || curr.project_ref_id,
           project_id: prev.project_id || matchedProj?.code || curr.project_id,
           project_name: prev.project_name || matchedProj?.name || curr.project_name,
           app_impacted: prev.app_impacted || matchedProj?.app_impacted || curr.app_impacted,
+          is_berita_acara: prev.is_berita_acara !== undefined ? prev.is_berita_acara : curr.is_berita_acara,
+          berita_acara_notes: prev.berita_acara_notes !== undefined ? prev.berita_acara_notes : curr.berita_acara_notes,
         }));
         notify("Berhasil menyalin data kegiatan hari sebelumnya 📋", "success");
       }

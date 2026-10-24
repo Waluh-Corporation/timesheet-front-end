@@ -15,14 +15,17 @@ import {
   IconClock,
   IconDatabase,
   IconClipboardList,
+  IconShieldCheck,
   IconX,
   type Icon as TablerIcon,
 } from "@tabler/icons-react";
+import { getPendingWitnessRequests } from "@/services/beritaAcaraService";
 
 interface NavItem {
   href: string;
   label: string;
   icon: TablerIcon;
+  badge?: number | string;
 }
 
 interface NavSection {
@@ -48,8 +51,23 @@ export default function Shell({ children }: { readonly children: React.ReactNode
   const pathname = usePathname();
   const router = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [witnessCount, setWitnessCount] = useState(0);
   const mobileToggleRef = useRef<HTMLButtonElement>(null);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    let mounted = true;
+    if (user && user.role !== "admin") {
+      getPendingWitnessRequests()
+        .then((reqs) => {
+          if (mounted) setWitnessCount(reqs?.length || 0);
+        })
+        .catch(() => {});
+    }
+    return () => {
+      mounted = false;
+    };
+  }, [user, pathname]);
 
   const isAdmin =
     user?.role === "admin" ||
@@ -58,6 +76,19 @@ export default function Shell({ children }: { readonly children: React.ReactNode
       (pathname.startsWith("/users") ||
         pathname.startsWith("/profile-changes") ||
         pathname.startsWith("/master-data")));
+
+  const userTimesheetItems: NavItem[] = [
+    { href: "/dashboard", label: "Dashboard", icon: IconLayoutDashboard },
+    { href: "/activity", label: "Daily Activity", icon: IconCalendarCheck },
+    { href: "/overtime", label: "Overtime", icon: IconClock },
+    { href: "/historical-data", label: "Historical Data", icon: IconHistory },
+    {
+      href: "/berita-acara/witness-requests",
+      label: "Permintaan Saksi",
+      icon: IconShieldCheck,
+      badge: witnessCount > 0 ? witnessCount : undefined,
+    },
+  ];
 
   const sections: NavSection[] = isAdmin
     ? [
@@ -73,7 +104,7 @@ export default function Shell({ children }: { readonly children: React.ReactNode
     : [
         {
           title: "Timesheet",
-          items: timesheetItems,
+          items: userTimesheetItems,
         },
         {
           title: "Account",
@@ -160,6 +191,11 @@ export default function Shell({ children }: { readonly children: React.ReactNode
                       >
                         <Icon size={18} className={active ? "text-primary" : "text-secondary"} />
                         <span>{item.label}</span>
+                        {item.badge !== undefined && (
+                          <span className="badge bg-danger text-white rounded-pill ms-auto">
+                            {item.badge}
+                          </span>
+                        )}
                       </Link>
                     </li>
                   );
@@ -271,6 +307,11 @@ export default function Shell({ children }: { readonly children: React.ReactNode
                         >
                           <Icon size={18} className={active ? "text-primary" : "text-secondary"} />
                           <span>{item.label}</span>
+                          {item.badge !== undefined && (
+                            <span className="badge bg-danger text-white rounded-pill ms-auto">
+                              {item.badge}
+                            </span>
+                          )}
                         </Link>
                       </li>
                     );

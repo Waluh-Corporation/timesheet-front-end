@@ -58,16 +58,19 @@ export interface User {
   bni_id?: string;
   division?: string;
   division_id?: number;
+  division_rel?: Division;
   department?: string;
   department_id?: number;
   department_rel?: Department;
   site?: string;
   site_id?: number;
+  site_rel?: Site;
   company?: string;
   company_id?: number;
   company_rel?: Company;
   position?: string;
   group_name?: string;
+  signature_file_key?: string;
   created_at: string;
   updated_at?: string;
 }
@@ -124,17 +127,22 @@ export interface ProfileChangeRequest {
   bni_id?: string;
   division?: string;
   division_id?: number;
+  division_rel?: Division;
   department?: string;
   department_id?: number;
+  department_rel?: Department;
   site?: string;
   site_id?: number;
+  site_rel?: Site;
   company_id?: number;
+  company_rel?: Company;
   notes?: string;
   position?: string;
   group_name?: string;
   reviewed_by?: number;
   reviewer_name?: string;
   reviewed_at?: string;
+  reviewer?: User;
   created_at: string;
   updated_at?: string;
   user?: User;
@@ -185,6 +193,8 @@ export interface Approver {
   role_type: "team_leader" | "department_head";
   title?: string;
   is_active: boolean;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface OvertimeEntry {
@@ -250,6 +260,8 @@ export interface Division {
   code: string;
   name: string;
   is_active: boolean;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface DivisionRequest {
@@ -263,6 +275,8 @@ export interface Site {
   code: string;
   name: string;
   is_active: boolean;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface SiteRequest {
@@ -502,4 +516,100 @@ export function isUserAnonymized(
     (u.email?.startsWith("deleted_") && u.email?.endsWith("@timesheet.local"))
   );
 }
+
+// ==========================================
+// Digital Signatures, Berita Acara & Verification
+// ==========================================
+
+export interface UploadSignatureRequest {
+  signature_base64: string;
+}
+
+export interface UserSignatureResponse {
+  has_signature: boolean;
+  signature_url?: string;
+  file_key?: string;
+  updated_at?: string;
+}
+
+export interface SignTimesheetRequest {
+  month: number;
+  year: number;
+}
+
+export interface RevokeTimesheetRequest {
+  month: number;
+  year: number;
+}
+
+export interface TimesheetStatusResponse {
+  is_signed: boolean;
+  status: "draft" | "signed" | "revoked" | string;
+  signed_at?: string;
+  signature_hash?: string;
+  can_sign?: boolean;
+  can_revoke?: boolean;
+  verification_token?: string;
+}
+
+export interface SubmitBeritaAcaraRequest {
+  month: number;
+  year: number;
+  witness_id?: number; // Opsional: kosongkan atau hilangkan jika sudah ada saksi bulanan
+}
+
+export interface WitnessActionRequest {
+  action: "approve" | "reject";
+  notes?: string;
+}
+
+export interface BeritaAcaraStatusResponse {
+  id?: string | number;
+  user_id?: number;
+  employee_name?: string;
+  month: number;
+  year: number;
+  status: "draft" | "submitted" | "pending_witness" | "signed" | "approved" | "rejected" | "revoked" | string;
+  witness_id?: number;
+  witness_name?: string;
+  witness?: WitnessResponse;
+  submitted_at?: string;
+  reviewed_at?: string;
+  employee_signed_at?: string;
+  witness_signed_at?: string;
+  witness_rejection_notes?: string;
+  notes?: string;
+  verification_token?: string;
+  document_hash?: string;
+  verification_url?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface WitnessRequestItem {
+  id: string | number;
+  user_id: number;
+  user?: User;
+  user_name?: string;
+  month: number;
+  year: number;
+  status: string;
+  submitted_at: string;
+  activities_count?: number;
+  notes?: string;
+}
+
+export interface DocVerificationResponse {
+  is_valid: boolean;
+  document_type?: "timesheet" | "berita_acara" | string;
+  user_name?: string;
+  employee_id?: string;
+  period?: string;
+  signed_at?: string;
+  witness_name?: string;
+  witness_signed_at?: string;
+  verification_token?: string;
+  hash?: string;
+}
+
 

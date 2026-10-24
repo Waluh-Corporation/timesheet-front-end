@@ -88,9 +88,11 @@ describe("activityService integration tests", () => {
             project_id: "PROJ-1",
             project_name: "Timesheet System",
             app_impacted: "Core System",
-            start_time: "08:00",
-            end_time: "17:00",
+            start_time: "",
+            end_time: "",
             status: "P",
+            is_berita_acara: true,
+            berita_acara_notes: "Lupa tap kartu",
           },
         }),
         { status: 200, headers: { "Content-Type": "application/json" } }
@@ -101,6 +103,10 @@ describe("activityService integration tests", () => {
     expect(calledUrl).toContain("/api/v1/activities/previous?date=2026-10-16");
     expect(res.activity).toBe("Refactoring API integration");
     expect(res.project_name).toBe("Timesheet System");
+    expect(res.start_time).toBe("");
+    expect(res.end_time).toBe("");
+    expect(res.is_berita_acara).toBe(true);
+    expect(res.berita_acara_notes).toBe("Lupa tap kartu");
   });
 
   it("fetchActivityDetail queries /api/v1/activities/:id", async () => {

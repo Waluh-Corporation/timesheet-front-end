@@ -31,6 +31,8 @@ interface DashboardHeaderProps {
   monthlyWitness?: WitnessResponse;
   beritaAcaraCount?: number;
   onOpenWitnessModal?: () => void;
+  witnessRequestsCount?: number;
+  onOpenWitnessReviewModal?: () => void;
 }
 
 export function DashboardHeader({
@@ -50,6 +52,8 @@ export function DashboardHeader({
   monthlyWitness,
   beritaAcaraCount = 0,
   onOpenWitnessModal,
+  witnessRequestsCount = 0,
+  onOpenWitnessReviewModal,
 }: Readonly<DashboardHeaderProps>) {
   const router = useRouter();
 
@@ -76,6 +80,19 @@ export function DashboardHeader({
               </div>
             </div>
             <div className="col-auto ms-auto d-flex flex-wrap gap-2 mt-2 mt-sm-0">
+              {witnessRequestsCount > 0 && onOpenWitnessReviewModal && (
+                <button
+                  type="button"
+                  onClick={onOpenWitnessReviewModal}
+                  className="btn btn-outline-danger d-flex align-items-center gap-1"
+                  title="Tinjau permohonan Berita Acara rekan kerja yang menunggu tanda tangan Anda sebagai saksi"
+                >
+                  <IconShieldCheck size={18} />
+                  <span>
+                    Tanda Tangan Saksi ({witnessRequestsCount})
+                  </span>
+                </button>
+              )}
               {onOpenWitnessModal && (
                 <button
                   type="button"

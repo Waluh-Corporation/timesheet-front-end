@@ -9,6 +9,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **Interactive Typed Digital Signature**: Added tabbed signature creation on `/profile` with a **"Ketik Nama" (Type Name)** mode supporting cursive web fonts (*Caveat*, *Dancing Script*, *Great Vibes*), rendered to a 2x Retina transparent HTML5 canvas and uploaded via `POST /api/v1/user/signature` alongside freehand drawing and image upload tabs.
+- **Berita Acara Witness Signature Guard on Generation**: Integrated backend validation guard for monthly timesheet generation (`POST /api/v1/timesheet/generate`), surfacing status alerts when Berita Acara entries are unsubmitted, awaiting witness sign-off, or rejected with revision notes:
+  - Added dynamic status banners and quick **"Ajukan ke Saksi"** action on the dashboard utilizing optional `witness_id` in `SubmitBeritaAcaraRequest`.
+  - Added error response handling on "Generate" preventing timesheet creation if Berita Acara is not yet `signed`.
+- **Witness Requests Navigation & Review**: Added dedicated review route `/berita-acara/witness-requests` and `WitnessReviewModal` with responsive badge notifications on the sidebar navigation and dashboard header, allowing designated witnesses to approve or reject submissions with revision notes.
+- **API Contracts Integration (Swagger Sync)**: Synchronized frontend domain contracts and API client services with backend OpenAPI specification (`/swagger/doc.json`):
+  - **Timesheet Sign-off Lifecycle**: Added `getTimesheetStatus`, `signTimesheet`, `revokeTimesheet`, and `getTimesheetDownloadUrl` in `timesheetService`.
+  - **Berita Acara E-Sign & Witness Review Workflow**: Added `beritaAcaraService` supporting `getBeritaAcaraStatus`, `submitBeritaAcara` (with optional `witness_id`), `getPendingWitnessRequests`, `revokeBeritaAcara`, and `witnessAction`.
+  - **User Digital Signature Management**: Added `signatureService` supporting `getUserSignature`, `uploadUserSignature` (Base64 PNG/JPEG), and `deleteUserSignature`.
+  - **Public Document Verification**: Added `verifyService` and public verification route `/verify/doc/[token]` with Tabler UI layout for verifying document authenticity, signature timestamp, and cryptographic SHA-256 audit hash.
+  - **Domain Model Relations**: Expanded `User`, `Company`, `Department`, `Division`, `Site`, `Project`, `Approver`, and `ProfileChangeRequest` with relational model links and audit timestamps.
+
+### Changed
+- **Previous Activity Copying (Attendance Time Reset)**: Updated `copyPreviousDay` on `/activity` to leave `start_time` and `end_time` empty for accurate daily attendance tracking while autofilling task description, project reference, status, and Berita Acara notes from `GET /api/v1/activities/previous`.
+
 ## [0.9.0] - 2026-10-19
 
 ### Added

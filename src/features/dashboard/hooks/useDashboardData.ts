@@ -7,8 +7,18 @@ import {
   downloadTimesheet,
   requestTimesheetGeneration,
 } from "../services/dashboardService";
+import {
+  getBeritaAcaraStatus,
+  submitBeritaAcara,
+  getPendingWitnessRequests,
+} from "@/services/beritaAcaraService";
 import { useToast } from "@/components/Toast";
-import type { DailyActivity, WitnessResponse } from "@/lib/types";
+import type {
+  DailyActivity,
+  WitnessResponse,
+  BeritaAcaraStatusResponse,
+  WitnessRequestItem,
+} from "@/lib/types";
 import {
   enablePush,
   disablePush,
@@ -33,28 +43,36 @@ export function useDashboardData() {
   const [month, setMonth] = useState(now.getMonth() + 1);
   const [activities, setActivities] = useState<DailyActivity[]>([]);
   const [monthlyWitness, setMonthlyWitness] = useState<WitnessResponse | undefined>();
+  const [beritaAcaraStatus, setBeritaAcaraStatus] = useState<BeritaAcaraStatusResponse | null>(null);
+  const [witnessRequests, setWitnessRequests] = useState<WitnessRequestItem[]>([]);
   const [holidays, setHolidays] = useState<Record<number, string>>({});
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
+  const [submittingBA, setSubmittingBA] = useState(false);
   const [pushBusy, setPushBusy] = useState(false);
   const [pushOn, setPushOn] = useState(false);
   const [sendingTestPush, setSendingTestPush] = useState(false);
   const [isJobsModalOpen, setIsJobsModalOpen] = useState(false);
   const [isWitnessModalOpen, setIsWitnessModalOpen] = useState(false);
+  const [isWitnessReviewModalOpen, setIsWitnessReviewModalOpen] = useState(false);
   const [page, setPage] = useState(1);
   const ITEMS_PER_PAGE = 7;
 
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const [actRes, hols] = await Promise.all([
+      const [actRes, hols, baStatusRes, pendingWitnessReqs] = await Promise.all([
         fetchDashboardActivities(year, month),
         fetchHolidays(year, month),
+        getBeritaAcaraStatus(year, month).catch(() => null),
+        getPendingWitnessRequests().catch(() => []),
       ]);
       const acts = Array.isArray(actRes) ? actRes : (actRes?.activities || []);
       const mWitness = Array.isArray(actRes) ? undefined : actRes?.monthlyWitness;
       setActivities(acts);
       setMonthlyWitness(mWitness);
+      setBeritaAcaraStatus(baStatusRes);
+      setWitnessRequests(pendingWitnessReqs || []);
 
       const hmap: Record<number, string> = {};
       (hols || []).forEach((h) => {
@@ -103,6 +121,20 @@ export function useDashboardData() {
     return activities.filter((a) => a.is_berita_acara).length;
   }, [activities]);
 
+  const handleSubmitBeritaAcara = async (witnessId?: number) => {
+    setSubmittingBA(true);
+    try {
+      const targetWitness = witnessId || monthlyWitness?.id;
+      await submitBeritaAcara(year, month, targetWitness);
+      notify("Berita Acara berhasil diajukan ke saksi! 📋", "success");
+      await load();
+    } catch (err: any) {
+      notify(err.message || "Gagal mengajukan Berita Acara", "error");
+    } finally {
+      setSubmittingBA(false);
+    }
+  };
+
   const generate = async () => {
     setGenerating(true);
     try {
@@ -115,11 +147,20 @@ export function useDashboardData() {
         notify("Timesheet downloaded & emailed to you 📧", "success");
       }
     } catch (err: any) {
-      try {
-        await downloadTimesheet(year, month);
-        notify("Timesheet downloaded & emailed to you 📧", "success");
-      } catch (fallbackErr: any) {
-        notify(err.message || fallbackErr.message || "Generation failed", "error");
+      const msg = err.message || "";
+      if (
+        msg.includes("Berita Acara") ||
+        msg.includes("dokumen belum dapat dibuat") ||
+        msg.includes("terdapat catatan")
+      ) {
+        notify(msg, "error");
+      } else {
+        try {
+          await downloadTimesheet(year, month);
+          notify("Timesheet downloaded & emailed to you 📧", "success");
+        } catch (fallbackErr: any) {
+          notify(err.message || fallbackErr.message || "Generation failed", "error");
+        }
       }
     } finally {
       setGenerating(false);
@@ -173,6 +214,12 @@ export function useDashboardData() {
     activities,
     monthlyWitness,
     beritaAcaraCount,
+    beritaAcaraStatus,
+    submittingBA,
+    handleSubmitBeritaAcara,
+    witnessRequests,
+    isWitnessReviewModalOpen,
+    setIsWitnessReviewModalOpen,
     holidays,
     loading,
     generating, generate,
