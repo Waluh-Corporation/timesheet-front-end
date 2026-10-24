@@ -78,6 +78,10 @@ export interface User {
 export interface WitnessResponse {
   id: number;
   name: string;
+  username?: string;
+  employee_id?: string;
+  division?: string;
+  department?: string;
 }
 
 export interface UpdateMonthlyWitnessRequest {
@@ -93,6 +97,7 @@ export interface DailyActivity {
   end_time: string;
   status: string;
   activity: string;
+  work_description?: string;
   project_name: string;
   project_id: string;
   app_impacted: string;
@@ -561,7 +566,7 @@ export interface TimesheetStatusResponse {
 export interface SubmitBeritaAcaraRequest {
   month: number;
   year: number;
-  witness_id?: number; // Opsional: kosongkan atau hilangkan jika sudah ada saksi bulanan
+  witness_id?: number; // Optional: leave empty or omit if monthly witness is already designated
 }
 
 export interface WitnessActionRequest {
@@ -588,6 +593,7 @@ export interface BeritaAcaraStatusResponse {
   verification_token?: string;
   document_hash?: string;
   verification_url?: string;
+  total_days?: number;
   created_at?: string;
   updated_at?: string;
 }

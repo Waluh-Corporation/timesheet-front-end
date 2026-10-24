@@ -3,9 +3,10 @@ import "./globals.css";
 import { AuthProvider } from "@/lib/auth";
 import { ToastProvider } from "@/components/Toast";
 import { ThemeProvider, themeInitScript } from "@/lib/theme";
+import { QueryProvider } from "@/lib/query-provider";
 
 export const metadata: Metadata = {
-  title: "Maman Racing — Timesheet Portal",
+  title: "Timesheet Portal",
   description: "Internal portal for daily timesheet entry, dynamic templates, and reminders.",
   manifest: "/manifest.json",
 };
@@ -24,7 +25,9 @@ export default function RootLayout({
       <body className="min-h-screen">
         <ThemeProvider>
           <AuthProvider>
-            <ToastProvider>{children}</ToastProvider>
+            <QueryProvider>
+              <ToastProvider>{children}</ToastProvider>
+            </QueryProvider>
           </AuthProvider>
         </ThemeProvider>
       </body>
