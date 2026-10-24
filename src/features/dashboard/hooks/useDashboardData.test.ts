@@ -44,6 +44,7 @@ const mockGetBeritaAcaraStatus = mock(async () => ({
   witness_name: "Pak Budi",
 }));
 const mockSubmitBeritaAcara = mock(async () => ({ message: "Submitted" }));
+const mockRevokeBeritaAcara = mock(async () => ({ message: "Revoked" }));
 const mockGetPendingWitnessRequests = mock(async () => [
   {
     id: "req-1",
@@ -59,6 +60,7 @@ const mockGetPendingWitnessRequests = mock(async () => [
 mock.module("@/services/beritaAcaraService", () => ({
   getBeritaAcaraStatus: mockGetBeritaAcaraStatus,
   submitBeritaAcara: mockSubmitBeritaAcara,
+  revokeBeritaAcara: mockRevokeBeritaAcara,
   getPendingWitnessRequests: mockGetPendingWitnessRequests,
 }));
 
@@ -97,6 +99,7 @@ describe("useDashboardData hook (Feature)", () => {
     mockFetchActivities.mockClear();
     mockGetBeritaAcaraStatus.mockClear();
     mockSubmitBeritaAcara.mockClear();
+    mockRevokeBeritaAcara.mockClear();
     mockGetPendingWitnessRequests.mockClear();
     mockRequestTimesheetGeneration.mockClear();
     mockDownloadTimesheet.mockClear();
@@ -167,6 +170,30 @@ describe("useDashboardData hook (Feature)", () => {
     );
     // Should NOT have attempted fallback download
     expect(mockDownloadTimesheet).not.toHaveBeenCalled();
+
+    root.unmount();
+    container.remove();
+  });
+
+  it("revokes submitted Berita Acara signature request successfully", async () => {
+    let captured: any;
+    function Consumer() {
+      captured = useDashboardData();
+      return React.createElement("div", null, "Ready");
+    }
+
+    const root = createRoot(container);
+    await act(async () => {
+      root.render(React.createElement(Consumer));
+      await new Promise((resolve) => setTimeout(resolve, 30));
+    });
+
+    await act(async () => {
+      await captured.handleRevokeBeritaAcara();
+    });
+
+    expect(mockRevokeBeritaAcara).toHaveBeenCalledWith("ba-1");
+    expect(mockNotify).toHaveBeenCalledWith("Permintaan tanda tangan saksi berhasil dibatalkan. 🔄", "success");
 
     root.unmount();
     container.remove();

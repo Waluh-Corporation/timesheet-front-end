@@ -10,6 +10,7 @@ import {
 import {
   getBeritaAcaraStatus,
   submitBeritaAcara,
+  revokeBeritaAcara,
   getPendingWitnessRequests,
 } from "@/services/beritaAcaraService";
 import { useToast } from "@/components/Toast";
@@ -49,6 +50,7 @@ export function useDashboardData() {
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
   const [submittingBA, setSubmittingBA] = useState(false);
+  const [revokingBA, setRevokingBA] = useState(false);
   const [pushBusy, setPushBusy] = useState(false);
   const [pushOn, setPushOn] = useState(false);
   const [sendingTestPush, setSendingTestPush] = useState(false);
@@ -135,6 +137,20 @@ export function useDashboardData() {
     }
   };
 
+  const handleRevokeBeritaAcara = async () => {
+    if (!beritaAcaraStatus?.id) return;
+    setRevokingBA(true);
+    try {
+      await revokeBeritaAcara(beritaAcaraStatus.id);
+      notify("Permintaan tanda tangan saksi berhasil dibatalkan.", "success");
+      await load();
+    } catch (err: any) {
+      notify(err.message || "Gagal membatalkan permintaan tanda tangan saksi", "error");
+    } finally {
+      setRevokingBA(false);
+    }
+  };
+
   const generate = async () => {
     setGenerating(true);
     try {
@@ -217,6 +233,8 @@ export function useDashboardData() {
     beritaAcaraStatus,
     submittingBA,
     handleSubmitBeritaAcara,
+    revokingBA,
+    handleRevokeBeritaAcara,
     witnessRequests,
     isWitnessReviewModalOpen,
     setIsWitnessReviewModalOpen,

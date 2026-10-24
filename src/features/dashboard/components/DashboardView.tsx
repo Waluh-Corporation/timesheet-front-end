@@ -8,6 +8,7 @@ import {
   IconX,
   IconSend,
   IconLoader2,
+  IconArrowBackUp,
 } from "@tabler/icons-react";
 import { useDashboardData } from "../hooks/useDashboardData";
 import { DashboardHeader } from "./DashboardHeader";
@@ -25,6 +26,8 @@ export default function DashboardView() {
     beritaAcaraStatus,
     submittingBA,
     handleSubmitBeritaAcara,
+    revokingBA,
+    handleRevokeBeritaAcara,
     witnessRequests,
     isWitnessReviewModalOpen,
     setIsWitnessReviewModalOpen,
@@ -65,7 +68,8 @@ export default function DashboardView() {
   const isBaPending =
     beritaAcaraStatus?.status === "pending_witness" || beritaAcaraStatus?.status === "submitted";
   const isBaRejected = beritaAcaraStatus?.status === "rejected";
-  const isBaUnsubmitted = !beritaAcaraStatus || beritaAcaraStatus.status === "draft" || beritaAcaraStatus.status === "revoked";
+  const isBaRevoked = beritaAcaraStatus?.status === "revoked";
+  const isBaUnsubmitted = !beritaAcaraStatus || beritaAcaraStatus.status === "draft";
 
   return (
     <div className="d-flex flex-column gap-3">
@@ -139,16 +143,66 @@ export default function DashboardView() {
           )}
 
           {isBaPending && (
-            <div className="alert alert-info border-info shadow-sm d-flex align-items-center gap-2 mb-0" role="alert">
-              <span className="avatar avatar-sm bg-info-lt text-info rounded shrink-0">
-                <IconClock size={20} />
-              </span>
-              <div>
-                <div className="fw-bold">⏳ Menunggu Tanda Tangan Saksi</div>
-                <div className="small text-secondary">
-                  Pengajuan Berita Acara telah terkirim. Dokumen belum dapat dibuat karena masih menunggu persetujuan dan tanda tangan dari saksi {witnessName}.
+            <div className="alert alert-info border-info shadow-sm d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-3 mb-0" role="alert">
+              <div className="d-flex align-items-center gap-2">
+                <span className="avatar avatar-sm bg-info-lt text-info rounded shrink-0">
+                  <IconClock size={20} />
+                </span>
+                <div>
+                  <div className="fw-bold">⏳ Menunggu Tanda Tangan Saksi</div>
+                  <div className="small text-secondary">
+                    Pengajuan Berita Acara telah terkirim. Dokumen belum dapat dibuat karena masih menunggu persetujuan dan tanda tangan dari saksi {witnessName}.
+                  </div>
                 </div>
               </div>
+              <button
+                type="button"
+                className="btn btn-outline-danger btn-sm d-flex align-items-center gap-1 shrink-0"
+                onClick={() => {
+                  if (window.confirm("Batalkan permintaan tanda tangan saksi untuk Berita Acara periode ini?")) {
+                    handleRevokeBeritaAcara();
+                  }
+                }}
+                disabled={revokingBA}
+                title="Batalkan permintaan tanda tangan saksi ini"
+              >
+                {revokingBA ? (
+                  <IconLoader2 size={16} className="animate-spin" />
+                ) : (
+                  <IconArrowBackUp size={16} />
+                )}
+                <span>Batalkan Permintaan</span>
+              </button>
+            </div>
+          )}
+
+          {isBaRevoked && (
+            <div className="alert alert-warning border-warning shadow-sm d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-3 mb-0" role="alert">
+              <div className="d-flex align-items-center gap-2">
+                <span className="avatar avatar-sm bg-warning-lt text-warning rounded shrink-0">
+                  <IconArrowBackUp size={20} />
+                </span>
+                <div>
+                  <div className="fw-bold">↩️ Pengajuan Berita Acara Dibatalkan</div>
+                  <div className="small text-secondary">
+                    Permintaan tanda tangan saksi untuk periode ini telah dibatalkan. Anda dapat mengoreksi aktivitas harian atau mengajukan kembali ke saksi.
+                  </div>
+                </div>
+              </div>
+              <button
+                type="button"
+                className="btn btn-primary btn-sm d-flex align-items-center gap-1 shrink-0"
+                onClick={() => handleSubmitBeritaAcara()}
+                disabled={submittingBA || !monthlyWitness}
+                title={!monthlyWitness ? "Atur saksi bulanan terlebih dahulu" : "Ajukan kembali Berita Acara ke saksi"}
+              >
+                {submittingBA ? (
+                  <IconLoader2 size={16} className="animate-spin" />
+                ) : (
+                  <IconSend size={16} />
+                )}
+                <span>Ajukan Kembali ke Saksi</span>
+              </button>
             </div>
           )}
 
@@ -187,7 +241,7 @@ export default function DashboardView() {
                 <IconCheck size={20} />
               </span>
               <div>
-                <div className="fw-bold">✅ Berita Acara Telah Disetujui & Ditandatangani Saksi ({witnessName})</div>
+                <div className="fw-bold">Berita Acara Telah Disetujui & Ditandatangani Saksi</div>
                 <div className="small text-secondary">
                   Seluruh catatan Berita Acara telah diverifikasi oleh saksi. Dokumen timesheet siap untuk di-generate.
                 </div>
