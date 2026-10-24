@@ -543,13 +543,19 @@ export interface RevokeTimesheetRequest {
 }
 
 export interface TimesheetStatusResponse {
-  is_signed: boolean;
+  id?: string;
+  user_id?: number;
+  month?: number;
+  year?: number;
+  is_signed?: boolean;
   status: "draft" | "signed" | "revoked" | string;
   signed_at?: string;
   signature_hash?: string;
+  document_hash?: string;
   can_sign?: boolean;
   can_revoke?: boolean;
   verification_token?: string;
+  verification_url?: string;
 }
 
 export interface SubmitBeritaAcaraRequest {

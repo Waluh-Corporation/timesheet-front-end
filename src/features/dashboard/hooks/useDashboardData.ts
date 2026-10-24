@@ -13,12 +13,18 @@ import {
   revokeBeritaAcara,
   getPendingWitnessRequests,
 } from "@/services/beritaAcaraService";
+import {
+  getTimesheetStatus,
+  signTimesheet,
+  revokeTimesheet,
+} from "@/services/timesheetService";
 import { useToast } from "@/components/Toast";
 import type {
   DailyActivity,
   WitnessResponse,
   BeritaAcaraStatusResponse,
   WitnessRequestItem,
+  TimesheetStatusResponse,
 } from "@/lib/types";
 import {
   enablePush,
@@ -45,12 +51,15 @@ export function useDashboardData() {
   const [activities, setActivities] = useState<DailyActivity[]>([]);
   const [monthlyWitness, setMonthlyWitness] = useState<WitnessResponse | undefined>();
   const [beritaAcaraStatus, setBeritaAcaraStatus] = useState<BeritaAcaraStatusResponse | null>(null);
+  const [timesheetStatus, setTimesheetStatus] = useState<TimesheetStatusResponse | null>(null);
   const [witnessRequests, setWitnessRequests] = useState<WitnessRequestItem[]>([]);
   const [holidays, setHolidays] = useState<Record<number, string>>({});
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
   const [submittingBA, setSubmittingBA] = useState(false);
   const [revokingBA, setRevokingBA] = useState(false);
+  const [signingTimesheet, setSigningTimesheet] = useState(false);
+  const [revokingTimesheet, setRevokingTimesheet] = useState(false);
   const [pushBusy, setPushBusy] = useState(false);
   const [pushOn, setPushOn] = useState(false);
   const [sendingTestPush, setSendingTestPush] = useState(false);
@@ -63,11 +72,12 @@ export function useDashboardData() {
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const [actRes, hols, baStatusRes, pendingWitnessReqs] = await Promise.all([
+      const [actRes, hols, baStatusRes, pendingWitnessReqs, tsStatusRes] = await Promise.all([
         fetchDashboardActivities(year, month),
         fetchHolidays(year, month),
         getBeritaAcaraStatus(year, month).catch(() => null),
         getPendingWitnessRequests().catch(() => []),
+        getTimesheetStatus(year, month).catch(() => null),
       ]);
       const acts = Array.isArray(actRes) ? actRes : (actRes?.activities || []);
       const mWitness = Array.isArray(actRes) ? undefined : actRes?.monthlyWitness;
@@ -75,6 +85,7 @@ export function useDashboardData() {
       setMonthlyWitness(mWitness);
       setBeritaAcaraStatus(baStatusRes);
       setWitnessRequests(pendingWitnessReqs || []);
+      setTimesheetStatus(tsStatusRes);
 
       const hmap: Record<number, string> = {};
       (hols || []).forEach((h) => {
@@ -148,6 +159,32 @@ export function useDashboardData() {
       notify(err.message || "Gagal membatalkan permintaan tanda tangan saksi", "error");
     } finally {
       setRevokingBA(false);
+    }
+  };
+
+  const handleSignTimesheet = async () => {
+    setSigningTimesheet(true);
+    try {
+      await signTimesheet(year, month);
+      notify("Timesheet berhasil ditandatangani! Dokumen dan periode aktivitas kini terkunci. ✍️", "success");
+      await load();
+    } catch (err: any) {
+      notify(err.message || "Gagal menandatangani timesheet", "error");
+    } finally {
+      setSigningTimesheet(false);
+    }
+  };
+
+  const handleRevokeTimesheet = async () => {
+    setRevokingTimesheet(true);
+    try {
+      await revokeTimesheet(year, month);
+      notify("Tanda tangan timesheet berhasil dibatalkan. Periode aktivitas kini terbuka kembali. 🔄", "success");
+      await load();
+    } catch (err: any) {
+      notify(err.message || "Gagal membatalkan tanda tangan timesheet", "error");
+    } finally {
+      setRevokingTimesheet(false);
     }
   };
 
@@ -235,6 +272,11 @@ export function useDashboardData() {
     handleSubmitBeritaAcara,
     revokingBA,
     handleRevokeBeritaAcara,
+    timesheetStatus,
+    signingTimesheet,
+    handleSignTimesheet,
+    revokingTimesheet,
+    handleRevokeTimesheet,
     witnessRequests,
     isWitnessReviewModalOpen,
     setIsWitnessReviewModalOpen,

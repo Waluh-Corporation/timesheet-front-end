@@ -28,6 +28,11 @@ export default function DashboardView() {
     handleSubmitBeritaAcara,
     revokingBA,
     handleRevokeBeritaAcara,
+    timesheetStatus,
+    signingTimesheet,
+    handleSignTimesheet,
+    revokingTimesheet,
+    handleRevokeTimesheet,
     witnessRequests,
     isWitnessReviewModalOpen,
     setIsWitnessReviewModalOpen,
@@ -70,6 +75,7 @@ export default function DashboardView() {
   const isBaRejected = beritaAcaraStatus?.status === "rejected";
   const isBaRevoked = beritaAcaraStatus?.status === "revoked";
   const isBaUnsubmitted = !beritaAcaraStatus || beritaAcaraStatus.status === "draft";
+  const isTimesheetSigned = timesheetStatus?.status === "signed";
 
   return (
     <div className="d-flex flex-column gap-3">
@@ -149,7 +155,7 @@ export default function DashboardView() {
                   <IconClock size={20} />
                 </span>
                 <div>
-                  <div className="fw-bold">⏳ Menunggu Tanda Tangan Saksi</div>
+                  <div className="fw-bold">Menunggu Tanda Tangan Saksi</div>
                   <div className="small text-secondary">
                     Pengajuan Berita Acara telah terkirim. Dokumen belum dapat dibuat karena masih menunggu persetujuan dan tanda tangan dari saksi {witnessName}.
                   </div>
@@ -183,7 +189,7 @@ export default function DashboardView() {
                   <IconArrowBackUp size={20} />
                 </span>
                 <div>
-                  <div className="fw-bold">↩️ Pengajuan Berita Acara Dibatalkan</div>
+                  <div className="fw-bold">Pengajuan Berita Acara Dibatalkan</div>
                   <div className="small text-secondary">
                     Permintaan tanda tangan saksi untuk periode ini telah dibatalkan. Anda dapat mengoreksi aktivitas harian atau mengajukan kembali ke saksi.
                   </div>
@@ -236,20 +242,75 @@ export default function DashboardView() {
           )}
 
           {isBaSigned && (
-            <div className="alert alert-success border-success shadow-sm d-flex align-items-center gap-2 mb-0" role="alert">
-              <span className="avatar avatar-sm bg-success-lt text-success rounded shrink-0">
-                <IconCheck size={20} />
-              </span>
-              <div>
-                <div className="fw-bold">Berita Acara Telah Disetujui & Ditandatangani Saksi</div>
-                <div className="small text-secondary">
-                  Seluruh catatan Berita Acara telah diverifikasi oleh saksi. Dokumen timesheet siap untuk di-generate.
+            <div className="alert alert-success border-success shadow-sm d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-3 mb-0" role="alert">
+              <div className="d-flex align-items-center gap-2">
+                <span className="avatar avatar-sm bg-success-lt text-success rounded shrink-0">
+                  <IconCheck size={20} />
+                </span>
+                <div>
+                  <div className="fw-bold">Berita Acara Telah Disetujui & Ditandatangani Saksi</div>
+                  <div className="small text-secondary">
+                    Seluruh catatan Berita Acara telah diverifikasi oleh saksi. Dokumen timesheet siap untuk di-generate.
+                  </div>
                 </div>
               </div>
+              <button
+                type="button"
+                className="btn btn-outline-danger btn-sm d-flex align-items-center gap-1 shrink-0"
+                onClick={() => {
+                  if (window.confirm("Batalkan/revoke tanda tangan Berita Acara ini? Status akan kembali ke draft dan aktivitas harian dapat diedit kembali.")) {
+                    handleRevokeBeritaAcara();
+                  }
+                }}
+                disabled={revokingBA}
+                title="Batalkan tanda tangan Berita Acara agar aktivitas dapat diedit"
+              >
+                {revokingBA ? (
+                  <IconLoader2 size={16} className="animate-spin" />
+                ) : (
+                  <IconArrowBackUp size={16} />
+                )}
+                <span>Revoke Tanda Tangan Berita Acara</span>
+              </button>
             </div>
           )}
         </>
       )}
+
+      {/* Timesheet Signature Status Banner */}
+      {isTimesheetSigned ? (
+        <div className="alert alert-info border-info shadow-sm d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-3 mb-0" role="alert">
+          <div className="d-flex align-items-center gap-2">
+            <span className="avatar avatar-sm bg-info-lt text-info rounded shrink-0">
+              <IconShieldCheck size={20} />
+            </span>
+            <div>
+              <div className="fw-bold">🔒 Timesheet Telah Ditandatangani & Terkunci</div>
+              <div className="small text-secondary">
+                Timesheet periode ini telah ditandatangani digital oleh karyawan. Seluruh mutasi aktivitas harian terkunci.
+              </div>
+            </div>
+          </div>
+          <button
+            type="button"
+            className="btn btn-outline-danger btn-sm d-flex align-items-center gap-1 shrink-0"
+            onClick={() => {
+              if (window.confirm("Batalkan/revoke tanda tangan timesheet periode ini? Penguncian aktivitas akan dibuka kembali.")) {
+                handleRevokeTimesheet();
+              }
+            }}
+            disabled={revokingTimesheet}
+            title="Batalkan tanda tangan timesheet agar aktivitas harian dapat dimodifikasi"
+          >
+            {revokingTimesheet ? (
+              <IconLoader2 size={16} className="animate-spin" />
+            ) : (
+              <IconArrowBackUp size={16} />
+            )}
+            <span>Revoke Tanda Tangan Timesheet</span>
+          </button>
+        </div>
+      ) : null}
 
       <DashboardHeader
         user={user}

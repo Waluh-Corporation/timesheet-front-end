@@ -64,6 +64,21 @@ mock.module("@/services/beritaAcaraService", () => ({
   getPendingWitnessRequests: mockGetPendingWitnessRequests,
 }));
 
+// Stable mocks for timesheetService
+const mockGetTimesheetStatus = mock(async () => ({
+  status: "signed",
+  is_signed: true,
+  document_hash: "hash123",
+}));
+const mockSignTimesheet = mock(async () => ({ message: "Signed" }));
+const mockRevokeTimesheet = mock(async () => ({ message: "Revoked" }));
+
+mock.module("@/services/timesheetService", () => ({
+  getTimesheetStatus: mockGetTimesheetStatus,
+  signTimesheet: mockSignTimesheet,
+  revokeTimesheet: mockRevokeTimesheet,
+}));
+
 // Stable mock for Toast
 const mockNotify = mock(() => {});
 mock.module("@/components/Toast", () => ({
@@ -101,6 +116,9 @@ describe("useDashboardData hook (Feature)", () => {
     mockSubmitBeritaAcara.mockClear();
     mockRevokeBeritaAcara.mockClear();
     mockGetPendingWitnessRequests.mockClear();
+    mockGetTimesheetStatus.mockClear();
+    mockSignTimesheet.mockClear();
+    mockRevokeTimesheet.mockClear();
     mockRequestTimesheetGeneration.mockClear();
     mockDownloadTimesheet.mockClear();
   });
@@ -194,6 +212,43 @@ describe("useDashboardData hook (Feature)", () => {
 
     expect(mockRevokeBeritaAcara).toHaveBeenCalledWith("ba-1");
     expect(mockNotify).toHaveBeenCalledWith("Permintaan tanda tangan saksi berhasil dibatalkan.", "success");
+
+    root.unmount();
+    container.remove();
+  });
+
+  it("signs and revokes monthly timesheet successfully", async () => {
+    let captured: any;
+    function Consumer() {
+      captured = useDashboardData();
+      return React.createElement("div", null, "Ready");
+    }
+
+    const root = createRoot(container);
+    await act(async () => {
+      root.render(React.createElement(Consumer));
+      await new Promise((resolve) => setTimeout(resolve, 30));
+    });
+
+    // Test sign
+    await act(async () => {
+      await captured.handleSignTimesheet();
+    });
+    expect(mockSignTimesheet).toHaveBeenCalledWith(2026, 10);
+    expect(mockNotify).toHaveBeenCalledWith(
+      "Timesheet berhasil ditandatangani! Dokumen dan periode aktivitas kini terkunci. ✍️",
+      "success"
+    );
+
+    // Test revoke
+    await act(async () => {
+      await captured.handleRevokeTimesheet();
+    });
+    expect(mockRevokeTimesheet).toHaveBeenCalledWith(2026, 10);
+    expect(mockNotify).toHaveBeenCalledWith(
+      "Tanda tangan timesheet berhasil dibatalkan. Periode aktivitas kini terbuka kembali. 🔄",
+      "success"
+    );
 
     root.unmount();
     container.remove();
