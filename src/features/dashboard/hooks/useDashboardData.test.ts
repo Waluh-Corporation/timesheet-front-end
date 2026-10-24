@@ -193,7 +193,7 @@ describe("useDashboardData hook (Feature)", () => {
     });
 
     expect(mockRevokeBeritaAcara).toHaveBeenCalledWith("ba-1");
-    expect(mockNotify).toHaveBeenCalledWith("Permintaan tanda tangan saksi berhasil dibatalkan. 🔄", "success");
+    expect(mockNotify).toHaveBeenCalledWith("Permintaan tanda tangan saksi berhasil dibatalkan.", "success");
 
     root.unmount();
     container.remove();
