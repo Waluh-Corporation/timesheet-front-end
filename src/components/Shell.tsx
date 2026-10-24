@@ -84,7 +84,7 @@ export default function Shell({ children }: { readonly children: React.ReactNode
     { href: "/historical-data", label: "Historical Data", icon: IconHistory },
     {
       href: "/berita-acara/witness-requests",
-      label: "Permintaan Saksi",
+      label: "Witness Requests",
       icon: IconShieldCheck,
       badge: witnessCount > 0 ? witnessCount : undefined,
     },

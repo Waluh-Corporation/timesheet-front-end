@@ -42,7 +42,7 @@ export function useUsers() {
 
   const toggleActive = async (u: User) => {
     if (isUserAnonymized(u)) {
-      notify("Akun yang telah dianonimkan tidak dapat diubah statusnya", "error");
+      notify("Anonymized accounts cannot have their status modified", "error");
       return;
     }
     try {
@@ -56,7 +56,7 @@ export function useUsers() {
 
   const deactivateUser = async (u: User) => {
     if (isUserAnonymized(u)) {
-      notify("Akun yang telah dianonimkan tidak dapat dinonaktifkan", "error");
+      notify("Anonymized accounts cannot be deactivated", "error");
       return;
     }
     // ponytail: [Need custom modal to replace native confirm]
@@ -73,7 +73,7 @@ export function useUsers() {
 
   const assignCompany = async (u: User, compId?: number, compObj?: Company) => {
     if (isUserAnonymized(u)) {
-      notify("Akun yang telah dianonimkan tidak dapat diubah perusahaannya", "error");
+      notify("Anonymized accounts cannot be assigned to another company", "error");
       return;
     }
     try {
@@ -88,7 +88,7 @@ export function useUsers() {
 
   const viewPasskeys = async (u: User) => {
     if (isUserAnonymized(u)) {
-      notify("Akun yang telah dianonimkan tidak memiliki passkey aktif", "error");
+      notify("Anonymized accounts do not have active passkeys", "error");
       return;
     }
     if (passkeysFor === u.id) {
@@ -123,7 +123,7 @@ export function useUsers() {
   const handleUpdateUser = async (id: number, payload: Partial<UpdateUserRequestDTO>) => {
     const target = users.find((u) => u.id === id);
     if (target && isUserAnonymized(target)) {
-      notify("Akun yang telah dianonimkan tidak dapat diubah datanya", "error");
+      notify("Anonymized accounts cannot be edited", "error");
       return;
     }
     try {

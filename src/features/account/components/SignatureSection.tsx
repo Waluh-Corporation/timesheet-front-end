@@ -181,12 +181,12 @@ export function SignatureSection() {
     if (!file) return;
 
     if (!file.type.startsWith("image/")) {
-      notify("Harap pilih berkas gambar (PNG, JPEG, atau WebP)", "error");
+      notify("Please select an image file (PNG, JPEG, or WebP)", "error");
       return;
     }
 
     if (file.size > 2 * 1024 * 1024) {
-      notify("Ukuran berkas maksimal 2 MB", "error");
+      notify("File size cannot exceed 2 MB", "error");
       return;
     }
 
@@ -203,7 +203,7 @@ export function SignatureSection() {
   // -------------------------------------------------------------
   const renderTypedSignatureToCanvas = (): string | null => {
     if (!typedName.trim()) {
-      notify("Harap ketik nama Anda terlebih dahulu", "error");
+      notify("Please enter your full name first", "error");
       return null;
     }
 
@@ -249,13 +249,13 @@ export function SignatureSection() {
       base64Payload = renderTypedSignatureToCanvas();
     } else if (activeTab === "draw") {
       if (!hasDrawn || !drawCanvasRef.current) {
-        notify("Harap buat goresan tanda tangan terlebih dahulu", "error");
+        notify("Please draw your signature first", "error");
         return;
       }
       base64Payload = drawCanvasRef.current.toDataURL("image/png");
     } else if (activeTab === "upload") {
       if (!uploadedBase64) {
-        notify("Harap pilih gambar tanda tangan terlebih dahulu", "error");
+        notify("Please select a signature image file first", "error");
         return;
       }
       base64Payload = uploadedBase64;
@@ -266,12 +266,12 @@ export function SignatureSection() {
     setSaving(true);
     try {
       await uploadUserSignature(base64Payload);
-      notify("Tanda tangan profil berhasil disimpan dan diperbarui! ✍️", "success");
+      notify("Profile signature saved and updated successfully! ✍️", "success");
       await fetchSignature();
       setUploadedBase64(null);
       clearDrawing();
     } catch (err: any) {
-      notify(err.message || "Gagal menyimpan tanda tangan", "error");
+      notify(err.message || "Failed to save signature", "error");
     } finally {
       setSaving(false);
     }
@@ -281,17 +281,17 @@ export function SignatureSection() {
   // Delete / Revoke Action
   // -------------------------------------------------------------
   const handleDeleteSignature = async () => {
-    if (!confirm("Apakah Anda yakin ingin menghapus spesimen tanda tangan profil Anda?")) {
+    if (!confirm("Are you sure you want to delete your profile signature specimen?")) {
       return;
     }
 
     setDeleting(true);
     try {
       await deleteUserSignature();
-      notify("Spesimen tanda tangan profil berhasil dihapus", "info");
+      notify("Profile signature specimen deleted successfully", "info");
       await fetchSignature();
     } catch (err: any) {
-      notify(err.message || "Gagal menghapus tanda tangan", "error");
+      notify(err.message || "Failed to delete signature", "error");
     } finally {
       setDeleting(false);
     }
@@ -305,9 +305,9 @@ export function SignatureSection() {
             <IconFileCertificate size={18} />
           </span>
           <div>
-            <h3 className="card-title m-0">Tanda Tangan Digital Profil</h3>
+            <h3 className="card-title m-0">Digital Profile Signature</h3>
             <p className="card-subtitle m-0 text-secondary small">
-              Tanda tangan resmi yang otomatis distempel pada Timesheet dan Berita Acara bulanan.
+              Official signature automatically stamped on monthly Timesheets and Attendance Incident Reports.
             </p>
           </div>
         </div>
@@ -315,7 +315,7 @@ export function SignatureSection() {
         {signature?.has_signature && (
           <span className="badge bg-success-lt text-success d-inline-flex align-items-center gap-1">
             <IconCheck size={14} />
-            Tanda Tangan Aktif
+            Active Signature
           </span>
         )}
       </div>
@@ -324,7 +324,7 @@ export function SignatureSection() {
         {loading ? (
           <div className="text-center py-4 text-secondary">
             <div className="spinner-border spinner-border-sm me-2" role="status" />
-            Memuat data tanda tangan...
+            Loading signature data...
           </div>
         ) : (
           <div className="d-flex flex-column gap-4">
@@ -334,22 +334,22 @@ export function SignatureSection() {
                 <div className="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
                   <div>
                     <span className="text-secondary small fw-bold text-uppercase d-block mb-2">
-                      Pratinjau Spesimen Tanda Tangan Aktif
+                      Active Signature Specimen Preview
                     </span>
                     <div
                       className="border rounded p-2 bg-white d-inline-flex align-items-center justify-content-center shadow-sm"
                       style={{ width: "280px", height: "100px" }}
-                      title="Latar transparan ditampilkan pada kanvas putih"
+                      title="Transparent background displayed on white canvas"
                     >
                       <img
                         src={signature.signature_url}
-                        alt="Spesimen Tanda Tangan"
+                        alt="Signature Specimen"
                         className="mw-100 mh-100 object-fit-contain"
                       />
                     </div>
                     {signature.updated_at && (
                       <div className="text-secondary fs-6 mt-1">
-                        Diperbarui: {new Date(signature.updated_at).toLocaleString("id-ID")}
+                        Updated: {new Date(signature.updated_at).toLocaleString("en-US")}
                       </div>
                     )}
                   </div>
@@ -362,7 +362,7 @@ export function SignatureSection() {
                       disabled={deleting}
                     >
                       <IconTrash size={16} />
-                      {deleting ? "Menghapus..." : "Hapus Spesimen"}
+                      {deleting ? "Deleting..." : "Delete Specimen"}
                     </button>
                   </div>
                 </div>
@@ -371,7 +371,7 @@ export function SignatureSection() {
               <div className="alert alert-info d-flex align-items-center gap-2 mb-0" role="alert">
                 <IconWriting size={20} className="text-info shrink-0" />
                 <div className="small">
-                  Anda belum memiliki spesimen tanda tangan aktif. Buat tanda tangan Anda di bawah menggunakan opsi <strong>Ketik Nama</strong>, <strong>Gambar</strong>, atau <strong>Unggah</strong>.
+                  You do not have an active signature specimen yet. Create your signature below using <strong>Type Name</strong>, <strong>Draw</strong>, or <strong>Upload</strong>.
                 </div>
               </div>
             )}
@@ -386,7 +386,7 @@ export function SignatureSection() {
                     onClick={() => setActiveTab("type")}
                   >
                     <IconWriting size={16} />
-                    <span>Ketik Nama (Type Name)</span>
+                    <span>Type Name</span>
                   </button>
                 </li>
                 <li className="nav-item">
@@ -396,7 +396,7 @@ export function SignatureSection() {
                     onClick={() => setActiveTab("draw")}
                   >
                     <IconPencil size={16} />
-                    <span>Gambar (Draw)</span>
+                    <span>Draw</span>
                   </button>
                 </li>
                 <li className="nav-item">
@@ -406,30 +406,30 @@ export function SignatureSection() {
                     onClick={() => setActiveTab("upload")}
                   >
                     <IconUpload size={16} />
-                    <span>Unggah Gambar (Upload)</span>
+                    <span>Upload Image</span>
                   </button>
                 </li>
               </ul>
 
-              {/* Tab 1: Ketik Nama */}
+              {/* Tab 1: Type Name */}
               {activeTab === "type" && (
                 <div className="d-flex flex-column gap-3">
                   <div>
                     <label htmlFor="typed-signature-input" className="form-label required">
-                      Nama Lengkap Anda
+                      Your Full Name
                     </label>
                     <input
                       id="typed-signature-input"
                       type="text"
                       className="form-control"
-                      placeholder="Masukkan nama lengkap untuk tanda tangan..."
+                      placeholder="Enter full name for signature..."
                       value={typedName}
                       onChange={(e) => setTypedName(e.target.value)}
                     />
                   </div>
 
                   <div>
-                    <label className="form-label d-block">Pilih Gaya Kaligrafi / Font Kursif</label>
+                    <label className="form-label d-block">Select Calligraphy Style / Cursive Font</label>
                     <div className="row g-2">
                       {FONT_OPTIONS.map((font) => (
                         <div key={font.id} className="col-12 col-md-4">
@@ -452,7 +452,7 @@ export function SignatureSection() {
                                 className={`${font.className} fs-1 text-dark text-truncate`}
                                 style={{ lineHeight: "1.2" }}
                               >
-                                {typedName.trim() || user?.name || "Tanda Tangan"}
+                                {typedName.trim() || user?.name || "Signature"}
                               </div>
                             </div>
                           </label>
@@ -463,7 +463,7 @@ export function SignatureSection() {
 
                   {/* Live Preview Box */}
                   <div>
-                    <span className="form-label d-block mb-1">Pratinjau Hasil Stempel</span>
+                    <span className="form-label d-block mb-1">Signature Stamp Preview</span>
                     <div
                       className="border rounded p-4 bg-white d-flex align-items-center justify-content-center shadow-sm"
                       style={{ minHeight: "140px" }}
@@ -472,28 +472,28 @@ export function SignatureSection() {
                         className={`${selectedFont.className} fs-1 text-dark text-center`}
                         style={{ fontSize: "2.5rem", letterSpacing: "1px" }}
                       >
-                        {typedName.trim() || "(Pratinjau tanda tangan akan muncul di sini)"}
+                        {typedName.trim() || "(Signature preview will appear here)"}
                       </div>
                     </div>
                     <span className="text-secondary fs-6 mt-1 d-block">
-                      Tanda tangan akan diekspor sebagai berkas PNG berlatar transparan tajam (resolusi Retina 2x) dengan tinta gelap.
+                      Signature will be exported as a high-resolution transparent PNG (2x Retina) with dark ink.
                     </span>
                   </div>
                 </div>
               )}
 
-              {/* Tab 2: Gambar Tanda Tangan */}
+              {/* Tab 2: Draw Signature */}
               {activeTab === "draw" && (
                 <div className="d-flex flex-column gap-2">
                   <div className="d-flex align-items-center justify-content-between">
-                    <label className="form-label m-0">Goreskan Tanda Tangan Menggunakan Mouse / Touch</label>
+                    <label className="form-label m-0">Draw Signature Using Mouse / Touchscreen</label>
                     <button
                       type="button"
                       className="btn btn-outline-secondary btn-sm d-flex align-items-center gap-1"
                       onClick={clearDrawing}
                     >
                       <IconRefresh size={14} />
-                      Bersihkan
+                      Clear
                     </button>
                   </div>
                   <div className="border rounded bg-white overflow-hidden shadow-sm" style={{ touchAction: "none" }}>
@@ -511,17 +511,17 @@ export function SignatureSection() {
                     />
                   </div>
                   <span className="text-secondary fs-6">
-                    Gunakan kursor atau jari Anda pada area kanvas di atas.
+                    Use your mouse or finger on the drawing canvas above.
                   </span>
                 </div>
               )}
 
-              {/* Tab 3: Unggah Berkas */}
+              {/* Tab 3: Upload Image */}
               {activeTab === "upload" && (
                 <div className="d-flex flex-column gap-3">
                   <div>
                     <label htmlFor="signature-file-upload" className="form-label">
-                      Pilih Berkas Gambar Tanda Tangan
+                      Select Signature Image File
                     </label>
                     <input
                       id="signature-file-upload"
@@ -532,20 +532,20 @@ export function SignatureSection() {
                       onChange={handleFileChange}
                     />
                     <span className="text-secondary fs-6 d-block mt-1">
-                      Format didukung: PNG (sangat disarankan dengan latar transparan), JPEG, WebP. Maks 2 MB.
+                      Supported formats: PNG (transparent background highly recommended), JPEG, WebP. Max 2 MB.
                     </span>
                   </div>
 
                   {uploadedBase64 && (
                     <div>
-                      <span className="form-label d-block mb-1">Pratinjau Berkas yang Dipilih</span>
+                      <span className="form-label d-block mb-1">Selected Image Preview</span>
                       <div
                         className="border rounded p-3 bg-white d-flex align-items-center justify-content-center shadow-sm"
                         style={{ height: "150px" }}
                       >
                         <img
                           src={uploadedBase64}
-                          alt="Pratinjau Berkas"
+                          alt="Selected Preview"
                           className="mw-100 mh-100 object-fit-contain"
                         />
                       </div>
@@ -565,10 +565,10 @@ export function SignatureSection() {
                   <IconCheck size={18} />
                   <span>
                     {saving
-                      ? "Menyimpan Tanda Tangan..."
+                      ? "Saving Signature..."
                       : signature?.has_signature
-                      ? "Perbarui Tanda Tangan"
-                      : "Simpan Tanda Tangan"}
+                      ? "Update Signature"
+                      : "Save Signature"}
                   </span>
                 </button>
               </div>

@@ -16,8 +16,8 @@ import { getPendingWitnessRequests, witnessAction } from "@/services/beritaAcara
 import type { WitnessRequestItem } from "@/lib/types";
 
 const MONTH_NAMES = [
-  "Januari", "Februari", "Maret", "April", "Mei", "Juni",
-  "Juli", "Agustus", "September", "Oktober", "November", "Desember",
+  "January", "February", "March", "April", "May", "June",
+  "July", "August", "September", "October", "November", "December",
 ];
 
 export default function WitnessRequestsPage() {
@@ -35,7 +35,7 @@ export default function WitnessRequestsPage() {
       setRequests(data || []);
     } catch (err: unknown) {
       notify(
-        err instanceof Error ? err.message : "Gagal memuat permintaan saksi",
+        err instanceof Error ? err.message : "Failed to load witness requests",
         "error"
       );
     } finally {
@@ -51,11 +51,11 @@ export default function WitnessRequestsPage() {
     setProcessingId(id);
     try {
       await witnessAction(id, "approve");
-      notify("Berita Acara berhasil disetujui & ditandatangani sebagai saksi! ✍️", "success");
+      notify("Attendance Incident Report approved & signed as witness! ✍️", "success");
       await loadRequests();
     } catch (err: unknown) {
       notify(
-        err instanceof Error ? err.message : "Gagal menandatangani Berita Acara",
+        err instanceof Error ? err.message : "Failed to sign Attendance Incident Report",
         "error"
       );
     } finally {
@@ -66,19 +66,19 @@ export default function WitnessRequestsPage() {
   const handleReject = async (id: string | number) => {
     const notes = rejectNotes[id]?.trim();
     if (!notes) {
-      notify("Harap berikan catatan revisi alasan penolakan Berita Acara", "error");
+      notify("Please provide revision notes explaining the rejection reason", "error");
       return;
     }
 
     setProcessingId(id);
     try {
       await witnessAction(id, "reject", notes);
-      notify("Pengajuan Berita Acara telah ditolak dengan catatan revisi", "info");
+      notify("Attendance Incident Report has been rejected with revision notes", "info");
       setRejectingId(null);
       await loadRequests();
     } catch (err: unknown) {
       notify(
-        err instanceof Error ? err.message : "Gagal memproses penolakan",
+        err instanceof Error ? err.message : "Failed to process rejection",
         "error"
       );
     } finally {
@@ -89,19 +89,19 @@ export default function WitnessRequestsPage() {
   return (
     <div className="d-flex flex-column gap-3">
       <PageHeader
-        pretitle="Berita Acara"
-        title="Permintaan Tanda Tangan Saksi"
-        description="Daftar pengajuan Berita Acara dari rekan kerja yang menunjuk Anda sebagai saksi bulanan."
+        pretitle="Attendance Incident Report"
+        title="Witness Signature Requests"
+        description="List of Attendance Incident Reports from colleagues designating you as their monthly witness."
         actions={
           <button
             type="button"
             onClick={loadRequests}
             disabled={loading}
             className="btn btn-outline-secondary d-flex align-items-center gap-1"
-            title="Segarkan daftar"
+            title="Refresh list"
           >
             <IconRefresh size={16} className={loading ? "animate-spin" : ""} />
-            <span>Segarkan</span>
+            <span>Refresh</span>
           </button>
         }
       />
@@ -112,10 +112,10 @@ export default function WitnessRequestsPage() {
             <span className="avatar avatar-xs bg-primary-lt rounded text-primary">
               <IconShieldCheck size={18} />
             </span>
-            <h3 className="card-title m-0">Antrean Verifikasi Saksi</h3>
+            <h3 className="card-title m-0">Witness Verification Queue</h3>
           </div>
           <span className="badge bg-blue-lt">
-            {requests.length} Permintaan Tertunda
+            {requests.length} Pending Requests
           </span>
         </div>
 
@@ -123,16 +123,16 @@ export default function WitnessRequestsPage() {
           {loading ? (
             <div className="text-center py-5 text-secondary">
               <div className="spinner-border spinner-border-sm me-2" role="status" />
-              Memeriksa antrean permohonan tanda tangan saksi...
+              Checking witness signature requests queue...
             </div>
           ) : requests.length === 0 ? (
             <div className="text-center py-5">
               <div className="avatar avatar-lg bg-success-lt rounded-circle mb-3">
                 <IconCheck size={36} className="text-success" />
               </div>
-              <h3 className="fw-bold mb-1">Tidak Ada Permintaan Saksi Tertunda</h3>
+              <h3 className="fw-bold mb-1">No Pending Witness Requests</h3>
               <p className="text-secondary small mb-0">
-                Semua permohonan Berita Acara yang menunjuk Anda sebagai saksi telah selesai ditinjau dan ditandatangani.
+                All Attendance Incident Reports designating you as witness have been reviewed and signed.
               </p>
             </div>
           ) : (
@@ -140,7 +140,7 @@ export default function WitnessRequestsPage() {
               <div className="alert alert-info py-2 px-3 small d-flex align-items-center gap-2 mb-0">
                 <IconAlertCircle size={20} className="text-info flex-shrink-0" />
                 <span>
-                  Berikut adalah Berita Acara yang memerlukan tanda tangan Anda sebagai saksi sebelum rekan kerja Anda dapat men-generate dokumen timesheet mereka.
+                  Below are Attendance Incident Reports requiring your signature as witness before your colleagues can generate their monthly timesheet.
                 </span>
               </div>
 
@@ -149,7 +149,7 @@ export default function WitnessRequestsPage() {
                   const isProcessing = processingId === req.id;
                   const isRejecting = rejectingId === req.id;
                   const monthName = MONTH_NAMES[(req.month || 1) - 1] || req.month;
-                  const employeeName = req.user_name || req.user?.name || `Pegawai #${req.user_id}`;
+                  const employeeName = req.user_name || req.user?.name || `Employee #${req.user_id}`;
 
                   return (
                     <div key={req.id} className="list-group-item p-3">
@@ -164,11 +164,11 @@ export default function WitnessRequestsPage() {
                               <div className="text-secondary small d-flex align-items-center gap-2 flex-wrap">
                                 <span className="d-inline-flex align-items-center gap-1">
                                   <IconCalendar size={14} />
-                                  Periode: <strong>{monthName} {req.year}</strong>
+                                  Period: <strong>{monthName} {req.year}</strong>
                                 </span>
                                 {req.submitted_at && (
                                   <span>
-                                    • Diajukan: {new Date(req.submitted_at).toLocaleDateString("id-ID")}
+                                    • Submitted: {new Date(req.submitted_at).toLocaleDateString("en-US", { dateStyle: "medium" })}
                                   </span>
                                 )}
                               </div>
@@ -177,7 +177,7 @@ export default function WitnessRequestsPage() {
 
                           {req.notes && (
                             <div className="mt-2 p-2 bg-body-tertiary rounded small text-secondary">
-                              <strong>Catatan Pemohon:</strong> {req.notes}
+                              <strong>Requester Notes:</strong> {req.notes}
                             </div>
                           )}
                         </div>
@@ -192,7 +192,7 @@ export default function WitnessRequestsPage() {
                           >
                             <IconCheck size={16} />
                             <span>
-                              {isProcessing ? "Menandatangani..." : "Tanda Tangani / Setujui"}
+                              {isProcessing ? "Signing..." : "Sign & Approve"}
                             </span>
                           </button>
 
@@ -203,7 +203,7 @@ export default function WitnessRequestsPage() {
                             disabled={isProcessing}
                           >
                             <IconX size={16} />
-                            <span>{isRejecting ? "Batal" : "Tolak / Revisi"}</span>
+                            <span>{isRejecting ? "Cancel" : "Reject / Revision"}</span>
                           </button>
                         </div>
                       </div>
@@ -212,13 +212,13 @@ export default function WitnessRequestsPage() {
                       {isRejecting && (
                         <div className="mt-3 p-3 border border-danger-subtle rounded bg-danger-subtle bg-opacity-10">
                           <label htmlFor={`reject-notes-${req.id}`} className="form-label text-danger fw-bold small mb-1">
-                            Alasan Penolakan / Catatan Revisi untuk {employeeName}:
+                            Rejection Reason / Revision Notes for {employeeName}:
                           </label>
                           <textarea
                             id={`reject-notes-${req.id}`}
                             className="form-control mb-2"
                             rows={2}
-                            placeholder="Contoh: Tanggal 15 catatan belum lengkap..."
+                            placeholder="e.g. Please clarify the activity description on the 15th..."
                             value={rejectNotes[req.id] || ""}
                             onChange={(e) =>
                               setRejectNotes((prev) => ({
@@ -233,7 +233,7 @@ export default function WitnessRequestsPage() {
                               className="btn btn-sm btn-outline-secondary"
                               onClick={() => setRejectingId(null)}
                             >
-                              Batal
+                              Cancel
                             </button>
                             <button
                               type="button"
@@ -242,7 +242,7 @@ export default function WitnessRequestsPage() {
                               disabled={isProcessing}
                             >
                               <IconX size={14} />
-                              <span>Kirim Penolakan</span>
+                              <span>Send Rejection</span>
                             </button>
                           </div>
                         </div>

@@ -70,8 +70,8 @@ describe("SignatureSection Component", () => {
     });
 
     expect(mockGetUserSignature).toHaveBeenCalled();
-    expect(document.body.innerHTML).toContain("Tanda Tangan Digital Profil");
-    expect(document.body.innerHTML).toContain("Pratinjau Spesimen Tanda Tangan Aktif");
+    expect(document.body.innerHTML).toContain("Digital Profile Signature");
+    expect(document.body.innerHTML).toContain("Active Signature Specimen Preview");
     expect(document.body.innerHTML).toContain("https://example.com/specimen.png");
   });
 
@@ -86,33 +86,33 @@ describe("SignatureSection Component", () => {
       root?.render(<SignatureSection />);
     });
 
-    expect(document.body.innerHTML).toContain("Anda belum memiliki spesimen tanda tangan aktif");
+    expect(document.body.innerHTML).toContain("You do not have an active signature specimen yet");
   });
 
-  it("switches tabs between Ketik Nama, Gambar, and Unggah", async () => {
+  it("switches tabs between Type Name, Draw, and Upload", async () => {
     root = createRoot(container);
     await act(async () => {
       root?.render(<SignatureSection />);
     });
 
     const buttons = document.body.querySelectorAll("button");
-    const drawTabBtn = Array.from(buttons).find((b) => b.textContent?.includes("Gambar (Draw)"));
+    const drawTabBtn = Array.from(buttons).find((b) => b.textContent?.includes("Draw"));
     expect(drawTabBtn).toBeDefined();
 
     await act(async () => {
       drawTabBtn?.click();
     });
 
-    expect(document.body.innerHTML).toContain("Goreskan Tanda Tangan");
+    expect(document.body.innerHTML).toContain("Draw Signature Using Mouse");
 
-    const uploadTabBtn = Array.from(buttons).find((b) => b.textContent?.includes("Unggah Gambar"));
+    const uploadTabBtn = Array.from(buttons).find((b) => b.textContent?.includes("Upload Image"));
     expect(uploadTabBtn).toBeDefined();
 
     await act(async () => {
       uploadTabBtn?.click();
     });
 
-    expect(document.body.innerHTML).toContain("Pilih Berkas Gambar Tanda Tangan");
+    expect(document.body.innerHTML).toContain("Select Signature Image File");
   });
 
   it("saves typed signature using HTML5 canvas export", async () => {
@@ -128,7 +128,7 @@ describe("SignatureSection Component", () => {
     // Click submit button
     const buttons = document.body.querySelectorAll("button");
     const saveBtn = Array.from(buttons).find((b) =>
-      b.textContent?.includes("Perbarui Tanda Tangan") || b.textContent?.includes("Simpan Tanda Tangan")
+      b.textContent?.includes("Update Signature") || b.textContent?.includes("Save Signature")
     );
     expect(saveBtn).toBeDefined();
 
@@ -137,7 +137,7 @@ describe("SignatureSection Component", () => {
     });
 
     expect(mockUploadUserSignature).toHaveBeenCalled();
-    expect(mockNotify).toHaveBeenCalledWith("Tanda tangan profil berhasil disimpan dan diperbarui! ✍️", "success");
+    expect(mockNotify).toHaveBeenCalledWith("Profile signature saved and updated successfully! ✍️", "success");
   });
 
   it("handles delete signature with confirmation", async () => {
@@ -150,7 +150,7 @@ describe("SignatureSection Component", () => {
     });
 
     const deleteBtn = Array.from(document.body.querySelectorAll("button")).find((b) =>
-      b.textContent?.includes("Hapus Spesimen")
+      b.textContent?.includes("Delete Specimen")
     );
     expect(deleteBtn).toBeDefined();
 
@@ -159,7 +159,7 @@ describe("SignatureSection Component", () => {
     });
 
     expect(mockDeleteUserSignature).toHaveBeenCalled();
-    expect(mockNotify).toHaveBeenCalledWith("Spesimen tanda tangan profil berhasil dihapus", "info");
+    expect(mockNotify).toHaveBeenCalledWith("Profile signature specimen deleted successfully", "info");
 
     globalThis.confirm = originalConfirm;
   });

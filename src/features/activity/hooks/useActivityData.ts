@@ -5,6 +5,7 @@ import { fetchActivityById, createActivity } from "../services/activityService";
 import type { DailyActivity, Project, ActivityStatus, WitnessResponse } from "@/lib/types";
 import { fetchProjects, fetchActivityStatuses } from "@/app/(admin)/master-data/services/masterData";
 import { fetchEligibleWitnesses, fetchPreviousDayActivity } from "@/services/activityService";
+import { fetchDashboardActivities } from "@/features/dashboard/services/dashboardService";
 import { useToast } from "@/components/Toast";
 import { useRouter } from "next/navigation";
 
@@ -30,7 +31,6 @@ export const useActivityData = (initialId: string | null, defaultDate: string) =
     app_impacted: "",
     is_berita_acara: false,
     berita_acara_notes: "",
-    witness_id: undefined,
   });
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -38,8 +38,23 @@ export const useActivityData = (initialId: string | null, defaultDate: string) =
   const [projects, setProjects] = useState<Project[]>([]);
   const [statuses, setStatuses] = useState<ActivityStatus[]>(DEFAULT_STATUSES);
   const [witnesses, setWitnesses] = useState<WitnessResponse[]>([]);
+  const [monthlyWitness, setMonthlyWitness] = useState<WitnessResponse | undefined>();
   const { notify } = useToast();
   const router = useRouter();
+
+  useEffect(() => {
+    // Resolve designated monthly witness for the activity's month & year
+    const d = form.date ? new Date(form.date) : new Date();
+    const y = d.getFullYear() || new Date().getFullYear();
+    const m = (d.getMonth() + 1) || (new Date().getMonth() + 1);
+    fetchDashboardActivities(y, m)
+      .then((res) => {
+        if (res?.monthlyWitness) {
+          setMonthlyWitness(res.monthlyWitness);
+        }
+      })
+      .catch(() => {});
+  }, [form.date]);
 
   useEffect(() => {
     void fetchActivityStatuses()
@@ -125,11 +140,11 @@ export const useActivityData = (initialId: string | null, defaultDate: string) =
           is_berita_acara: prev.is_berita_acara !== undefined ? prev.is_berita_acara : curr.is_berita_acara,
           berita_acara_notes: prev.berita_acara_notes !== undefined ? prev.berita_acara_notes : curr.berita_acara_notes,
         }));
-        notify("Berhasil menyalin data kegiatan hari sebelumnya 📋", "success");
+        notify("Successfully copied previous day's activity 📋", "success");
       }
     } catch (err) {
       const error = err as Error;
-      notify(error.message || "Tidak ada data kegiatan hari sebelumnya", "error");
+      notify(error.message || "No activity data found from previous day", "error");
     } finally {
       setCopying(false);
     }
@@ -173,8 +188,9 @@ export const useActivityData = (initialId: string | null, defaultDate: string) =
 
     setSaving(true);
     try {
+      const { witness_id, witness, ...activityData } = form;
       const payload = {
-        ...form,
+        ...activityData,
         date: form.date ? form.date.split("T")[0] : "",
       };
 
@@ -202,5 +218,6 @@ export const useActivityData = (initialId: string | null, defaultDate: string) =
     projects,
     statuses,
     witnesses,
+    monthlyWitness,
   };
 };

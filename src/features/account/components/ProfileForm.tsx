@@ -226,7 +226,7 @@ export function ProfileForm({
 
           <div className="col-12">
             <label htmlFor="profile-notes" className="form-label">
-              Reason / Notes (Catatan Pengajuan)
+              Reason / Submission Notes
             </label>
             <textarea
               id="profile-notes"
@@ -234,7 +234,7 @@ export function ProfileForm({
               rows={3}
               value={form.notes}
               onChange={(e) => setFieldValue("notes", e.target.value)}
-              placeholder="Jelaskan alasan perubahan data profil (mis. rotasi penempatan site baru, koreksi NIK/BNI ID)..."
+              placeholder="Explain the reason for profile updates (e.g. site relocation, employee ID correction)..."
             />
           </div>
         </div>
