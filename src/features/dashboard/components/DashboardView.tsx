@@ -109,10 +109,6 @@ export default function DashboardView() {
         witnessRequestsCount={witnessRequests.length}
         onOpenWitnessReviewModal={() => setIsWitnessReviewModalOpen(true)}
         timesheetStatus={timesheetStatus}
-        signingTimesheet={signingTimesheet}
-        onSignTimesheet={handleSignTimesheet}
-        revokingTimesheet={revokingTimesheet}
-        onRevokeTimesheet={handleRevokeTimesheet}
       />
 
       {/* Unified Monthly Witness & Berita Acara Card (Single Source of Truth) */}

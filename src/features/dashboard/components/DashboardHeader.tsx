@@ -12,7 +12,6 @@ import {
   IconShieldCheck,
   IconClock,
   IconAlertTriangle,
-  IconArrowBackUp,
 } from "@tabler/icons-react";
 import { useRouter } from "next/navigation";
 import type { WitnessResponse, BeritaAcaraStatusResponse, TimesheetStatusResponse } from "@/lib/types";
@@ -40,10 +39,6 @@ interface DashboardHeaderProps {
   witnessRequestsCount?: number;
   onOpenWitnessReviewModal?: () => void;
   timesheetStatus?: TimesheetStatusResponse | null;
-  signingTimesheet?: boolean;
-  onSignTimesheet?: () => void;
-  revokingTimesheet?: boolean;
-  onRevokeTimesheet?: () => void;
 }
 
 export function DashboardHeader({
@@ -69,10 +64,6 @@ export function DashboardHeader({
   witnessRequestsCount = 0,
   onOpenWitnessReviewModal,
   timesheetStatus,
-  signingTimesheet = false,
-  onSignTimesheet,
-  revokingTimesheet = false,
-  onRevokeTimesheet,
 }: Readonly<DashboardHeaderProps>) {
   const router = useRouter();
 
@@ -115,59 +106,6 @@ export function DashboardHeader({
               </div>
             </div>
             <div className="col-auto ms-auto d-flex flex-wrap gap-2 mt-2 mt-sm-0">
-              {/* Timesheet Sign / Revoke Action Button */}
-              {isTimesheetSigned ? (
-                onRevokeTimesheet && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (
-                        window.confirm(
-                          "Revoke digital signature for this timesheet period? Activity locking will be released."
-                        )
-                      ) {
-                        onRevokeTimesheet();
-                      }
-                    }}
-                    disabled={revokingTimesheet}
-                    className="btn btn-outline-danger d-inline-flex align-items-center gap-1.5"
-                    style={{ minHeight: 44 }}
-                    title="Revoke timesheet signature to unlock daily activity editing"
-                  >
-                    {revokingTimesheet ? (
-                      <IconLoader2 size={18} className="animate-spin" />
-                    ) : (
-                      <IconArrowBackUp size={18} />
-                    )}
-                    <span>Revoke Timesheet Signature</span>
-                  </button>
-                )
-              ) : (
-                onSignTimesheet && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (beritaAcaraCount > 0 && !isBaSigned) {
-                        onGenerate();
-                      } else {
-                        onSignTimesheet();
-                      }
-                    }}
-                    disabled={signingTimesheet}
-                    className="btn btn-outline-success d-inline-flex align-items-center gap-1.5"
-                    style={{ minHeight: 44 }}
-                    title="Digitally sign and lock monthly timesheet"
-                  >
-                    {signingTimesheet ? (
-                      <IconLoader2 size={18} className="animate-spin" />
-                    ) : (
-                      <IconShieldCheck size={18} />
-                    )}
-                    <span>Sign Timesheet</span>
-                  </button>
-                )
-              )}
-
               {witnessRequestsCount > 0 && onOpenWitnessReviewModal && (
                 <button
                   type="button"

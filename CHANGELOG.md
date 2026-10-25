@@ -66,7 +66,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Previous Activity Copying (Attendance Time Reset)**: Updated `copyPreviousDay` on `/activity` to leave `start_time` and `end_time` empty for accurate daily attendance tracking while autofilling task description, project reference, status, and Berita Acara notes from `GET /api/v1/activities/previous`.
 
 ### Removed
-- **Redundant Timesheet Status Banner & Duplicate Action Buttons**: Removed duplicate top "Timesheet Signed & Locked" alert banner in `DashboardView.tsx` in favor of `DashboardHeader` action buttons and Card 1 indicators. Hidden Berita Acara revocation buttons on `MonthlyWitnessCard` when timesheet is signed, and clearly labeled them as "Revoke BA Signature" when in draft to avoid action ambiguity.
+- **Standalone Sign/Revoke Timesheet Button in Header**: Removed the standalone `Sign Timesheet` and `Revoke Timesheet Signature` action button from `DashboardHeader.tsx` to keep the header focused exclusively on `+ Today's Activity` and prevent duplicate controls alongside the Generate Timesheet quick action card.
+- **Redundant Timesheet Status Banner & Duplicate Action Buttons**: Removed duplicate top "Timesheet Signed & Locked" alert banner in `DashboardView.tsx` in favor of Card 1 indicators. Hidden Berita Acara revocation buttons on `MonthlyWitnessCard` when timesheet is signed, and clearly labeled them as "Revoke BA Signature" when in draft to avoid action ambiguity.
 - **Redundant Error Banner**: Removed `ErrorSummaryAlert` banner from the dashboard in favor of the interactive `UnsignedBeritaAcaraModal` modal and centralized witness card indicators.
 
 ## [0.9.0] - 2026-10-19

@@ -190,8 +190,7 @@ describe("DashboardHeader Component", () => {
     expect(container.textContent).toContain("1 report needs witness signature");
   });
 
-  it("renders 'Sign Timesheet' button when timesheet is not signed and calls onSignTimesheet", async () => {
-    const onSignTimesheet = mock(() => {});
+  it("renders clean header with Today's Activity button without standalone sign/revoke buttons", async () => {
     root = createRoot(container);
 
     await act(async () => {
@@ -207,7 +206,6 @@ describe("DashboardHeader Component", () => {
           pushSupported={false}
           onAddPasskey={() => {}}
           passkeysSupported={false}
-          onSignTimesheet={onSignTimesheet}
           timesheetStatus={{
             month: 10,
             year: 2026,
@@ -218,61 +216,13 @@ describe("DashboardHeader Component", () => {
       );
     });
 
-    const signBtn = Array.from(container.querySelectorAll("button")).find((btn) =>
-      btn.textContent?.includes("Sign Timesheet")
-    );
-    expect(signBtn).toBeDefined();
+    const buttons = Array.from(container.querySelectorAll("button"));
+    const signBtn = buttons.find((btn) => btn.textContent?.includes("Sign Timesheet"));
+    const revokeBtn = buttons.find((btn) => btn.textContent?.includes("Revoke"));
+    const activityBtn = buttons.find((btn) => btn.textContent?.includes("Today's Activity"));
 
-    await act(async () => {
-      signBtn?.click();
-    });
-    expect(onSignTimesheet).toHaveBeenCalledTimes(1);
-  });
-
-  it("renders 'Revoke Timesheet Signature' button when timesheet is signed and calls onRevokeTimesheet on confirm", async () => {
-    const onRevokeTimesheet = mock(() => {});
-    const originalConfirm = window.confirm;
-    window.confirm = () => true;
-
-    try {
-      root = createRoot(container);
-
-      await act(async () => {
-        root?.render(
-          <DashboardHeader
-            user={mockUser}
-            filledCount={10}
-            generating={false}
-            onGenerate={() => {}}
-            pushBusy={false}
-            pushOn={false}
-            onTogglePush={() => {}}
-            pushSupported={false}
-            onAddPasskey={() => {}}
-            passkeysSupported={false}
-            onRevokeTimesheet={onRevokeTimesheet}
-            timesheetStatus={{
-              month: 10,
-              year: 2026,
-              is_signed: true,
-              status: "signed",
-              signed_at: "2026-10-24T10:00:00Z",
-            }}
-          />
-        );
-      });
-
-      const revokeBtn = Array.from(container.querySelectorAll("button")).find((btn) =>
-        btn.textContent?.includes("Revoke Timesheet Signature")
-      );
-      expect(revokeBtn).toBeDefined();
-
-      await act(async () => {
-        revokeBtn?.click();
-      });
-      expect(onRevokeTimesheet).toHaveBeenCalledTimes(1);
-    } finally {
-      window.confirm = originalConfirm;
-    }
+    expect(signBtn).toBeUndefined();
+    expect(revokeBtn).toBeUndefined();
+    expect(activityBtn).toBeDefined();
   });
 });
