@@ -3,15 +3,13 @@
 import {
   IconPlus,
   IconDownload,
-  IconBell,
-  IconBellOff,
+  IconBellRinging,
+  IconBellCancel,
   IconFingerprint,
   IconLoader2,
   IconFileSpreadsheet,
   IconSend,
   IconShieldCheck,
-  IconClock,
-  IconAlertTriangle,
 } from "@tabler/icons-react";
 import { useRouter } from "next/navigation";
 import type { WitnessResponse, BeritaAcaraStatusResponse, TimesheetStatusResponse } from "@/lib/types";
@@ -83,11 +81,11 @@ export function DashboardHeader({
     monthlyWitness?.name ||
     (beritaAcaraStatus?.witness_id ? `Witness #${beritaAcaraStatus.witness_id}` : "Witness");
 
-  let pushIcon = <IconBellOff size={22} />;
+  let pushIcon = <IconBellCancel size={22} />;
   if (pushBusy) {
     pushIcon = <IconLoader2 size={22} className="animate-spin" />;
   } else if (pushOn) {
-    pushIcon = <IconBell size={22} />;
+    pushIcon = <IconBellRinging size={22} />;
   }
 
   return (

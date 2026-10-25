@@ -42,7 +42,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - **Domain Model Relations**: Expanded `User`, `Company`, `Department`, `Division`, `Site`, `Project`, `Approver`, and `ProfileChangeRequest` with relational model links and audit timestamps.
 
 ### Changed
-- **Quick Action Cards Visual Symmetrization**: Harmonized Card 3 (Daily Reminders) in `DashboardHeader.tsx` with a symmetrical 22px avatar box matching Cards 1, 2, and 4. Represented reminder status cleanly via the main avatar icon (`IconBell` with `bg-yellow-lt` when enabled, `IconBellOff` with `bg-secondary-lt` when disabled) without redundant badges or clutter.
+- **Quick Action Cards Visual Symmetrization**: Harmonized Card 3 (Daily Reminders) in `DashboardHeader.tsx` with a symmetrical 22px avatar box matching Cards 1, 2, and 4. Represented reminder status cleanly via dynamic bell icons (`IconBellRinging` with `bg-yellow-lt` when enabled, `IconBellCancel` with `bg-secondary-lt` when disabled) without redundant badges or clutter.
 - **Backend API Load Optimization & TanStack Query Migration**:
   - Migrated data fetching across `Shell`, `DashboardView` (`useDashboardData`), `ActivityDetail` (`useActivityData`), and Witness Requests page to TanStack Query v5.
   - Implemented tiered caching with automatic deduplication across parallel components:
