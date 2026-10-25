@@ -19,7 +19,7 @@ import {
   IconX,
   type Icon as TablerIcon,
 } from "@tabler/icons-react";
-import { getPendingWitnessRequests } from "@/services/beritaAcaraService";
+import { usePendingWitnessRequestsQuery } from "@/services/queries/useWitnessQueries";
 
 interface NavItem {
   href: string;
@@ -51,23 +51,14 @@ export default function Shell({ children }: { readonly children: React.ReactNode
   const pathname = usePathname();
   const router = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [witnessCount, setWitnessCount] = useState(0);
   const mobileToggleRef = useRef<HTMLButtonElement>(null);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    let mounted = true;
-    if (user && user.role !== "admin") {
-      getPendingWitnessRequests()
-        .then((reqs) => {
-          if (mounted) setWitnessCount(reqs?.length || 0);
-        })
-        .catch(() => {});
-    }
-    return () => {
-      mounted = false;
-    };
-  }, [user, pathname]);
+  const isWitnessEligible = Boolean(user && user.role !== "admin");
+  const { data: pendingWitnessRequests } = usePendingWitnessRequestsQuery({
+    enabled: isWitnessEligible,
+  });
+  const witnessCount = pendingWitnessRequests?.length || 0;
 
   const isAdmin =
     user?.role === "admin" ||

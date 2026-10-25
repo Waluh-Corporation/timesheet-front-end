@@ -1,6 +1,7 @@
 import { describe, it, expect, mock, beforeEach } from "bun:test";
 import React, { act } from "react";
 import { createRoot } from "react-dom/client";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { daysInMonth, useDashboardData } from "./useDashboardData";
 
 // Stable mocks for dashboardService
@@ -106,10 +107,16 @@ mock.module("@/lib/push", () => ({
 
 describe("useDashboardData hook (Feature)", () => {
   let container: HTMLDivElement;
+  let queryClient: QueryClient;
 
   beforeEach(() => {
     container = document.createElement("div");
     document.body.appendChild(container);
+    queryClient = new QueryClient({
+      defaultOptions: {
+        queries: { retry: false },
+      },
+    });
     mockNotify.mockClear();
     mockFetchActivities.mockClear();
     mockGetBeritaAcaraStatus.mockClear();
@@ -137,8 +144,12 @@ describe("useDashboardData hook (Feature)", () => {
 
     const root = createRoot(container);
     await act(async () => {
-      root.render(React.createElement(Consumer));
-      await new Promise((resolve) => setTimeout(resolve, 30));
+      root.render(
+        React.createElement(QueryClientProvider, { client: queryClient }, React.createElement(Consumer))
+      );
+    });
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 50));
     });
 
     expect(captured).toBeDefined();
@@ -174,8 +185,12 @@ describe("useDashboardData hook (Feature)", () => {
 
     const root = createRoot(container);
     await act(async () => {
-      root.render(React.createElement(Consumer));
-      await new Promise((resolve) => setTimeout(resolve, 30));
+      root.render(
+        React.createElement(QueryClientProvider, { client: queryClient }, React.createElement(Consumer))
+      );
+    });
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 50));
     });
 
     await act(async () => {
@@ -202,8 +217,12 @@ describe("useDashboardData hook (Feature)", () => {
 
     const root = createRoot(container);
     await act(async () => {
-      root.render(React.createElement(Consumer));
-      await new Promise((resolve) => setTimeout(resolve, 30));
+      root.render(
+        React.createElement(QueryClientProvider, { client: queryClient }, React.createElement(Consumer))
+      );
+    });
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 50));
     });
 
     await act(async () => {
@@ -226,8 +245,12 @@ describe("useDashboardData hook (Feature)", () => {
 
     const root = createRoot(container);
     await act(async () => {
-      root.render(React.createElement(Consumer));
-      await new Promise((resolve) => setTimeout(resolve, 30));
+      root.render(
+        React.createElement(QueryClientProvider, { client: queryClient }, React.createElement(Consumer))
+      );
+    });
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 50));
     });
 
     // Test sign

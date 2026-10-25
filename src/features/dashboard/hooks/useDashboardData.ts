@@ -1,31 +1,32 @@
 "use client";
 
 import { useState, useCallback, useEffect, useMemo } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import {
-  fetchDashboardActivities,
-  fetchHolidays,
   downloadTimesheet,
   requestTimesheetGeneration,
 } from "../services/dashboardService";
 import {
-  getBeritaAcaraStatus,
+  useDashboardActivitiesQuery,
+  useBeritaAcaraStatusQuery,
+  useTimesheetStatusQuery,
+  DASHBOARD_QUERY_KEYS,
+} from "../useDashboardQueries";
+import {
+  usePendingWitnessRequestsQuery,
+  WITNESS_REQUESTS_KEY,
+} from "@/services/queries/useWitnessQueries";
+import { useHolidaysQuery } from "@/services/queries/useMasterDataQueries";
+import {
   submitBeritaAcara,
   revokeBeritaAcara,
-  getPendingWitnessRequests,
 } from "@/services/beritaAcaraService";
 import {
-  getTimesheetStatus,
   signTimesheet,
   revokeTimesheet,
 } from "@/services/timesheetService";
 import { useToast } from "@/components/Toast";
-import type {
-  DailyActivity,
-  WitnessResponse,
-  BeritaAcaraStatusResponse,
-  WitnessRequestItem,
-  TimesheetStatusResponse,
-} from "@/lib/types";
+import type { DailyActivity } from "@/lib/types";
 import {
   enablePush,
   disablePush,
@@ -44,17 +45,54 @@ export function daysInMonth(year: number, month: number) {
 export function useDashboardData() {
   const { user } = useAuth();
   const { notify } = useToast();
+  const queryClient = useQueryClient();
 
   const now = new Date();
   const [year, setYear] = useState(now.getFullYear());
   const [month, setMonth] = useState(now.getMonth() + 1);
-  const [activities, setActivities] = useState<DailyActivity[]>([]);
-  const [monthlyWitness, setMonthlyWitness] = useState<WitnessResponse | undefined>();
-  const [beritaAcaraStatus, setBeritaAcaraStatus] = useState<BeritaAcaraStatusResponse | null>(null);
-  const [timesheetStatus, setTimesheetStatus] = useState<TimesheetStatusResponse | null>(null);
-  const [witnessRequests, setWitnessRequests] = useState<WitnessRequestItem[]>([]);
-  const [holidays, setHolidays] = useState<Record<number, string>>({});
-  const [loading, setLoading] = useState(true);
+
+  const isWitnessEligible = Boolean(user && user.role !== "admin");
+
+  // TanStack Queries (Cached with 1m staleTime & deduplicated across components)
+  const {
+    data: dashboardActs,
+    isLoading: loadingActs,
+  } = useDashboardActivitiesQuery(year, month);
+
+  const {
+    data: holsData,
+  } = useHolidaysQuery(year, month);
+
+  const {
+    data: beritaAcaraStatus = null,
+    isLoading: loadingBA,
+  } = useBeritaAcaraStatusQuery(year, month);
+
+  const {
+    data: timesheetStatus = null,
+    isLoading: loadingTS,
+  } = useTimesheetStatusQuery(year, month);
+
+  const {
+    data: witnessRequests = [],
+  } = usePendingWitnessRequestsQuery({
+    enabled: isWitnessEligible,
+  });
+
+  const activities = useMemo(() => dashboardActs?.activities || [], [dashboardActs?.activities]);
+  const monthlyWitness = dashboardActs?.monthlyWitness;
+
+  const holidays = useMemo(() => {
+    const hmap: Record<number, string> = {};
+    (holsData || []).forEach((h) => {
+      const d = Number.parseInt(h.date.split("-")[2], 10);
+      if (!Number.isNaN(d)) hmap[d] = h.description;
+    });
+    return hmap;
+  }, [holsData]);
+
+  const loading = loadingActs || loadingBA || loadingTS;
+
   const [generating, setGenerating] = useState(false);
   const [submittingBA, setSubmittingBA] = useState(false);
   const [revokingBA, setRevokingBA] = useState(false);
@@ -70,41 +108,9 @@ export function useDashboardData() {
   const [page, setPage] = useState(1);
   const ITEMS_PER_PAGE = 7;
 
-  const load = useCallback(async () => {
-    setLoading(true);
-    try {
-      const [actRes, hols, baStatusRes, pendingWitnessReqs, tsStatusRes] = await Promise.all([
-        fetchDashboardActivities(year, month),
-        fetchHolidays(year, month),
-        getBeritaAcaraStatus(year, month).catch(() => null),
-        getPendingWitnessRequests().catch(() => []),
-        getTimesheetStatus(year, month).catch(() => null),
-      ]);
-      const acts = Array.isArray(actRes) ? actRes : (actRes?.activities || []);
-      const mWitness = Array.isArray(actRes) ? undefined : actRes?.monthlyWitness;
-      setActivities(acts);
-      setMonthlyWitness(mWitness);
-      setBeritaAcaraStatus(baStatusRes);
-      setWitnessRequests(pendingWitnessReqs || []);
-      setTimesheetStatus(tsStatusRes);
-
-      const hmap: Record<number, string> = {};
-      (hols || []).forEach((h) => {
-        const d = Number.parseInt(h.date.split("-")[2], 10);
-        if (!Number.isNaN(d)) hmap[d] = h.description;
-      });
-      setHolidays(hmap);
-    } catch (err: any) {
-      notify(err.message, "error");
-    } finally {
-      setLoading(false);
-    }
-  }, [year, month, notify]);
-
   useEffect(() => {
-    load();
     setPage(1);
-  }, [load]);
+  }, [year, month]);
 
   useEffect(() => {
     let mounted = true;
@@ -135,13 +141,27 @@ export function useDashboardData() {
     return activities.filter((a) => a.is_berita_acara).length;
   }, [activities]);
 
+  const reload = useCallback(async () => {
+    await Promise.all([
+      queryClient.invalidateQueries({ queryKey: DASHBOARD_QUERY_KEYS.monthlyActivities(year, month) }),
+      queryClient.invalidateQueries({ queryKey: DASHBOARD_QUERY_KEYS.beritaAcaraStatus(year, month) }),
+      queryClient.invalidateQueries({ queryKey: DASHBOARD_QUERY_KEYS.timesheetStatus(year, month) }),
+      queryClient.invalidateQueries({ queryKey: WITNESS_REQUESTS_KEY }),
+      queryClient.invalidateQueries({ queryKey: ["activities"] }),
+    ]);
+  }, [queryClient, year, month]);
+
   const handleSubmitBeritaAcara = async (witnessId?: number) => {
     setSubmittingBA(true);
     try {
       const targetWitness = witnessId || monthlyWitness?.id;
       await submitBeritaAcara(year, month, targetWitness);
       notify("Attendance Incident Reports successfully submitted to witness! 📋", "success");
-      await load();
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: DASHBOARD_QUERY_KEYS.beritaAcaraStatus(year, month) }),
+        queryClient.invalidateQueries({ queryKey: DASHBOARD_QUERY_KEYS.monthlyActivities(year, month) }),
+        queryClient.invalidateQueries({ queryKey: ["activities"] }),
+      ]);
     } catch (err: any) {
       notify(err.message || "Failed to submit Attendance Incident Reports", "error");
     } finally {
@@ -155,7 +175,11 @@ export function useDashboardData() {
     try {
       await revokeBeritaAcara(beritaAcaraStatus.id);
       notify("Witness signature request successfully cancelled.", "success");
-      await load();
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: DASHBOARD_QUERY_KEYS.beritaAcaraStatus(year, month) }),
+        queryClient.invalidateQueries({ queryKey: DASHBOARD_QUERY_KEYS.monthlyActivities(year, month) }),
+        queryClient.invalidateQueries({ queryKey: ["activities"] }),
+      ]);
     } catch (err: any) {
       notify(err.message || "Failed to cancel witness signature request", "error");
     } finally {
@@ -168,7 +192,7 @@ export function useDashboardData() {
     try {
       await signTimesheet(year, month);
       notify("Timesheet signed successfully! Document and activity period are now locked. ✍️", "success");
-      await load();
+      await queryClient.invalidateQueries({ queryKey: DASHBOARD_QUERY_KEYS.timesheetStatus(year, month) });
     } catch (err: any) {
       notify(err.message || "Failed to sign timesheet", "error");
     } finally {
@@ -181,7 +205,7 @@ export function useDashboardData() {
     try {
       await revokeTimesheet(year, month);
       notify("Timesheet signature revoked. Activity period is unlocked. 🔄", "success");
-      await load();
+      await queryClient.invalidateQueries({ queryKey: DASHBOARD_QUERY_KEYS.timesheetStatus(year, month) });
     } catch (err: any) {
       notify(err.message || "Failed to revoke timesheet signature", "error");
     } finally {
@@ -310,6 +334,6 @@ export function useDashboardData() {
     handleAddPasskey, passkeysSupported,
     page, setPage, ITEMS_PER_PAGE,
     totalDays, byDay, now,
-    reload: load,
+    reload,
   };
 }

@@ -2,10 +2,6 @@
 
 import { useState } from "react";
 import {
-  IconShieldCheck,
-  IconLoader2,
-  IconArrowBackUp,
-  IconAlertTriangle,
   IconTable,
   IconLayoutList,
 } from "@tabler/icons-react";
@@ -89,41 +85,6 @@ export default function DashboardView() {
 
   return (
     <div className="d-flex flex-column gap-3">
-      {/* Timesheet Signature Status Banner (Audit Indicator) */}
-      {isTimesheetSigned ? (
-        <div className="alert alert-info border-info shadow-sm d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-3 mb-0" role="alert">
-          <div className="d-flex align-items-center gap-2">
-            <span className="avatar avatar-sm bg-info-lt text-info rounded shrink-0">
-              <IconShieldCheck size={20} aria-hidden="true" />
-            </span>
-            <div>
-              <div className="fw-bold">🔒 Timesheet Signed & Locked</div>
-              <div className="small text-secondary">
-                The monthly timesheet has been digitally signed by the employee. All daily activity mutations are locked.
-              </div>
-            </div>
-          </div>
-          <button
-            type="button"
-            className="btn btn-outline-danger btn-sm d-flex align-items-center gap-1 shrink-0"
-            onClick={() => {
-              if (window.confirm("Revoke digital signature for this timesheet period? Activity locking will be released.")) {
-                handleRevokeTimesheet();
-              }
-            }}
-            disabled={revokingTimesheet}
-            title="Revoke timesheet signature to unlock daily activity editing"
-          >
-            {revokingTimesheet ? (
-              <IconLoader2 size={16} className="animate-spin" aria-hidden="true" />
-            ) : (
-              <IconArrowBackUp size={16} aria-hidden="true" />
-            )}
-            <span>Revoke Timesheet Signature</span>
-          </button>
-        </div>
-      ) : null}
-
       {/* Header with Quick Action Cards */}
       <DashboardHeader
         user={user}
@@ -167,6 +128,7 @@ export default function DashboardView() {
         revokingBA={revokingBA}
         onOpenUnsignedModal={() => setIsUnsignedBAModalOpen(true)}
         onOpenWitnessModal={() => setIsWitnessModalOpen(true)}
+        isTimesheetSigned={isTimesheetSigned}
       />
 
       {/* Table vs Grid View Selector */}

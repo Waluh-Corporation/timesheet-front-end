@@ -26,6 +26,7 @@ interface MonthlyWitnessCardProps {
   revokingBA?: boolean;
   onOpenUnsignedModal?: () => void;
   onOpenWitnessModal?: () => void;
+  isTimesheetSigned?: boolean;
 }
 
 const MONTH_NAMES = [
@@ -45,6 +46,7 @@ export function MonthlyWitnessCard({
   revokingBA = false,
   onOpenUnsignedModal,
   onOpenWitnessModal,
+  isTimesheetSigned = false,
 }: Readonly<MonthlyWitnessCardProps>) {
   const monthName = MONTH_NAMES[month - 1] || `Month ${month}`;
 
@@ -53,7 +55,7 @@ export function MonthlyWitnessCard({
   const isBaPending =
     beritaAcaraStatus?.status === "pending_witness" || beritaAcaraStatus?.status === "submitted";
   const isBaRejected = beritaAcaraStatus?.status === "rejected";
-  const isLocked = isBaSigned || isBaPending;
+  const isLocked = isBaSigned || isBaPending || isTimesheetSigned;
 
   if (!monthlyWitness) {
     return (
@@ -188,7 +190,7 @@ export function MonthlyWitnessCard({
           )}
 
           {/* Action button if Berita Acara is pending witness signature (pembatalan pengajuan tanda tangan) */}
-          {beritaAcaraCount > 0 && isBaPending && onRevokeBeritaAcara && (
+          {beritaAcaraCount > 0 && isBaPending && !isTimesheetSigned && onRevokeBeritaAcara && (
             <button
               type="button"
               onClick={() => {
@@ -214,7 +216,7 @@ export function MonthlyWitnessCard({
           )}
 
           {/* Action button if Berita Acara is signed (pembatalan tanda tangan Berita Acara) */}
-          {beritaAcaraCount > 0 && isBaSigned && onRevokeBeritaAcara && (
+          {beritaAcaraCount > 0 && isBaSigned && !isTimesheetSigned && onRevokeBeritaAcara && (
             <button
               type="button"
               onClick={() => {

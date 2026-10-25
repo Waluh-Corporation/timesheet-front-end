@@ -236,6 +236,7 @@ describe("MonthlyWitnessCard", () => {
             beritaAcaraCount={1}
             beritaAcaraStatus={status}
             onRevokeBeritaAcara={onRevoke}
+            isTimesheetSigned={false}
           />
         );
       });
@@ -252,5 +253,40 @@ describe("MonthlyWitnessCard", () => {
     } finally {
       window.confirm = originalConfirm;
     }
+  });
+
+  it("does not render 'Revoke BA Signature' button when isTimesheetSigned is true", async () => {
+    const witness: WitnessResponse = {
+      id: 12,
+      name: "Budi Santoso",
+      division: "Core Banking",
+    };
+    const status: BeritaAcaraStatusResponse = {
+      month: 10,
+      year: 2026,
+      status: "signed",
+      witness_name: "Budi Santoso",
+    };
+    const onRevoke = mock(() => {});
+
+    root = createRoot(container);
+    await act(async () => {
+      root?.render(
+        <MonthlyWitnessCard
+          month={10}
+          year={2026}
+          monthlyWitness={witness}
+          beritaAcaraCount={1}
+          beritaAcaraStatus={status}
+          onRevokeBeritaAcara={onRevoke}
+          isTimesheetSigned={true}
+        />
+      );
+    });
+
+    const revokeBtn = Array.from(container.querySelectorAll("button")).find((btn) =>
+      btn.textContent?.includes("Revoke")
+    );
+    expect(revokeBtn).toBeUndefined();
   });
 });

@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   IconShieldCheck,
   IconCheck,
@@ -12,8 +13,11 @@ import {
 } from "@tabler/icons-react";
 import { PageHeader } from "@/components/tabler";
 import { useToast } from "@/components/Toast";
-import { getPendingWitnessRequests, witnessAction } from "@/services/beritaAcaraService";
-import type { WitnessRequestItem } from "@/lib/types";
+import { witnessAction } from "@/services/beritaAcaraService";
+import {
+  usePendingWitnessRequestsQuery,
+  WITNESS_REQUESTS_KEY,
+} from "@/services/queries/useWitnessQueries";
 
 const MONTH_NAMES = [
   "January", "February", "March", "April", "May", "June",
@@ -22,37 +26,31 @@ const MONTH_NAMES = [
 
 export default function WitnessRequestsPage() {
   const { notify } = useToast();
-  const [requests, setRequests] = useState<WitnessRequestItem[]>([]);
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
+  const {
+    data: requests = [],
+    isLoading: loading,
+    refetch,
+    isFetching,
+  } = usePendingWitnessRequestsQuery();
+
   const [processingId, setProcessingId] = useState<string | number | null>(null);
   const [rejectingId, setRejectingId] = useState<string | number | null>(null);
   const [rejectNotes, setRejectNotes] = useState<Record<string | number, string>>({});
 
-  const loadRequests = useCallback(async () => {
-    setLoading(true);
-    try {
-      const data = await getPendingWitnessRequests();
-      setRequests(data || []);
-    } catch (err: unknown) {
-      notify(
-        err instanceof Error ? err.message : "Failed to load witness requests",
-        "error"
-      );
-    } finally {
-      setLoading(false);
-    }
-  }, [notify]);
-
-  useEffect(() => {
-    loadRequests();
-  }, [loadRequests]);
+  const loadRequests = async () => {
+    await refetch();
+  };
 
   const handleApprove = async (id: string | number) => {
     setProcessingId(id);
     try {
       await witnessAction(id, "approve");
       notify("Attendance Incident Report approved & signed as witness! ✍️", "success");
-      await loadRequests();
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: WITNESS_REQUESTS_KEY }),
+        queryClient.invalidateQueries({ queryKey: ["berita-acara-status"] }),
+      ]);
     } catch (err: unknown) {
       notify(
         err instanceof Error ? err.message : "Failed to sign Attendance Incident Report",
@@ -75,7 +73,10 @@ export default function WitnessRequestsPage() {
       await witnessAction(id, "reject", notes);
       notify("Attendance Incident Report has been rejected with revision notes", "info");
       setRejectingId(null);
-      await loadRequests();
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: WITNESS_REQUESTS_KEY }),
+        queryClient.invalidateQueries({ queryKey: ["berita-acara-status"] }),
+      ]);
     } catch (err: unknown) {
       notify(
         err instanceof Error ? err.message : "Failed to process rejection",

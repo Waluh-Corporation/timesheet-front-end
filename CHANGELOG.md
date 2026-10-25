@@ -15,7 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Witness Request Cancellation & Signature Revocation**:
   - Added direct action buttons to `MonthlyWitnessCard` and `UnsignedBeritaAcaraModal`:
     - `Cancel Witness Request`: Allows employees to cancel pending witness review requests when status is `pending_witness` or `submitted`.
-    - `Revoke BA Signature`: Allows employees to revoke approved/signed Berita Acara signatures and return them to draft when revisions are needed.
+    - `Revoke Signature`: Allows employees to revoke approved/signed Berita Acara signatures and return them to draft when revisions are needed.
 - **TanStack Query v5 & Zustand Client Architecture**:
   - Integrated **Zustand** store (`useTimesheetStore`) managing active month, year, page, and rows-per-page limit.
   - Implemented **TanStack Query v5** hooks (`useActivities`, `useAssignMonthlyWitness`, `useGenerateTimesheet`) with `placeholderData: keepPreviousData` preventing layout flicker during pagination and caching active queries.
@@ -42,6 +42,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - **Domain Model Relations**: Expanded `User`, `Company`, `Department`, `Division`, `Site`, `Project`, `Approver`, and `ProfileChangeRequest` with relational model links and audit timestamps.
 
 ### Changed
+- **Backend API Load Optimization & TanStack Query Migration**:
+  - Migrated data fetching across `Shell`, `DashboardView` (`useDashboardData`), `ActivityDetail` (`useActivityData`), and Witness Requests page to TanStack Query v5.
+  - Implemented tiered caching with automatic deduplication across parallel components:
+    - Master Data (`projects`, `activity-statuses`, `eligible-witnesses`, `holidays`): 5-minute `staleTime` (`300000ms`).
+    - Transactional & Status Data (`activities`, `berita-acara-status`, `timesheet-status`, `witness-requests`): 1-minute `staleTime` (`60000ms`).
+  - Eliminated repetitive `getPendingWitnessRequests()` API hits triggered on every client-side page navigation in `Shell.tsx`.
+  - Resolved duplicate concurrent `fetchProjects()` calls on mount in `useActivityData.ts`.
+  - Added targeted cache invalidations (`queryClient.invalidateQueries`) across Berita Acara submissions/revocations, Timesheet signing/revocations, activity creations/edits, and witness approvals/rejections.
 - **Witness Action Controls & Card Button Proportion Tuning**:
   - Sized down action buttons in `MonthlyWitnessCard` (`Cancel Witness Request`, `Revoke BA Signature`, `Submit to Witness`, `Change Witness`) to compact `btn-sm`, removed unnecessary 44px min-height constraints, and harmonized `Witness Locked` badge padding for balanced alignment.
   - Simplified witness rejection action button label and notes prompt on `/berita-acara/witness-requests` to "Reject".
@@ -58,6 +66,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Previous Activity Copying (Attendance Time Reset)**: Updated `copyPreviousDay` on `/activity` to leave `start_time` and `end_time` empty for accurate daily attendance tracking while autofilling task description, project reference, status, and Berita Acara notes from `GET /api/v1/activities/previous`.
 
 ### Removed
+- **Redundant Timesheet Status Banner & Duplicate Action Buttons**: Removed duplicate top "Timesheet Signed & Locked" alert banner in `DashboardView.tsx` in favor of `DashboardHeader` action buttons and Card 1 indicators. Hidden Berita Acara revocation buttons on `MonthlyWitnessCard` when timesheet is signed, and clearly labeled them as "Revoke BA Signature" when in draft to avoid action ambiguity.
 - **Redundant Error Banner**: Removed `ErrorSummaryAlert` banner from the dashboard in favor of the interactive `UnsignedBeritaAcaraModal` modal and centralized witness card indicators.
 
 ## [0.9.0] - 2026-10-19
