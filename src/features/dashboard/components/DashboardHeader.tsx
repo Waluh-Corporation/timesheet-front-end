@@ -83,11 +83,11 @@ export function DashboardHeader({
     monthlyWitness?.name ||
     (beritaAcaraStatus?.witness_id ? `Witness #${beritaAcaraStatus.witness_id}` : "Witness");
 
-  let pushIcon = <IconBell size={20} />;
+  let pushIcon = <IconBellOff size={22} />;
   if (pushBusy) {
-    pushIcon = <IconLoader2 size={20} className="animate-spin" />;
+    pushIcon = <IconLoader2 size={22} className="animate-spin" />;
   } else if (pushOn) {
-    pushIcon = <IconBellOff size={20} />;
+    pushIcon = <IconBell size={22} />;
   }
 
   return (
@@ -223,28 +223,36 @@ export function DashboardHeader({
 
         {/* Card 3: Push Notification */}
         <div className="col-sm-6 col-lg-3">
-          <div className="card card-sm shadow-sm h-100">
+          <div
+            className={`card card-sm shadow-sm h-100 ${
+              pushSupported && !pushBusy ? "cursor-pointer hover-shadow" : "opacity-60"
+            }`}
+            onClick={pushSupported && !pushBusy ? onTogglePush : undefined}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => {
+              if (pushSupported && !pushBusy && (e.key === "Enter" || e.key === " ")) {
+                onTogglePush();
+              }
+            }}
+            title={
+              !pushSupported
+                ? "Push notifications not supported on this browser"
+                : pushOn
+                ? "Click to disable daily reminders"
+                : "Click to enable daily reminders at 17:00"
+            }
+          >
             <div className="card-body d-flex align-items-center">
-              <button
-                type="button"
-                onClick={onTogglePush}
-                disabled={pushBusy || !pushSupported}
-                className="btn btn-icon btn-ghost me-3 p-0 border-0"
-                aria-label={pushOn ? "Disable reminders" : "Enable reminders"}
+              <span
+                className={`avatar ${
+                  pushOn ? "bg-yellow-lt text-yellow" : "bg-secondary-lt text-secondary"
+                } me-3 rounded`}
               >
-                <span className={`avatar ${pushOn ? "bg-yellow text-yellow-fg" : "bg-yellow-lt text-yellow"} rounded`}>
-                  {pushIcon}
-                </span>
-              </button>
+                {pushIcon}
+              </span>
               <div className="min-w-0 flex-fill">
-                <div
-                  className="fw-bold text-truncate cursor-pointer"
-                  onClick={onTogglePush}
-                  role="button"
-                  tabIndex={0}
-                >
-                  {pushOn ? "Disable Reminders" : "Enable Reminders"}
-                </div>
+                <div className="fw-bold text-truncate">Daily Reminders</div>
                 <div className="d-flex align-items-center justify-content-between">
                   <span className="text-secondary small">Daily push at 17:00</span>
                   {pushOn && onSendTestPush && (
@@ -263,7 +271,7 @@ export function DashboardHeader({
                       ) : (
                         <IconSend size={12} />
                       )}
-                      Test
+                      <span>Test</span>
                     </button>
                   )}
                 </div>

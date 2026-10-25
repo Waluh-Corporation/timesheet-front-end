@@ -225,4 +225,56 @@ describe("DashboardHeader Component", () => {
     expect(revokeBtn).toBeUndefined();
     expect(activityBtn).toBeDefined();
   });
+
+  it("renders 'Daily Reminders' card with active icon avatar when pushOn is true", async () => {
+    root = createRoot(container);
+
+    await act(async () => {
+      root?.render(
+        <DashboardHeader
+          user={mockUser}
+          filledCount={10}
+          generating={false}
+          onGenerate={() => {}}
+          pushBusy={false}
+          pushOn={true}
+          onTogglePush={() => {}}
+          pushSupported={true}
+          onAddPasskey={() => {}}
+          passkeysSupported={false}
+        />
+      );
+    });
+
+    expect(container.textContent).toContain("Daily Reminders");
+    expect(container.textContent).not.toContain("Active");
+    const yellowAvatar = container.querySelector(".avatar.bg-yellow-lt");
+    expect(yellowAvatar).not.toBeNull();
+  });
+
+  it("renders 'Daily Reminders' card with disabled icon avatar when pushOn is false", async () => {
+    root = createRoot(container);
+
+    await act(async () => {
+      root?.render(
+        <DashboardHeader
+          user={mockUser}
+          filledCount={10}
+          generating={false}
+          onGenerate={() => {}}
+          pushBusy={false}
+          pushOn={false}
+          onTogglePush={() => {}}
+          pushSupported={true}
+          onAddPasskey={() => {}}
+          passkeysSupported={false}
+        />
+      );
+    });
+
+    expect(container.textContent).toContain("Daily Reminders");
+    expect(container.textContent).not.toContain("Off");
+    const secondaryAvatar = container.querySelector(".avatar.bg-secondary-lt");
+    expect(secondaryAvatar).not.toBeNull();
+  });
 });
