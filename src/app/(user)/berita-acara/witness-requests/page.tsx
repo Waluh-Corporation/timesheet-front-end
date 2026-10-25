@@ -203,7 +203,7 @@ export default function WitnessRequestsPage() {
                             disabled={isProcessing}
                           >
                             <IconX size={16} />
-                            <span>{isRejecting ? "Cancel" : "Reject / Revision"}</span>
+                            <span>{isRejecting ? "Cancel" : "Reject"}</span>
                           </button>
                         </div>
                       </div>
@@ -212,7 +212,7 @@ export default function WitnessRequestsPage() {
                       {isRejecting && (
                         <div className="mt-3 p-3 border border-danger-subtle rounded bg-danger-subtle bg-opacity-10">
                           <label htmlFor={`reject-notes-${req.id}`} className="form-label text-danger fw-bold small mb-1">
-                            Rejection Reason / Revision Notes for {employeeName}:
+                            Rejection Reason Notes for {employeeName}:
                           </label>
                           <textarea
                             id={`reject-notes-${req.id}`}

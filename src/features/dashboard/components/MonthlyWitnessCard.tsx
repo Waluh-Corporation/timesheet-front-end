@@ -174,13 +174,12 @@ export function MonthlyWitnessCard({
                 else if (onOpenUnsignedModal) onOpenUnsignedModal();
               }}
               disabled={submittingBA}
-              className="btn btn-warning text-dark fw-bold d-inline-flex align-items-center justify-content-center gap-1.5"
-              style={{ minHeight: 44 }}
+              className="btn btn-warning btn-sm text-dark fw-bold d-inline-flex align-items-center justify-content-center gap-1.5"
             >
               {submittingBA ? (
-                <IconLoader2 size={16} className="animate-spin" aria-hidden="true" />
+                <IconLoader2 size={14} className="animate-spin" aria-hidden="true" />
               ) : (
-                <IconSend size={16} aria-hidden="true" />
+                <IconSend size={14} aria-hidden="true" />
               )}
               <span>
                 Submit to Witness ({beritaAcaraCount} {beritaAcaraCount === 1 ? "day" : "days"})
@@ -202,14 +201,13 @@ export function MonthlyWitnessCard({
                 }
               }}
               disabled={revokingBA}
-              className="btn btn-outline-danger d-inline-flex align-items-center justify-content-center gap-1.5"
-              style={{ minHeight: 44 }}
+              className="btn btn-outline-danger btn-sm d-inline-flex align-items-center justify-content-center gap-1.5"
               title="Cancel witness signature request and revert incident reports to draft"
             >
               {revokingBA ? (
-                <IconLoader2 size={16} className="animate-spin" aria-hidden="true" />
+                <IconLoader2 size={14} className="animate-spin" aria-hidden="true" />
               ) : (
-                <IconArrowBackUp size={16} aria-hidden="true" />
+                <IconArrowBackUp size={14} aria-hidden="true" />
               )}
               <span>Cancel Witness Request</span>
             </button>
@@ -229,14 +227,13 @@ export function MonthlyWitnessCard({
                 }
               }}
               disabled={revokingBA}
-              className="btn btn-outline-danger d-inline-flex align-items-center justify-content-center gap-1.5"
-              style={{ minHeight: 44 }}
+              className="btn btn-outline-danger btn-sm d-inline-flex align-items-center justify-content-center gap-1.5"
               title="Revoke incident report signature and unlock editing"
             >
               {revokingBA ? (
-                <IconLoader2 size={16} className="animate-spin" aria-hidden="true" />
+                <IconLoader2 size={14} className="animate-spin" aria-hidden="true" />
               ) : (
-                <IconArrowBackUp size={16} aria-hidden="true" />
+                <IconArrowBackUp size={14} aria-hidden="true" />
               )}
               <span>Revoke BA Signature</span>
             </button>
@@ -247,10 +244,9 @@ export function MonthlyWitnessCard({
             <button
               type="button"
               onClick={onOpenWitnessModal}
-              className="btn btn-danger d-inline-flex align-items-center justify-content-center gap-1.5"
-              style={{ minHeight: 44 }}
+              className="btn btn-danger btn-sm d-inline-flex align-items-center justify-content-center gap-1.5"
             >
-              <IconAlertTriangle size={16} aria-hidden="true" />
+              <IconAlertTriangle size={14} aria-hidden="true" />
               <span>View Revision Notes</span>
             </button>
           )}
@@ -258,7 +254,7 @@ export function MonthlyWitnessCard({
           {/* Change Witness Button */}
           {isLocked ? (
             <span
-              className="badge bg-secondary-lt text-secondary py-2 px-3 d-inline-flex align-items-center gap-1.5"
+              className="badge bg-secondary-lt text-secondary py-1.5 px-2.5 d-inline-flex align-items-center gap-1.5"
               title="Witness is locked while attendance incident reports are under review or signed."
             >
               <IconLock size={14} aria-hidden="true" />
@@ -268,11 +264,10 @@ export function MonthlyWitnessCard({
             <button
               type="button"
               onClick={onOpenWitnessModal}
-              className="btn btn-outline-secondary d-inline-flex align-items-center justify-content-center gap-1.5"
-              style={{ minHeight: 44 }}
+              className="btn btn-outline-secondary btn-sm d-inline-flex align-items-center justify-content-center gap-1.5"
               title="Change the designated witness for this month"
             >
-              <IconPencil size={16} aria-hidden="true" />
+              <IconPencil size={14} aria-hidden="true" />
               <span>Change Witness</span>
             </button>
           )}

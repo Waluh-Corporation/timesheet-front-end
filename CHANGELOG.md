@@ -42,6 +42,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - **Domain Model Relations**: Expanded `User`, `Company`, `Department`, `Division`, `Site`, `Project`, `Approver`, and `ProfileChangeRequest` with relational model links and audit timestamps.
 
 ### Changed
+- **Witness Action Controls & Card Button Proportion Tuning**:
+  - Sized down action buttons in `MonthlyWitnessCard` (`Cancel Witness Request`, `Revoke BA Signature`, `Submit to Witness`, `Change Witness`) to compact `btn-sm`, removed unnecessary 44px min-height constraints, and harmonized `Witness Locked` badge padding for balanced alignment.
+  - Simplified witness rejection action button label and notes prompt on `/berita-acara/witness-requests` to "Reject".
 - **Dashboard Witness & Incident Report UX Streamlining**:
   - Removed duplicate monthly witness section embedded inside `MonthlyGrid`, eliminating redundant stacked witness cards.
   - Removed redundant "Saksi BA" button next to "Today's Activity" in `DashboardHeader` in favor of centralized monthly card interactions.
