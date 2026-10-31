@@ -1,9 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { IconLoader2, IconCalendarEvent, IconHelp } from "@tabler/icons-react";
+import {
+  IconLoader2,
+  IconCalendarEvent,
+  IconHelp,
+} from "@tabler/icons-react";
 import { DailyActivityRow } from "./DailyActivityRow";
-import type { DailyActivity } from "@/lib/types";
+import type { DailyActivity, WitnessResponse, BeritaAcaraStatusResponse } from "@/lib/types";
 
 const MONTHS = [
   "January", "February", "March", "April", "May", "June",
@@ -21,6 +25,9 @@ interface MonthlyGridProps {
   page: number;
   setPage: (page: number | ((p: number) => number)) => void;
   ITEMS_PER_PAGE: number;
+  monthlyWitness?: WitnessResponse;
+  beritaAcaraStatus?: BeritaAcaraStatusResponse | null;
+  onOpenWitnessModal?: () => void;
 }
 
 export function MonthlyGrid({
@@ -34,12 +41,13 @@ export function MonthlyGrid({
   page,
   setPage,
   ITEMS_PER_PAGE,
+  beritaAcaraStatus,
 }: Readonly<MonthlyGridProps>) {
   const [showTooltip, setShowTooltip] = useState(false);
 
   return (
     <div className="card shadow-sm">
-      <div className="card-header d-flex justify-content-between align-items-center">
+      <div className="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
         <div className="d-flex align-items-center gap-2">
           <IconCalendarEvent size={20} className="text-primary" />
           <h3 className="card-title mb-0">Monthly Timesheet</h3>
@@ -82,7 +90,7 @@ export function MonthlyGrid({
           </div>
         </div>
 
-        <div className="text-secondary small">
+        <div className="text-secondary small fw-medium">
           {MONTHS[month - 1]} {year}
         </div>
       </div>
@@ -144,6 +152,7 @@ export function MonthlyGrid({
                             holiday={holiday}
                             isWeekend={isWeekend}
                             activity={act}
+                            beritaAcaraStatus={beritaAcaraStatus}
                           />
                         );
                       })}
@@ -174,22 +183,24 @@ export function MonthlyGrid({
               }
 
               return (
-                <div className="d-flex align-items-center justify-content-between mt-3 pt-3 border-top">
+                <div className="d-flex align-items-center justify-content-between mt-3 pt-3 border-top flex-wrap gap-2">
                   <span className="text-secondary small">
                     Page <strong>{currentPage}</strong> of <strong>{totalPages}</strong>
                   </span>
                   <div className="btn-group">
                     <button
-                      className="btn btn-sm btn-outline-secondary"
-                      disabled={currentPage === 1}
+                      type="button"
+                      disabled={currentPage <= 1}
                       onClick={() => setPage((p) => Math.max(1, p - 1))}
+                      className="btn btn-sm btn-outline-secondary"
                     >
                       Previous
                     </button>
                     <button
-                      className="btn btn-sm btn-outline-secondary"
-                      disabled={currentPage === totalPages}
+                      type="button"
+                      disabled={currentPage >= totalPages}
                       onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                      className="btn btn-sm btn-outline-secondary"
                     >
                       Next
                     </button>

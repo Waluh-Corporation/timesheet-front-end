@@ -4,6 +4,7 @@ export * from "./components/PasskeySection";
 export * from "./components/ProfileForm";
 export * from "./components/ChangeRequestsHistory";
 export * from "./components/ChangePasswordForm";
+export * from "./components/SignatureSection";
 export * from "./components/ProfileView";
 export * from "./services/accountService";
 export * from "./hooks/useProfileForm";

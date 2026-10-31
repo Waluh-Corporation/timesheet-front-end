@@ -15,14 +15,17 @@ import {
   IconClock,
   IconDatabase,
   IconClipboardList,
+  IconShieldCheck,
   IconX,
   type Icon as TablerIcon,
 } from "@tabler/icons-react";
+import { usePendingWitnessRequestsQuery } from "@/services/queries/useWitnessQueries";
 
 interface NavItem {
   href: string;
   label: string;
   icon: TablerIcon;
+  badge?: number | string;
 }
 
 interface NavSection {
@@ -51,6 +54,12 @@ export default function Shell({ children }: { readonly children: React.ReactNode
   const mobileToggleRef = useRef<HTMLButtonElement>(null);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
 
+  const isWitnessEligible = Boolean(user && user.role !== "admin");
+  const { data: pendingWitnessRequests } = usePendingWitnessRequestsQuery({
+    enabled: isWitnessEligible,
+  });
+  const witnessCount = pendingWitnessRequests?.length || 0;
+
   const isAdmin =
     user?.role === "admin" ||
     user?.username === "admin" ||
@@ -58,6 +67,19 @@ export default function Shell({ children }: { readonly children: React.ReactNode
       (pathname.startsWith("/users") ||
         pathname.startsWith("/profile-changes") ||
         pathname.startsWith("/master-data")));
+
+  const userTimesheetItems: NavItem[] = [
+    { href: "/dashboard", label: "Dashboard", icon: IconLayoutDashboard },
+    { href: "/activity", label: "Daily Activity", icon: IconCalendarCheck },
+    { href: "/overtime", label: "Overtime", icon: IconClock },
+    { href: "/historical-data", label: "Historical Data", icon: IconHistory },
+    {
+      href: "/berita-acara/witness-requests",
+      label: "Witness Requests",
+      icon: IconShieldCheck,
+      badge: witnessCount > 0 ? witnessCount : undefined,
+    },
+  ];
 
   const sections: NavSection[] = isAdmin
     ? [
@@ -73,7 +95,7 @@ export default function Shell({ children }: { readonly children: React.ReactNode
     : [
         {
           title: "Timesheet",
-          items: timesheetItems,
+          items: userTimesheetItems,
         },
         {
           title: "Account",
@@ -160,6 +182,11 @@ export default function Shell({ children }: { readonly children: React.ReactNode
                       >
                         <Icon size={18} className={active ? "text-primary" : "text-secondary"} />
                         <span>{item.label}</span>
+                        {item.badge !== undefined && (
+                          <span className="badge bg-danger text-white rounded-pill ms-auto">
+                            {item.badge}
+                          </span>
+                        )}
                       </Link>
                     </li>
                   );
@@ -271,6 +298,11 @@ export default function Shell({ children }: { readonly children: React.ReactNode
                         >
                           <Icon size={18} className={active ? "text-primary" : "text-secondary"} />
                           <span>{item.label}</span>
+                          {item.badge !== undefined && (
+                            <span className="badge bg-danger text-white rounded-pill ms-auto">
+                              {item.badge}
+                            </span>
+                          )}
                         </Link>
                       </li>
                     );

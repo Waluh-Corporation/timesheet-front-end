@@ -9,6 +9,74 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- **SonarCloud Reliability & Accessibility Standards Compliance**:
+  - Resolved 3 reliability bugs (`typescript:S9383`) by explicitly handling floating promises using the `void` operator in `MonthlyWitnessCard.tsx` and `VerifyClient.tsx`.
+  - Resolved 4 accessibility code smells (`typescript:S6853`) across `SignatureSection.tsx` and `ActivitiesTable.tsx` by replacing non-standard `<label>` wrappers with semantic `<span>` styling and ensuring explicit `htmlFor`/`id` association on radio controls.
+
+### Added
+- **Dynamic Push Reminder Schedule Integration**: Integrated dynamic reminder schedule endpoint (`GET /api/v1/push/schedule`) via `getPushSchedule` and `usePushScheduleQuery`. Replaced static hardcoded reminder labels with dynamic hour/minute formatting and server-configured timezone in Card 3 of `DashboardHeader`, including disabled state handling and human-readable hover tooltips.
+- **Timesheet Digital Signing & Revocation Controls**:
+  - Added dedicated timesheet sign-off and signature revocation action buttons (`Sign Timesheet` and `Revoke Timesheet Signature`) to the dashboard header, enabling employees to digitally lock their timesheet or unlock it if changes are necessary.
+- **Witness Request Cancellation & Signature Revocation**:
+  - Added direct action buttons to `MonthlyWitnessCard` and `UnsignedBeritaAcaraModal`:
+    - `Cancel Witness Request`: Allows employees to cancel pending witness review requests when status is `pending_witness` or `submitted`.
+    - `Revoke Signature`: Allows employees to revoke approved/signed Berita Acara signatures and return them to draft when revisions are needed.
+- **TanStack Query v5 & Zustand Client Architecture**:
+  - Integrated **Zustand** store (`useTimesheetStore`) managing active month, year, page, and rows-per-page limit.
+  - Implemented **TanStack Query v5** hooks (`useActivities`, `useAssignMonthlyWitness`, `useGenerateTimesheet`) with `placeholderData: keepPreviousData` preventing layout flicker during pagination and caching active queries.
+- **TanStack Table v8 Server-Side Pagination**:
+  - Added `ActivitiesTable` with `manualPagination: true` consuming standard backend envelope `response.pagination` (`page`, `limit`, `total_rows`, `total_pages`).
+  - Implemented accessible range counter (`Showing X to Y of Z results`), rows-per-page selector (`10`, `25`, `50`, `100`), smart page pills with ellipsis, and bi-directional URL query sync (`?page=X&limit=Y`).
+- **UI/UX Pro Max Monthly Witness Designation Card**:
+  - Added `MonthlyWitnessCard` with WCAG 2.2 AA contrast, responsive layout, unassigned amber callout, and locked witness badge (`Locked Witness for [Month] [Year]`) with touch targets $\ge 44\times 44\text{px}$.
+- **Public Verification Portal & Fingerprint Normalization**:
+  - Standardized public verification routes (`/verify/{token}` and `/verify/doc/{token}`) with English-only UI, dynamic `APP_NAME` branding (no hardcoded organization names), uppercase SHA-256 hash formatting, and timezone-aware timestamps (`formatLocalTimestamp`).
+- **Domain Labeling Standardization**:
+  - Formally labeled attendance incident documents as **"Berita Acara - Attendance Incident Report"** (distinguished from overtime/SPL) across all tables, cards, dialogs, and verification views.
+- **Interactive Typed Digital Signature**: Added tabbed signature creation on `/profile` with a **"Ketik Nama" (Type Name)** mode supporting cursive web fonts (*Caveat*, *Dancing Script*, *Great Vibes*), rendered to a 2x Retina transparent HTML5 canvas and uploaded via `POST /api/v1/user/signature` alongside freehand drawing and image upload tabs.
+- **Berita Acara Witness Signature Guard on Generation**: Integrated backend validation guard for monthly timesheet generation (`POST /api/v1/timesheet/generate`), surfacing status alerts when Berita Acara entries are unsubmitted, awaiting witness sign-off, or rejected with revision notes:
+  - Added dynamic status banners and quick **"Ajukan ke Saksi"** action on the dashboard utilizing optional `witness_id` in `SubmitBeritaAcaraRequest`.
+  - Added **"Batalkan Permintaan"** and **"Revoke Tanda Tangan"** actions on the dashboard for Berita Acara submissions (`POST /api/v1/berita-acara/:id/revoke`) and signed timesheets (`POST /api/v1/timesheets/revoke`), allowing employees to unlock daily activity mutations if revisions are required.
+  - Added error response handling on "Generate" preventing timesheet creation if Berita Acara is not yet `signed`.
+- **Witness Requests Navigation & Review**: Added dedicated review route `/berita-acara/witness-requests` and `WitnessReviewModal` with responsive badge notifications on the sidebar navigation and dashboard header, allowing designated witnesses to approve or reject submissions with revision notes.
+- **API Contracts Integration (Swagger Sync)**: Synchronized frontend domain contracts and API client services with backend OpenAPI specification (`/swagger/doc.json`):
+  - **Timesheet Sign-off Lifecycle**: Added `getTimesheetStatus`, `signTimesheet`, `revokeTimesheet`, and `getTimesheetDownloadUrl` in `timesheetService`.
+  - **Berita Acara E-Sign & Witness Review Workflow**: Added `beritaAcaraService` supporting `getBeritaAcaraStatus`, `submitBeritaAcara` (with optional `witness_id`), `getPendingWitnessRequests`, `revokeBeritaAcara`, and `witnessAction`.
+  - **User Digital Signature Management**: Added `signatureService` supporting `getUserSignature`, `uploadUserSignature` (Base64 PNG/JPEG), and `deleteUserSignature`.
+  - **Public Document Verification**: Added `verifyService` and public verification route `/verify/doc/[token]` with Tabler UI layout for verifying document authenticity, signature timestamp, and cryptographic SHA-256 audit hash.
+  - **Domain Model Relations**: Expanded `User`, `Company`, `Department`, `Division`, `Site`, `Project`, `Approver`, and `ProfileChangeRequest` with relational model links and audit timestamps.
+
+### Changed
+- **Quick Action Cards Visual Symmetrization**: Harmonized Card 3 (Daily Reminders) in `DashboardHeader.tsx` with a symmetrical 22px avatar box matching Cards 1, 2, and 4. Represented reminder status cleanly via dynamic bell icons (`IconBellRinging` with `bg-yellow-lt` when enabled, `IconBellCancel` with `bg-secondary-lt` when disabled) without redundant badges or clutter.
+- **Backend API Load Optimization & TanStack Query Migration**:
+  - Migrated data fetching across `Shell`, `DashboardView` (`useDashboardData`), `ActivityDetail` (`useActivityData`), and Witness Requests page to TanStack Query v5.
+  - Implemented tiered caching with automatic deduplication across parallel components:
+    - Master Data (`projects`, `activity-statuses`, `eligible-witnesses`, `holidays`): 5-minute `staleTime` (`300000ms`).
+    - Transactional & Status Data (`activities`, `berita-acara-status`, `timesheet-status`, `witness-requests`): 1-minute `staleTime` (`60000ms`).
+  - Eliminated repetitive `getPendingWitnessRequests()` API hits triggered on every client-side page navigation in `Shell.tsx`.
+  - Resolved duplicate concurrent `fetchProjects()` calls on mount in `useActivityData.ts`.
+  - Added targeted cache invalidations (`queryClient.invalidateQueries`) across Berita Acara submissions/revocations, Timesheet signing/revocations, activity creations/edits, and witness approvals/rejections.
+- **Witness Action Controls & Card Button Proportion Tuning**:
+  - Sized down action buttons in `MonthlyWitnessCard` (`Cancel Witness Request`, `Revoke BA Signature`, `Submit to Witness`, `Change Witness`) to compact `btn-sm`, removed unnecessary 44px min-height constraints, and harmonized `Witness Locked` badge padding for balanced alignment.
+  - Simplified witness rejection action button label and notes prompt on `/berita-acara/witness-requests` to "Reject".
+- **Dashboard Witness & Incident Report UX Streamlining**:
+  - Removed duplicate monthly witness section embedded inside `MonthlyGrid`, eliminating redundant stacked witness cards.
+  - Removed redundant "Saksi BA" button next to "Today's Activity" in `DashboardHeader` in favor of centralized monthly card interactions.
+  - Re-anchored Card 1 in the quick action grid as a permanent, consistent **"Generate Timesheet"** card (showing `Locked: Butuh Saksi` indicator and tooltip when unsigned incident reports exist), maintaining symmetry across all 4 dashboard action cards.
+  - Consolidated monthly witness identity, lock states, incident report count badges (`Laporan Menunggu Pengajuan`, `Menunggu Saksi`, `Ditolak Saksi`, `Telah Ditandatangani`), and the direct `[Ajukan ke Saksi]` action into a unified **`MonthlyWitnessCard`** as the single source of truth.
+- **Dynamic Generate Metric Card & Berita Acara Integration**:
+  - Replaced the top Berita Acara notification banners with a dynamic, context-aware "Generate" action card on the dashboard that transitions seamlessly through BA states: **"Ajukan ke Saksi"** (draft), **"Menunggu Saksi"** (pending approval), **"Ditolak Saksi"** (review revisions), and clean **"Generate"** once witness verification is completed.
+  - Centralized Berita Acara signature revocation, pending cancellation, and rejection review into the **Monthly Witness Modal** via the header action.
+  - Removed redundant top banner for inbound witness review requests in favor of the persistent header notification button.
+- **Daily Activity Form Simplification**: Removed redundant per-activity "Saksi Berita Acara (Rekan Kerja)" select dropdown on `/activity` in favor of centralized monthly witness assignment and sign-off locking.
+- **Previous Activity Copying (Attendance Time Reset)**: Updated `copyPreviousDay` on `/activity` to leave `start_time` and `end_time` empty for accurate daily attendance tracking while autofilling task description, project reference, status, and Berita Acara notes from `GET /api/v1/activities/previous`.
+
+### Removed
+- **Standalone Sign/Revoke Timesheet Button in Header**: Removed the standalone `Sign Timesheet` and `Revoke Timesheet Signature` action button from `DashboardHeader.tsx` to keep the header focused exclusively on `+ Today's Activity` and prevent duplicate controls alongside the Generate Timesheet quick action card.
+- **Redundant Timesheet Status Banner & Duplicate Action Buttons**: Removed duplicate top "Timesheet Signed & Locked" alert banner in `DashboardView.tsx` in favor of Card 1 indicators. Hidden Berita Acara revocation buttons on `MonthlyWitnessCard` when timesheet is signed, and clearly labeled them as "Revoke BA Signature" when in draft to avoid action ambiguity.
+- **Redundant Error Banner**: Removed `ErrorSummaryAlert` banner from the dashboard in favor of the interactive `UnsignedBeritaAcaraModal` modal and centralized witness card indicators.
+
 ## [0.9.0] - 2026-10-19
 
 ### Added

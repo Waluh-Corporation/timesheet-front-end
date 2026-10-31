@@ -1,10 +1,16 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { fetchActivityById, createActivity } from "../services/activityService";
-import type { DailyActivity, Project, ActivityStatus, WitnessResponse } from "@/lib/types";
-import { fetchProjects, fetchActivityStatuses } from "@/app/(admin)/master-data/services/masterData";
-import { fetchEligibleWitnesses, fetchPreviousDayActivity } from "@/services/activityService";
+import type { DailyActivity, ActivityStatus } from "@/lib/types";
+import {
+  useProjectsQuery,
+  useActivityStatusesQuery,
+  useEligibleWitnessesQuery,
+} from "@/services/queries/useMasterDataQueries";
+import { useDashboardActivitiesQuery } from "@/features/dashboard/useDashboardQueries";
+import { fetchPreviousDayActivity } from "@/services/activityService";
 import { useToast } from "@/components/Toast";
 import { useRouter } from "next/navigation";
 
@@ -30,49 +36,44 @@ export const useActivityData = (initialId: string | null, defaultDate: string) =
     app_impacted: "",
     is_berita_acara: false,
     berita_acara_notes: "",
-    witness_id: undefined,
   });
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [copying, setCopying] = useState(false);
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [statuses, setStatuses] = useState<ActivityStatus[]>(DEFAULT_STATUSES);
-  const [witnesses, setWitnesses] = useState<WitnessResponse[]>([]);
   const { notify } = useToast();
   const router = useRouter();
+  const queryClient = useQueryClient();
+
+  // Master data queries cached with 5-minute staleTime
+  const { data: projectsData } = useProjectsQuery();
+  const { data: statusesData } = useActivityStatusesQuery();
+  const { data: witnessesData } = useEligibleWitnessesQuery();
+
+  const projects = useMemo(() => projectsData || [], [projectsData]);
+  const statuses = useMemo(
+    () => (statusesData && statusesData.length > 0 ? statusesData : DEFAULT_STATUSES),
+    [statusesData]
+  );
+  const witnesses = useMemo(() => witnessesData || [], [witnessesData]);
+
+  // Resolve designated monthly witness using 1-minute cached dashboard activities query
+  const d = form.date ? new Date(form.date) : new Date();
+  const y = d.getFullYear() || new Date().getFullYear();
+  const m = (d.getMonth() + 1) || (new Date().getMonth() + 1);
+  const { data: dashboardActs } = useDashboardActivitiesQuery(y, m);
+  const monthlyWitness = dashboardActs?.monthlyWitness;
 
   useEffect(() => {
-    void fetchActivityStatuses()
-      .then((res) => {
-        if (res && res.length > 0) setStatuses(res);
-      })
-      .catch(() => {});
-
-    void fetchProjects()
-      .then((data) => {
-        if (data) setProjects(data);
-      })
-      .catch(() => {});
-
-    void fetchEligibleWitnesses()
-      .then((w) => {
-        if (w) setWitnesses(w);
-      })
-      .catch(() => {});
-
     const loadInitial = async () => {
       if (!initialId) return;
       setLoading(true);
       try {
-        const [data, projs] = await Promise.all([
-          fetchActivityById(initialId),
-          fetchProjects(),
-        ]);
-        if (projs) setProjects(projs);
+        const data = await fetchActivityById(initialId);
         const matchedProj =
-          (data.project_ref_id ? projs?.find((p) => p.id === data.project_ref_id) : undefined) ||
-          (data.project_name ? projs?.find((p) => p.name?.trim().toLowerCase() === data.project_name.trim().toLowerCase()) : undefined) ||
-          (data.project_id ? projs?.find((p) => p.code?.trim().toLowerCase() === data.project_id.trim().toLowerCase()) : undefined);
+          (data.project_ref_id ? projects.find((p) => p.id === data.project_ref_id) : undefined) ||
+          (data.project_name ? projects.find((p) => p.name?.trim().toLowerCase() === data.project_name.trim().toLowerCase()) : undefined) ||
+          (data.project_id ? projects.find((p) => p.code?.trim().toLowerCase() === data.project_id.trim().toLowerCase()) : undefined);
+
         setForm({
           ...data,
           project_ref_id: data.project_ref_id || matchedProj?.id,
@@ -96,7 +97,7 @@ export const useActivityData = (initialId: string | null, defaultDate: string) =
     };
 
     void loadInitial();
-  }, [initialId, notify]);
+  }, [initialId, notify, projects]);
 
   const set = <K extends keyof DailyActivity>(k: K, v: DailyActivity[K]) => {
     setForm((prev) => ({ ...prev, [k]: v }));
@@ -115,19 +116,21 @@ export const useActivityData = (initialId: string | null, defaultDate: string) =
         setForm((curr) => ({
           ...curr,
           activity: prev.activity || curr.activity,
-          start_time: prev.start_time || curr.start_time,
-          end_time: prev.end_time || curr.end_time,
+          start_time: "",
+          end_time: "",
           status: prev.status || curr.status,
           project_ref_id: prev.project_ref_id || matchedProj?.id || curr.project_ref_id,
           project_id: prev.project_id || matchedProj?.code || curr.project_id,
           project_name: prev.project_name || matchedProj?.name || curr.project_name,
           app_impacted: prev.app_impacted || matchedProj?.app_impacted || curr.app_impacted,
+          is_berita_acara: prev.is_berita_acara !== undefined ? prev.is_berita_acara : curr.is_berita_acara,
+          berita_acara_notes: prev.berita_acara_notes !== undefined ? prev.berita_acara_notes : curr.berita_acara_notes,
         }));
-        notify("Berhasil menyalin data kegiatan hari sebelumnya 📋", "success");
+        notify("Successfully copied previous day's activity 📋", "success");
       }
     } catch (err) {
       const error = err as Error;
-      notify(error.message || "Tidak ada data kegiatan hari sebelumnya", "error");
+      notify(error.message || "No activity data found from previous day", "error");
     } finally {
       setCopying(false);
     }
@@ -171,12 +174,14 @@ export const useActivityData = (initialId: string | null, defaultDate: string) =
 
     setSaving(true);
     try {
+      const { witness_id, witness, ...activityData } = form;
       const payload = {
-        ...form,
+        ...activityData,
         date: form.date ? form.date.split("T")[0] : "",
       };
 
       await createActivity(payload);
+      await queryClient.invalidateQueries({ queryKey: ["activities"] });
       notify(activeId ? "Activity updated" : "Activity saved", "success");
       router.push("/dashboard");
     } catch (err) {
@@ -200,5 +205,6 @@ export const useActivityData = (initialId: string | null, defaultDate: string) =
     projects,
     statuses,
     witnesses,
+    monthlyWitness,
   };
 };

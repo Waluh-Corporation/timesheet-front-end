@@ -1,6 +1,7 @@
 import { describe, it, expect, mock } from "bun:test";
 import React from "react";
 import { renderToString } from "react-dom/server";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import Shell from "./Shell";
 import { AuthContext } from "@/lib/auth";
 
@@ -26,13 +27,23 @@ const mockAuthValue: any = {
   loading: false,
 };
 
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: { retry: false },
+  },
+});
+
 describe("Shell component", () => {
   it("renders shell navigation and user details", () => {
     const html = renderToString(
       React.createElement(
-        AuthContext.Provider,
-        { value: mockAuthValue },
-        React.createElement(Shell, null, React.createElement("div", null, "Child Content"))
+        QueryClientProvider,
+        { client: queryClient },
+        React.createElement(
+          AuthContext.Provider,
+          { value: mockAuthValue },
+          React.createElement(Shell, null, React.createElement("div", null, "Child Content"))
+        )
       )
     );
     expect(html).toContain("Timesheet");
@@ -48,9 +59,13 @@ describe("Shell component", () => {
     };
     const html = renderToString(
       React.createElement(
-        AuthContext.Provider,
-        { value: adminAuthValue },
-        React.createElement(Shell, null, React.createElement("div", null, "Admin Content"))
+        QueryClientProvider,
+        { client: queryClient },
+        React.createElement(
+          AuthContext.Provider,
+          { value: adminAuthValue },
+          React.createElement(Shell, null, React.createElement("div", null, "Admin Content"))
+        )
       )
     );
     expect(html).toContain("Administration");
@@ -84,17 +99,20 @@ describe("Shell component", () => {
         }
       }
       findClick(tree);
-      return null;
+      return tree;
     }
 
     renderToString(
       React.createElement(
-        AuthContext.Provider,
-        { value: mockAuthValue },
-        React.createElement(Consumer)
+        QueryClientProvider,
+        { client: queryClient },
+        React.createElement(
+          AuthContext.Provider,
+          { value: mockAuthValue },
+          React.createElement(Consumer)
+        )
       )
     );
-
     expect(capturedHandler).toBeDefined();
     await capturedHandler();
     expect(mockLogout).toHaveBeenCalled();
