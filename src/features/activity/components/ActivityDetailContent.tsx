@@ -33,7 +33,7 @@ export function ActivityDetailContent() {
     activeId,
     projects,
     statuses,
-    witnesses,
+    monthlyWitness,
   } = useActivityData(id, defaultDate);
 
   if (loading) {
@@ -83,7 +83,7 @@ export function ActivityDetailContent() {
                   type="button"
                   onClick={copyPreviousDay}
                   disabled={copying}
-                  title="Salin aktivitas dari hari aktif sebelumnya"
+                  title="Copy activity from previous active day"
                   className="btn btn-link btn-sm p-0 text-primary small d-flex align-items-center gap-1"
                 >
                   {copying ? (
@@ -91,7 +91,7 @@ export function ActivityDetailContent() {
                   ) : (
                     <IconCopy size={13} />
                   )}
-                  Salin Hari Sebelumnya
+                  Copy Previous Day
                 </button>
               </div>
               <input
@@ -104,7 +104,7 @@ export function ActivityDetailContent() {
             </div>
 
             <div className="col-sm-6">
-              <label htmlFor="status" className="form-label required">Status Kehadiran</label>
+              <label htmlFor="status" className="form-label required">Attendance Status</label>
               <select
                 id="status"
                 className="form-select"
@@ -169,7 +169,7 @@ export function ActivityDetailContent() {
           {/* Row 4: Project / Application */}
           <div className="mb-3">
             <label htmlFor="project_ref_id" className="form-label">
-              Project / Aplikasi
+              Project / Application
             </label>
             <select
               id="project_ref_id"
@@ -177,7 +177,7 @@ export function ActivityDetailContent() {
               value={form.project_ref_id || ""}
               onChange={(e) => setProjectDetails(e.target.value)}
             >
-              <option value="">— Pilih Project —</option>
+              <option value="">— Select Project —</option>
               {projects.map((p) => (
                 <option key={p.id} value={p.id}>
                   {p.name} {p.app_impacted ? `(${p.app_impacted})` : ""}
@@ -206,44 +206,43 @@ export function ActivityDetailContent() {
                     size={18}
                     className={form.is_berita_acara ? "text-primary" : "text-secondary"}
                   />
-                  Perlu Berita Acara (Lupa tap absen / kendala kehadiran)
+                  Berita Acara - Attendance Incident Report (Missed clock-in / late arrival / attendance discrepancy)
                 </span>
               </label>
 
               {form.is_berita_acara && (
                 <div className="mt-3 pt-3 border-top">
-                  <div className="mb-3">
+                  <div>
                     <label className="form-label required">
-                      Catatan / Alasan Berita Acara
+                      Incident Reason / Attendance Discrepancy Notes
                     </label>
                     <input
                       className="form-control"
                       type="text"
-                      placeholder="Contoh: Lupa tap absen masuk / Mesin absen maintenance"
+                      placeholder="e.g. Late arrival / Missed tap time-in or time-out / Scanner maintenance"
                       value={form.berita_acara_notes || ""}
                       onChange={(e) => set("berita_acara_notes", e.target.value)}
                       required={form.is_berita_acara}
                     />
                   </div>
 
-                  <div>
-                    <label className="form-label">
-                      Saksi Berita Acara (Rekan Kerja)
-                    </label>
-                    <select
-                      className="form-select"
-                      value={form.witness_id || ""}
-                      onChange={(e) =>
-                        set("witness_id", e.target.value ? Number(e.target.value) : undefined)
-                      }
-                    >
-                      <option value="">— Pilih Saksi —</option>
-                      {witnesses.map((w) => (
-                        <option key={w.id} value={w.id}>
-                          {w.name}
-                        </option>
-                      ))}
-                    </select>
+                  {/* Read-only inherited witness indicator */}
+                  <div className="alert alert-info py-2 px-3 mt-3 mb-0 small d-flex align-items-center gap-2" role="alert">
+                    <IconShieldCheck size={18} className="text-info shrink-0" />
+                    <div>
+                      Witness:{" "}
+                      <strong>
+                        {monthlyWitness?.name || form.witness?.name || "None designated"}
+                      </strong>{" "}
+                      <span className="text-secondary">
+                        (Inherited from Monthly Witness Settings)
+                      </span>
+                      {!(monthlyWitness?.name || form.witness?.name) && (
+                        <div className="text-danger small mt-0.5">
+                          No witness designated for this month yet. Please configure the monthly witness on the timesheet dashboard.
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
               )}

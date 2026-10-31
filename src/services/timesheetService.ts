@@ -1,5 +1,5 @@
 import { api, apiWithMeta } from "@/lib/api";
-import type { TimesheetJobResponse, PaginatedResponse } from "@/lib/types";
+import type { TimesheetJobResponse, PaginatedResponse, TimesheetStatusResponse } from "@/lib/types";
 
 export interface TimesheetJobsQueryParams {
   page?: number;
@@ -42,4 +42,48 @@ export async function getTimesheetJobStatus(
   id: string
 ): Promise<TimesheetJobResponse> {
   return api<TimesheetJobResponse>(`/api/v1/timesheet/jobs/${id}`);
+}
+
+/**
+ * Retrieves the sign-off lifecycle state of a monthly timesheet.
+ */
+export async function getTimesheetStatus(
+  year: number,
+  month: number
+): Promise<TimesheetStatusResponse> {
+  return api<TimesheetStatusResponse>(`/api/v1/timesheets/status?year=${year}&month=${month}`);
+}
+
+/**
+ * Signs the user's monthly timesheet, locking activity edits and issuing verification hash.
+ */
+export async function signTimesheet(
+  year: number,
+  month: number
+): Promise<{ message: string; [key: string]: unknown }> {
+  return api<{ message: string; [key: string]: unknown }>("/api/v1/timesheets/sign", {
+    method: "POST",
+    body: JSON.stringify({ year, month }),
+  });
+}
+
+/**
+ * Revokes a signed timesheet, unlocking daily activity mutations.
+ */
+export async function revokeTimesheet(
+  year: number,
+  month: number
+): Promise<{ message: string; [key: string]: unknown }> {
+  return api<{ message: string; [key: string]: unknown }>("/api/v1/timesheets/revoke", {
+    method: "POST",
+    body: JSON.stringify({ year, month }),
+  });
+}
+
+/**
+ * Returns the URL to download a generated timesheet via its secure magic token.
+ */
+export function getTimesheetDownloadUrl(token: string): string {
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL || "";
+  return `${baseUrl}/api/v1/timesheet/downloads/${encodeURIComponent(token)}`;
 }

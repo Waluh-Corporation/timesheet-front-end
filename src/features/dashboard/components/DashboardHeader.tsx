@@ -1,10 +1,11 @@
 "use client";
 
+import { useMemo } from "react";
 import {
   IconPlus,
   IconDownload,
-  IconBell,
-  IconBellOff,
+  IconBellRinging,
+  IconBellCancel,
   IconFingerprint,
   IconLoader2,
   IconFileSpreadsheet,
@@ -12,7 +13,12 @@ import {
   IconShieldCheck,
 } from "@tabler/icons-react";
 import { useRouter } from "next/navigation";
-import type { WitnessResponse } from "@/lib/types";
+import type {
+  WitnessResponse,
+  BeritaAcaraStatusResponse,
+  TimesheetStatusResponse,
+  PushScheduleResponse,
+} from "@/lib/types";
 
 interface DashboardHeaderProps {
   user: any;
@@ -30,7 +36,14 @@ interface DashboardHeaderProps {
   passkeysSupported: boolean;
   monthlyWitness?: WitnessResponse;
   beritaAcaraCount?: number;
+  beritaAcaraStatus?: BeritaAcaraStatusResponse | null;
+  submittingBA?: boolean;
+  onSubmitBeritaAcara?: () => void;
   onOpenWitnessModal?: () => void;
+  witnessRequestsCount?: number;
+  onOpenWitnessReviewModal?: () => void;
+  timesheetStatus?: TimesheetStatusResponse | null;
+  pushSchedule?: PushScheduleResponse | null;
 }
 
 export function DashboardHeader({
@@ -49,16 +62,52 @@ export function DashboardHeader({
   passkeysSupported,
   monthlyWitness,
   beritaAcaraCount = 0,
+  beritaAcaraStatus,
+  submittingBA = false,
+  onSubmitBeritaAcara,
   onOpenWitnessModal,
+  witnessRequestsCount = 0,
+  onOpenWitnessReviewModal,
+  timesheetStatus,
+  pushSchedule,
 }: Readonly<DashboardHeaderProps>) {
   const router = useRouter();
 
-  let pushIcon = <IconBell size={20} />;
+  const isTimesheetSigned = Boolean(
+    timesheetStatus?.is_signed || timesheetStatus?.status === "signed"
+  );
+
+  const isBaSigned =
+    beritaAcaraStatus?.status === "signed" || beritaAcaraStatus?.status === "approved";
+  const isBaPending =
+    beritaAcaraStatus?.status === "pending_witness" || beritaAcaraStatus?.status === "submitted";
+  const isBaRejected = beritaAcaraStatus?.status === "rejected";
+  const isBaRevoked = beritaAcaraStatus?.status === "revoked";
+  const isBaUnsubmitted = !beritaAcaraStatus || beritaAcaraStatus.status === "draft";
+  const witnessName =
+    beritaAcaraStatus?.witness_name ||
+    monthlyWitness?.name ||
+    (beritaAcaraStatus?.witness_id ? `Witness #${beritaAcaraStatus.witness_id}` : "Witness");
+
+  let pushIcon = <IconBellCancel size={22} />;
   if (pushBusy) {
-    pushIcon = <IconLoader2 size={20} className="animate-spin" />;
+    pushIcon = <IconLoader2 size={22} className="animate-spin" />;
   } else if (pushOn) {
-    pushIcon = <IconBellOff size={20} />;
+    pushIcon = <IconBellRinging size={22} />;
   }
+
+  const reminderTime = useMemo(() => {
+    if (!pushSchedule) return "17:00";
+    return `${String(pushSchedule.hour).padStart(2, "0")}:${String(
+      pushSchedule.minute
+    ).padStart(2, "0")}`;
+  }, [pushSchedule]);
+
+  const reminderLabel = useMemo(() => {
+    if (!pushSchedule) return "Daily push at 17:00";
+    if (!pushSchedule.is_enabled) return "Reminders disabled";
+    return `Daily push at ${reminderTime}`;
+  }, [pushSchedule, reminderTime]);
 
   return (
     <>
@@ -76,26 +125,28 @@ export function DashboardHeader({
               </div>
             </div>
             <div className="col-auto ms-auto d-flex flex-wrap gap-2 mt-2 mt-sm-0">
-              {onOpenWitnessModal && (
+              {witnessRequestsCount > 0 && onOpenWitnessReviewModal && (
                 <button
                   type="button"
-                  onClick={onOpenWitnessModal}
-                  className="btn btn-outline-primary d-flex align-items-center gap-1"
-                  title="Atur saksi untuk seluruh entri Berita Acara bulan ini"
+                  onClick={onOpenWitnessReviewModal}
+                  className="btn btn-outline-danger d-flex align-items-center gap-1"
+                  title="Review coworker attendance incident reports awaiting your witness signature"
+                  style={{ minHeight: 44 }}
                 >
                   <IconShieldCheck size={18} />
                   <span>
-                    Saksi BA: {monthlyWitness ? monthlyWitness.name : "Atur Saksi"}
-                    {beritaAcaraCount > 0 ? ` (${beritaAcaraCount} hari)` : ""}
+                    Witness Signatures ({witnessRequestsCount})
                   </span>
                 </button>
               )}
               <button
                 type="button"
                 onClick={() => router.push("/activity")}
-                className="btn btn-primary d-flex align-items-center gap-1"
+                className="btn btn-primary d-inline-flex align-items-center gap-1.5"
+                style={{ minHeight: 44 }}
               >
-                <IconPlus size={18} /> Today&apos;s Activity
+                <IconPlus size={18} />
+                <span>Today&apos;s Activity</span>
               </button>
             </div>
           </div>
@@ -104,19 +155,34 @@ export function DashboardHeader({
 
       {/* 4 Tabler Quick Action Metric Cards */}
       <div className="row row-cards mb-3">
-        {/* Card 1: Generate */}
+        {/* Card 1: Generate Timesheet (Consistent Card) */}
         <div className="col-sm-6 col-lg-3">
           <div
-            className="card card-sm shadow-sm h-100 cursor-pointer hover-shadow"
+            className={`card card-sm shadow-sm h-100 cursor-pointer hover-shadow ${
+              beritaAcaraCount > 0 && !isBaSigned ? "border-warning-subtle" : ""
+            }`}
             onClick={onGenerate}
             role="button"
             tabIndex={0}
             onKeyDown={(e) => {
               if (e.key === "Enter" || e.key === " ") onGenerate();
             }}
+            title={
+              beritaAcaraCount > 0 && !isBaSigned
+                ? `Timesheet locked: ${beritaAcaraCount} attendance incident ${
+                    beritaAcaraCount === 1 ? "report requires" : "reports require"
+                  } witness signature`
+                : "Generate and export monthly timesheet"
+            }
           >
             <div className="card-body d-flex align-items-center">
-              <span className="avatar bg-green-lt text-green me-3 rounded">
+              <span
+                className={`avatar ${
+                  beritaAcaraCount > 0 && !isBaSigned
+                    ? "bg-warning-lt text-warning"
+                    : "bg-green-lt text-green"
+                } me-3 rounded`}
+              >
                 {generating ? (
                   <IconLoader2 size={22} className="animate-spin" />
                 ) : (
@@ -124,8 +190,28 @@ export function DashboardHeader({
                 )}
               </span>
               <div className="min-w-0">
-                <div className="fw-bold">Generate</div>
-                <div className="text-secondary small">Export monthly timesheet</div>
+                <div className="fw-bold d-flex align-items-center gap-1.5">
+                  <span>Generate</span>
+                  {beritaAcaraCount > 0 && !isBaSigned && (
+                    <span className="badge bg-warning-lt text-warning small px-1.5 py-0.5">
+                      Locked
+                    </span>
+                  )}
+                  {isTimesheetSigned && (
+                    <span className="badge bg-info-lt text-info small px-1.5 py-0.5">
+                      Signed
+                    </span>
+                  )}
+                </div>
+                <div className="text-secondary small text-truncate">
+                  {beritaAcaraCount > 0 && !isBaSigned
+                    ? `${beritaAcaraCount} ${
+                        beritaAcaraCount === 1 ? "report needs" : "reports need"
+                      } witness signature`
+                    : isTimesheetSigned
+                    ? "Timesheet signed & locked"
+                    : "Export monthly timesheet"}
+                </div>
               </div>
             </div>
           </div>
@@ -156,30 +242,45 @@ export function DashboardHeader({
 
         {/* Card 3: Push Notification */}
         <div className="col-sm-6 col-lg-3">
-          <div className="card card-sm shadow-sm h-100">
+          <div
+            className={`card card-sm shadow-sm h-100 ${
+              pushSupported && !pushBusy ? "cursor-pointer hover-shadow" : "opacity-60"
+            }`}
+            onClick={pushSupported && !pushBusy ? onTogglePush : undefined}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => {
+              if (pushSupported && !pushBusy && (e.key === "Enter" || e.key === " ")) {
+                onTogglePush();
+              }
+            }}
+            title={
+              !pushSupported
+                ? "Push notifications not supported on this browser"
+                : pushOn
+                ? "Click to disable daily reminders"
+                : pushSchedule?.human_readable
+                ? `Click to enable daily reminders (${pushSchedule.human_readable})`
+                : `Click to enable daily reminders at ${reminderTime}`
+            }
+          >
             <div className="card-body d-flex align-items-center">
-              <button
-                type="button"
-                onClick={onTogglePush}
-                disabled={pushBusy || !pushSupported}
-                className="btn btn-icon btn-ghost me-3 p-0 border-0"
-                aria-label={pushOn ? "Disable reminders" : "Enable reminders"}
+              <span
+                className={`avatar ${
+                  pushOn ? "bg-yellow-lt text-yellow" : "bg-secondary-lt text-secondary"
+                } me-3 rounded`}
               >
-                <span className={`avatar ${pushOn ? "bg-yellow text-yellow-fg" : "bg-yellow-lt text-yellow"} rounded`}>
-                  {pushIcon}
-                </span>
-              </button>
+                {pushIcon}
+              </span>
               <div className="min-w-0 flex-fill">
-                <div
-                  className="fw-bold text-truncate cursor-pointer"
-                  onClick={onTogglePush}
-                  role="button"
-                  tabIndex={0}
-                >
-                  {pushOn ? "Disable Reminders" : "Enable Reminders"}
-                </div>
+                <div className="fw-bold text-truncate">Daily Reminders</div>
                 <div className="d-flex align-items-center justify-content-between">
-                  <span className="text-secondary small">Daily push at 17:00</span>
+                  <span
+                    className="text-secondary small text-truncate"
+                    title={pushSchedule?.human_readable || reminderLabel}
+                  >
+                    {reminderLabel}
+                  </span>
                   {pushOn && onSendTestPush && (
                     <button
                       type="button"
@@ -196,7 +297,7 @@ export function DashboardHeader({
                       ) : (
                         <IconSend size={12} />
                       )}
-                      Test
+                      <span>Test</span>
                     </button>
                   )}
                 </div>

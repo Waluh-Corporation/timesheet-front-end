@@ -13,6 +13,7 @@ import { ProfileForm } from "./ProfileForm";
 import { AccountOverview } from "./AccountOverview";
 import { PasswordSection } from "./PasswordSection";
 import { PasskeySection } from "./PasskeySection";
+import { SignatureSection } from "./SignatureSection";
 import { ChangeRequestsHistory } from "./ChangeRequestsHistory";
 
 export function ProfileView() {
@@ -91,11 +92,12 @@ export function ProfileView() {
       <PageHeader
         pretitle="Account Settings"
         title="My Profile"
-        description="Manage your account credentials, passkeys, and profile details."
+        description="Manage your account credentials, passkeys, digital signature, and profile details."
       />
 
       <div className="d-flex flex-column gap-3">
         <AccountOverview />
+        <SignatureSection />
         <PasswordSection />
         <PasskeySection
           passkeys={passkeys}

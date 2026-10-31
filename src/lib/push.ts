@@ -3,6 +3,7 @@
 // subscription to the API.
 
 import { api } from "./api";
+import type { PushScheduleResponse } from "./types";
 
 function urlBase64ToUint8Array(base64String: string): Uint8Array {
   const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
@@ -129,4 +130,11 @@ export async function disablePush(): Promise<void> {
     method: "POST",
     body: JSON.stringify({ endpoint }),
   });
+}
+
+/**
+ * Retrieves the dynamic timesheet push reminder schedule metadata from the backend.
+ */
+export async function getPushSchedule(): Promise<PushScheduleResponse> {
+  return api<PushScheduleResponse>("/api/v1/push/schedule");
 }

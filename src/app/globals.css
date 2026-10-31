@@ -1,8 +1,17 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Dancing+Script:wght@600;700&family=Great+Vibes&family=IBM+Plex+Mono:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
 @import "@tabler/core/dist/css/tabler.min.css";
-
 @import "tailwindcss";
 @config "../../tailwind.config.ts";
+
+.font-signature-caveat {
+  font-family: 'Caveat', cursive;
+}
+.font-signature-dancing {
+  font-family: 'Dancing Script', cursive;
+}
+.font-signature-greatvibes {
+  font-family: 'Great Vibes', cursive;
+}
 
 @custom-variant dark (&:where([data-bs-theme=dark], [data-bs-theme=dark] *, [data-theme=dark], [data-theme=dark] *, .dark, .dark *));
 
