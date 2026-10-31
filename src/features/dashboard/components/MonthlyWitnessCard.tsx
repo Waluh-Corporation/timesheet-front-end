@@ -199,7 +199,7 @@ export function MonthlyWitnessCard({
                     "Cancel witness signature request for this period's incident reports?"
                   )
                 ) {
-                  onRevokeBeritaAcara();
+                  void onRevokeBeritaAcara();
                 }
               }}
               disabled={revokingBA}
@@ -225,7 +225,7 @@ export function MonthlyWitnessCard({
                     "Revoke digital signature for these incident reports? Status will revert to draft."
                   )
                 ) {
-                  onRevokeBeritaAcara();
+                  void onRevokeBeritaAcara();
                 }
               }}
               disabled={revokingBA}

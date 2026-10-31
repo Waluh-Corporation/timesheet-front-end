@@ -52,7 +52,7 @@ export default function VerifyClient({ initialToken }: { initialToken?: string }
     }
 
     if (token) {
-      loadVerification();
+      void loadVerification();
     } else {
       setLoading(false);
       setError("Document verification token was not provided.");

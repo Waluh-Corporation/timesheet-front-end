@@ -429,32 +429,35 @@ export function SignatureSection() {
                   </div>
 
                   <div>
-                    <label className="form-label d-block">Select Calligraphy Style / Cursive Font</label>
+                    <span className="form-label d-block">Select Calligraphy Style / Cursive Font</span>
                     <div className="row g-2">
                       {FONT_OPTIONS.map((font) => (
                         <div key={font.id} className="col-12 col-md-4">
                           <label
+                            htmlFor={`font-option-${font.id}`}
                             className={`form-selectgroup-item flex-fill w-100 ${
                               selectedFont.id === font.id ? "border-primary" : ""
                             }`}
                           >
                             <input
+                              id={`font-option-${font.id}`}
                               type="radio"
                               name="signature-font"
                               value={font.id}
                               className="form-selectgroup-input"
                               checked={selectedFont.id === font.id}
                               onChange={() => setSelectedFont(font)}
+                              aria-label={font.name}
                             />
-                            <div className="form-selectgroup-label p-3 text-center border rounded">
+                            <span className="form-selectgroup-label p-3 text-center border rounded d-block">
                               <span className="small text-secondary d-block mb-1">{font.name}</span>
-                              <div
-                                className={`${font.className} fs-1 text-dark text-truncate`}
+                              <span
+                                className={`${font.className} fs-1 text-dark text-truncate d-block`}
                                 style={{ lineHeight: "1.2" }}
                               >
                                 {typedName.trim() || user?.name || "Signature"}
-                              </div>
-                            </div>
+                              </span>
+                            </span>
                           </label>
                         </div>
                       ))}
@@ -486,7 +489,7 @@ export function SignatureSection() {
               {activeTab === "draw" && (
                 <div className="d-flex flex-column gap-2">
                   <div className="d-flex align-items-center justify-content-between">
-                    <label className="form-label m-0">Draw Signature Using Mouse / Touchscreen</label>
+                    <span className="form-label m-0">Draw Signature Using Mouse / Touchscreen</span>
                     <button
                       type="button"
                       className="btn btn-outline-secondary btn-sm d-flex align-items-center gap-1"

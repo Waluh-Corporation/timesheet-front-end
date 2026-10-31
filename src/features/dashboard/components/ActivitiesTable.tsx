@@ -441,9 +441,9 @@ export function ActivitiesTable({
             </div>
 
             <div>
-              <label className="form-label small fw-semibold text-secondary">
+              <span className="form-label small fw-semibold text-secondary d-block">
                 Reported Reason / Note
-              </label>
+              </span>
               <div className="p-3 border rounded bg-white">
                 {selectedIncident.berita_acara_notes || "No additional discrepancy note provided."}
               </div>

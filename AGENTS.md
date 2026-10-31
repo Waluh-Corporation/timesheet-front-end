@@ -141,6 +141,10 @@ git diff --staged
 ### Non-Negotiable Test Rules:
 - **Never bypass, delete, or comment out failing tests** to force a green build. Fix the underlying implementation or update test assertions to reflect intended contract updates.
 - **Always accompany new services, helpers, or hooks with unit tests** (`*.test.ts` / `*.test.tsx`).
+- **No Pre-Implementation Test Runs**: Do NOT run tests before starting feature implementation or bug fixing. Execute tests strictly during the post-implementation verification phase to avoid slow, redundant test executions.
+- **SonarQube Standards**:
+  - **Quality Profile (`Sonar way comprehensive`)**: The project enforces the **Sonar way comprehensive** profile for TypeScript/JavaScript, CSS, and HTML. All code must satisfy this profile: zero code smells, zero vulnerabilities, zero bugs, low cognitive complexity, and clean code hygiene.
+  - **Quality Gate (`Sonar way`)**: New code must pass the **Sonar way** quality gate (0 new bugs, 0 new vulnerabilities, 0 security hotspots, >= 80% test coverage on new code, <= 3% duplication, and Maintainability Rating A).
 
 ---
 
@@ -154,3 +158,9 @@ git diff --staged
 3. **No Hardcoded Credentials or Secrets**:
    - Never commit API secrets, private keys, or passwords.
    - Environment variables must be loaded via `.env.local` or `.env.development` and guarded by `.gitignore`.
+4. **English-Only Messages**:
+   - All messages—including commit messages, PR descriptions, code comments, and UI labels/form fields—MUST strictly be in English.
+5. **No Upfront Testing**:
+   - Do NOT execute tests before beginning work or code changes; run tests only once after completing implementation to avoid redundant test cycles.
+6. **SonarQube Compliance**:
+   - Strictly adhere to the **Sonar way comprehensive** profile for TypeScript/JavaScript/HTML and fulfill the **Sonar way** quality gate on all new or modified code.

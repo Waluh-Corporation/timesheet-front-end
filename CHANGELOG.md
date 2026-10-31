@@ -9,6 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- **SonarCloud Reliability & Accessibility Standards Compliance**:
+  - Resolved 3 reliability bugs (`typescript:S9383`) by explicitly handling floating promises using the `void` operator in `MonthlyWitnessCard.tsx` and `VerifyClient.tsx`.
+  - Resolved 4 accessibility code smells (`typescript:S6853`) across `SignatureSection.tsx` and `ActivitiesTable.tsx` by replacing non-standard `<label>` wrappers with semantic `<span>` styling and ensuring explicit `htmlFor`/`id` association on radio controls.
+
 ### Added
 - **Dynamic Push Reminder Schedule Integration**: Integrated dynamic reminder schedule endpoint (`GET /api/v1/push/schedule`) via `getPushSchedule` and `usePushScheduleQuery`. Replaced static hardcoded reminder labels with dynamic hour/minute formatting and server-configured timezone in Card 3 of `DashboardHeader`, including disabled state handling and human-readable hover tooltips.
 - **Timesheet Digital Signing & Revocation Controls**:
