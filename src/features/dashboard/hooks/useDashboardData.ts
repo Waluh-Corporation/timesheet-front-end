@@ -18,6 +18,10 @@ import {
 } from "@/services/queries/useWitnessQueries";
 import { useHolidaysQuery } from "@/services/queries/useMasterDataQueries";
 import {
+  usePushScheduleQuery,
+  PUSH_SCHEDULE_KEY,
+} from "@/services/queries/usePushScheduleQuery";
+import {
   submitBeritaAcara,
   revokeBeritaAcara,
 } from "@/services/beritaAcaraService";
@@ -78,6 +82,10 @@ export function useDashboardData() {
   } = usePendingWitnessRequestsQuery({
     enabled: isWitnessEligible,
   });
+
+  const {
+    data: pushSchedule = null,
+  } = usePushScheduleQuery();
 
   const activities = useMemo(() => dashboardActs?.activities || [], [dashboardActs?.activities]);
   const monthlyWitness = dashboardActs?.monthlyWitness;
@@ -148,6 +156,7 @@ export function useDashboardData() {
       queryClient.invalidateQueries({ queryKey: DASHBOARD_QUERY_KEYS.timesheetStatus(year, month) }),
       queryClient.invalidateQueries({ queryKey: WITNESS_REQUESTS_KEY }),
       queryClient.invalidateQueries({ queryKey: ["activities"] }),
+      queryClient.invalidateQueries({ queryKey: PUSH_SCHEDULE_KEY }),
     ]);
   }, [queryClient, year, month]);
 
@@ -284,7 +293,11 @@ export function useDashboardData() {
       } else {
         await enablePush();
         setPushOn(true);
-        notify("Daily reminders enabled at 17:00 WIB", "success");
+        const reminderTime = pushSchedule
+          ? `${String(pushSchedule.hour).padStart(2, "0")}:${String(pushSchedule.minute).padStart(2, "0")}`
+          : "17:00";
+        const reminderTz = pushSchedule?.timezone ? ` ${pushSchedule.timezone}` : "";
+        notify(`Daily reminders enabled at ${reminderTime}${reminderTz}`, "success");
       }
     } catch (err: any) {
       notify(err.message || "Could not update reminders", "error");
@@ -322,6 +335,7 @@ export function useDashboardData() {
     witnessRequests,
     isWitnessReviewModalOpen,
     setIsWitnessReviewModalOpen,
+    pushSchedule,
     holidays,
     loading,
     generating, generate,

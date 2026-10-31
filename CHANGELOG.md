@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Dynamic Push Reminder Schedule Integration**: Integrated dynamic reminder schedule endpoint (`GET /api/v1/push/schedule`) via `getPushSchedule` and `usePushScheduleQuery`. Replaced static hardcoded reminder labels with dynamic hour/minute formatting and server-configured timezone in Card 3 of `DashboardHeader`, including disabled state handling and human-readable hover tooltips.
 - **Timesheet Digital Signing & Revocation Controls**:
   - Added dedicated timesheet sign-off and signature revocation action buttons (`Sign Timesheet` and `Revoke Timesheet Signature`) to the dashboard header, enabling employees to digitally lock their timesheet or unlock it if changes are necessary.
 - **Witness Request Cancellation & Signature Revocation**:

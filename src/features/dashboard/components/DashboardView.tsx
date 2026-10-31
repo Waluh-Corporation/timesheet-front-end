@@ -34,6 +34,7 @@ export default function DashboardView() {
     witnessRequests,
     isWitnessReviewModalOpen,
     setIsWitnessReviewModalOpen,
+    pushSchedule,
     loading,
     generating,
     generate,
@@ -109,6 +110,7 @@ export default function DashboardView() {
         witnessRequestsCount={witnessRequests.length}
         onOpenWitnessReviewModal={() => setIsWitnessReviewModalOpen(true)}
         timesheetStatus={timesheetStatus}
+        pushSchedule={pushSchedule}
       />
 
       {/* Unified Monthly Witness & Berita Acara Card (Single Source of Truth) */}

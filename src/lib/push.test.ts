@@ -7,6 +7,7 @@ import {
   isPushSubscribed,
   unsubscribePush,
   disablePush,
+  getPushSchedule,
 } from "./push";
 
 describe("push notification helper", () => {
@@ -238,6 +239,40 @@ describe("push notification helper", () => {
       expect(fetchSpy).toHaveBeenCalled();
       const calledUrl = fetchSpy.mock.calls[0][0];
       expect(calledUrl).toContain("/api/v1/push/test");
+    });
+  });
+
+  describe("getPushSchedule", () => {
+    it("fetches schedule from /api/v1/push/schedule", async () => {
+      fetchSpy = mock(async () => {
+        return new Response(
+          JSON.stringify({
+            code: 200,
+            status: "success",
+            data: {
+              hour: 18,
+              minute: 30,
+              timezone: "Asia/Jakarta",
+              next_run: "2026-11-01T18:30:00+07:00",
+              human_readable: "Daily at 18:30 (Asia/Jakarta)",
+              cron_expression: "30 18 * * *",
+              is_enabled: true,
+            },
+          }),
+          { status: 200, headers: { "Content-Type": "application/json" } }
+        );
+      });
+      (globalThis as any).fetch = fetchSpy;
+
+      const schedule = await getPushSchedule();
+      expect(schedule.hour).toBe(18);
+      expect(schedule.minute).toBe(30);
+      expect(schedule.timezone).toBe("Asia/Jakarta");
+      expect(schedule.human_readable).toBe("Daily at 18:30 (Asia/Jakarta)");
+      expect(schedule.is_enabled).toBe(true);
+      expect(fetchSpy).toHaveBeenCalled();
+      const calledUrl = fetchSpy.mock.calls[0][0];
+      expect(calledUrl).toContain("/api/v1/push/schedule");
     });
   });
 });

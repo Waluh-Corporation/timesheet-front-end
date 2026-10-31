@@ -624,4 +624,14 @@ export interface DocVerificationResponse {
   hash?: string;
 }
 
+export interface PushScheduleResponse {
+  hour: number;
+  minute: number;
+  timezone: string;
+  next_run?: string;
+  human_readable: string;
+  cron_expression?: string;
+  is_enabled: boolean;
+}
+
 

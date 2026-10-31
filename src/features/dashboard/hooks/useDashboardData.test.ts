@@ -103,6 +103,13 @@ mock.module("@/lib/push", () => ({
   registerServiceWorker: mock(async () => ({})),
   isPushSubscribed: mock(async () => false),
   sendTestPush: mock(async () => {}),
+  getPushSchedule: mock(async () => ({
+    hour: 17,
+    minute: 0,
+    timezone: "UTC",
+    human_readable: "Daily at 17:00 (UTC)",
+    is_enabled: true,
+  })),
 }));
 
 describe("useDashboardData hook (Feature)", () => {

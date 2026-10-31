@@ -277,4 +277,68 @@ describe("DashboardHeader Component", () => {
     const secondaryAvatar = container.querySelector(".avatar.bg-secondary-lt");
     expect(secondaryAvatar).not.toBeNull();
   });
+
+  it("renders dynamic schedule time and tooltip when pushSchedule is provided", async () => {
+    root = createRoot(container);
+
+    await act(async () => {
+      root?.render(
+        <DashboardHeader
+          user={mockUser}
+          filledCount={10}
+          generating={false}
+          onGenerate={() => {}}
+          pushBusy={false}
+          pushOn={true}
+          onTogglePush={() => {}}
+          pushSupported={true}
+          onAddPasskey={() => {}}
+          passkeysSupported={false}
+          pushSchedule={{
+            hour: 18,
+            minute: 30,
+            timezone: "Asia/Jakarta",
+            human_readable: "Daily at 18:30 (Asia/Jakarta)",
+            is_enabled: true,
+          }}
+        />
+      );
+    });
+
+    expect(container.textContent).toContain("Daily Reminders");
+    expect(container.textContent).toContain("Daily push at 18:30");
+    const spans = Array.from(container.querySelectorAll("span"));
+    const scheduleSpan = spans.find((s) => s.textContent?.includes("Daily push"));
+    expect(scheduleSpan?.getAttribute("title")).toBe("Daily at 18:30 (Asia/Jakarta)");
+  });
+
+  it("renders 'Reminders disabled' when pushSchedule is disabled", async () => {
+    root = createRoot(container);
+
+    await act(async () => {
+      root?.render(
+        <DashboardHeader
+          user={mockUser}
+          filledCount={10}
+          generating={false}
+          onGenerate={() => {}}
+          pushBusy={false}
+          pushOn={false}
+          onTogglePush={() => {}}
+          pushSupported={true}
+          onAddPasskey={() => {}}
+          passkeysSupported={false}
+          pushSchedule={{
+            hour: 17,
+            minute: 0,
+            timezone: "UTC",
+            human_readable: "Dinonaktifkan / Disabled",
+            is_enabled: false,
+          }}
+        />
+      );
+    });
+
+    expect(container.textContent).toContain("Reminders disabled");
+  });
 });

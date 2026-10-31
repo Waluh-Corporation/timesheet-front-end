@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import {
   IconPlus,
   IconDownload,
@@ -12,7 +13,12 @@ import {
   IconShieldCheck,
 } from "@tabler/icons-react";
 import { useRouter } from "next/navigation";
-import type { WitnessResponse, BeritaAcaraStatusResponse, TimesheetStatusResponse } from "@/lib/types";
+import type {
+  WitnessResponse,
+  BeritaAcaraStatusResponse,
+  TimesheetStatusResponse,
+  PushScheduleResponse,
+} from "@/lib/types";
 
 interface DashboardHeaderProps {
   user: any;
@@ -37,6 +43,7 @@ interface DashboardHeaderProps {
   witnessRequestsCount?: number;
   onOpenWitnessReviewModal?: () => void;
   timesheetStatus?: TimesheetStatusResponse | null;
+  pushSchedule?: PushScheduleResponse | null;
 }
 
 export function DashboardHeader({
@@ -62,6 +69,7 @@ export function DashboardHeader({
   witnessRequestsCount = 0,
   onOpenWitnessReviewModal,
   timesheetStatus,
+  pushSchedule,
 }: Readonly<DashboardHeaderProps>) {
   const router = useRouter();
 
@@ -87,6 +95,19 @@ export function DashboardHeader({
   } else if (pushOn) {
     pushIcon = <IconBellRinging size={22} />;
   }
+
+  const reminderTime = useMemo(() => {
+    if (!pushSchedule) return "17:00";
+    return `${String(pushSchedule.hour).padStart(2, "0")}:${String(
+      pushSchedule.minute
+    ).padStart(2, "0")}`;
+  }, [pushSchedule]);
+
+  const reminderLabel = useMemo(() => {
+    if (!pushSchedule) return "Daily push at 17:00";
+    if (!pushSchedule.is_enabled) return "Reminders disabled";
+    return `Daily push at ${reminderTime}`;
+  }, [pushSchedule, reminderTime]);
 
   return (
     <>
@@ -238,7 +259,9 @@ export function DashboardHeader({
                 ? "Push notifications not supported on this browser"
                 : pushOn
                 ? "Click to disable daily reminders"
-                : "Click to enable daily reminders at 17:00"
+                : pushSchedule?.human_readable
+                ? `Click to enable daily reminders (${pushSchedule.human_readable})`
+                : `Click to enable daily reminders at ${reminderTime}`
             }
           >
             <div className="card-body d-flex align-items-center">
@@ -252,7 +275,12 @@ export function DashboardHeader({
               <div className="min-w-0 flex-fill">
                 <div className="fw-bold text-truncate">Daily Reminders</div>
                 <div className="d-flex align-items-center justify-content-between">
-                  <span className="text-secondary small">Daily push at 17:00</span>
+                  <span
+                    className="text-secondary small text-truncate"
+                    title={pushSchedule?.human_readable || reminderLabel}
+                  >
+                    {reminderLabel}
+                  </span>
                   {pushOn && onSendTestPush && (
                     <button
                       type="button"
