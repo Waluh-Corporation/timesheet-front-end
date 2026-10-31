@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+---
+
+## [0.10.0] - 2026-10-31
+
 ### Fixed
 - **SonarCloud Reliability & Accessibility Standards Compliance**:
   - Resolved 3 reliability bugs (`typescript:S9383`) by explicitly handling floating promises using the `void` operator in `MonthlyWitnessCard.tsx` and `VerifyClient.tsx`.
@@ -139,17 +143,3 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - **Form Accessibility**: Associated all profile form labels directly with their corresponding input controls using explicit identifiers, ensuring full compatibility with screen readers and assistive technology.
-
----
-
-## [0.6.2] - 2026-09-20
-
-### Fixed
-- **Seamless Passkey Device Recognition**: When adding a new passkey, your browser now automatically shares whether you are using device biometrics (such as Touch ID or Windows Hello) or an external key, ensuring hassle-free sign-in prompts when you log back in.
-
----
-
-## [0.6.1] - 2026-09-20
-
-### Changed
-- **Unified Authenticator Brand Icons**: Streamlined authenticator and passkey icon rendering to support the latest unified brand icon format, ensuring device and password manager logos (such as Bitwarden, Apple iCloud Keychain, and Windows Hello) display seamlessly across dark and light themes.
